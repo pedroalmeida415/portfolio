@@ -49,6 +49,13 @@ const nextConfig = {
       use: ['raw-loader', 'glslify-loader'],
     })
 
+    // svg
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: ['@svgr/webpack'],
+    })
+
     return config
   },
 }
