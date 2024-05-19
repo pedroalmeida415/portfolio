@@ -20,11 +20,13 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
 })
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
 const Hero = dynamic(() => import('@/components/sections/Hero').then((mod) => mod.Hero), { ssr: false })
+const About = dynamic(() => import('@/components/sections/About').then((mod) => mod.About), { ssr: false })
 
 export default function Page() {
   return (
     <>
       <Hero />
+      <About />
     </>
   )
 }
