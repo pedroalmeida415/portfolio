@@ -34,7 +34,7 @@ const Hero = () => {
         <Pedro className='mt-1 h-auto w-full' />
         <div className='-mt-11 flex w-full justify-end'>
           <h1 className='sr-only'>Pedro Almeida</h1>
-          <h2 className='mr-8 text-5xl font-light'>
+          <h2 className='mr-8 text-5xl font-extralight'>
             Creative <br />
             Developer & Designer
           </h2>

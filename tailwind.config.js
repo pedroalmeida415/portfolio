@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'neue-montreal': ['var(--font-neue-montreal)'],
+        'neue-montreal': ['var(--font-neue-montreal-variable)'],
       },
     },
   },

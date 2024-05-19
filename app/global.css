@@ -9,8 +9,10 @@
   
   html,
   body,
-  #root {
-    @apply font-neue-montreal;
+  :root {
+    @apply font-neue-montreal antialiased;
+    font-synthesis-weight: none;
+    font-variation-settings: 'wght' 450;
 
     width: 100%;
     height: 100%;
@@ -18,4 +20,28 @@
     padding: 0;
     overflow: hidden;
   }
+}
+
+@layer utilities {
+    .font-thin {
+        font-variation-settings: 'wght' 200;
+    }
+    .font-extralight {
+        font-variation-settings: 'wght' 300;
+    }
+    .font-light {
+        font-variation-settings: 'wght' 400;
+    }
+    .font-normal {
+        font-variation-settings: 'wght' 450;
+    }
+    .font-medium {
+        font-variation-settings: 'wght' 530;
+    }
+    .font-semibold {
+        font-variation-settings: 'wght' 700;
+    }
+    .font-bold {
+        font-variation-settings: 'wght' 800;
+    }
 }

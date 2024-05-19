@@ -7,7 +7,7 @@ const About = () => {
   return (
     <section className='flex items-start justify-start px-6 py-20'>
       <div className='w-3/12'>
-        <h1 className='text-5xl font-light'>About me</h1>
+        <h1 className='text-5xl font-extralight'>About me</h1>
       </div>
       <div className='w-5/12 pr-9'>
         <p className='text-[21.6px] leading-[1.75]'>

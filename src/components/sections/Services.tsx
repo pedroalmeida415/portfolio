@@ -7,7 +7,7 @@ const Services = () => {
     <section className='h-screen px-6 pt-20'>
       <div className='mb-10 flex'>
         <span className='w-3/12'></span>
-        <h1 className='text-5xl font-light'>What I do</h1>
+        <h1 className='text-5xl font-extralight'>What I do</h1>
       </div>
       <div className='mb-12 flex'>
         <span className='w-2/12'></span>
@@ -18,7 +18,7 @@ const Services = () => {
         <p className='w-1/12'>01</p>
         <div className='w-3/12'>
           <p className='mb-9'>It’s all about taking ideas and refining them into something excellent.</p>
-          <button className='flex h-[70px] items-center justify-start rounded-full bg-[#3D57DA] px-8 text-lg text-white'>
+          <button className='flex h-[70px] items-center justify-start rounded-full bg-[#3D57DA] px-8 text-lg font-semibold text-white'>
             Get in touch
             <span className='ml-8 size-[10px] rounded-full bg-white'></span>
           </button>
