@@ -23,6 +23,7 @@ const Hero = dynamic(() => import('@/components/sections/Hero').then((mod) => mo
 const About = dynamic(() => import('@/components/sections/About').then((mod) => mod.About), { ssr: false })
 const Services = dynamic(() => import('@/components/sections/Services').then((mod) => mod.Services), { ssr: false })
 const Showcase = dynamic(() => import('@/components/sections/Showcase').then((mod) => mod.Showcase), { ssr: false })
+const Contact = dynamic(() => import('@/components/sections/Contact').then((mod) => mod.Contact), { ssr: false })
 
 export default function Page() {
   return (
@@ -31,6 +32,7 @@ export default function Page() {
       <About />
       <Services />
       <Showcase />
+      <Contact />
     </>
   )
 }
