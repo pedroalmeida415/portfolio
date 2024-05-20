@@ -6,9 +6,10 @@ import gsap from 'gsap'
 import '@/global.css'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Script from 'next/script'
+import { Header } from './Header'
 
 const neue_montreal = localFont({
-  src: './fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
+  src: './assets/fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
   display: 'swap',
   variable: '--font-neue-montreal-variable',
   fallback: ['sans-serif'],
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
       */}
       <head />
       <body>
+        <Header />
         <div id='smooth-wrapper'>
           <div id='smooth-content'>
             <Layout>{children}</Layout>

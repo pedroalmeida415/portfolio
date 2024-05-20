@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import profilePic from './assets/profile-pic.png'
+import profilePic from '@/assets/profile-pic.png'
 
 const About = () => {
   return (
