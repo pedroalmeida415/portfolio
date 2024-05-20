@@ -5,9 +5,18 @@ import dynamic from 'next/dynamic'
 import Pedro from '@/assets/pedro.svg'
 import DownArrow from '@/assets/down-arrow.svg'
 import { Suspense, useEffect, useRef } from 'react'
-import { Center, MeshDistortMaterial, Svg } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import * as THREE from 'three'
+import { Center, MeshDistortMaterial } from '@react-three/drei'
+import { useLoader, useThree } from '@react-three/fiber'
+import {
+  Mesh,
+  PlaneGeometry,
+  CanvasTexture,
+  MeshBasicMaterial,
+  BufferGeometry,
+  Vector3,
+  PerspectiveCamera,
+} from 'three'
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -45,8 +54,10 @@ const Hero = () => {
         <DownArrow className='absolute -right-12 top-0 h-full w-auto' />
       </p>
 
-      <View className='absolute left-0 top-0 size-full'>
-        <ThreeComponent />
+      <View className='absolute left-0 top-0 -z-10 size-full'>
+        <Suspense fallback={null}>
+          <ThreeComponent />
+        </Suspense>
       </View>
     </section>
   )
@@ -55,33 +66,87 @@ const Hero = () => {
 export { Hero }
 
 const ThreeComponent = () => {
-  const { viewport } = useThree(({ viewport }) => ({ viewport }))
+  const { camera, size } = useThree(({ camera, size }) => {
+    return {
+      camera: camera as PerspectiveCamera,
+      size,
+    }
+  })
+  const result = useLoader(SVGLoader, '/pedro.svg')
+
+  const viewBox: string[] = (result.xml as any).attributes.viewBox.value.split(' ') // ['0','0','1493','489']
+
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+
+  // Determine canvas size and set it
+  const svgWidth = Number(viewBox[2])
+  const svgHeight = Number(viewBox[3])
+  const svgAspectRatio = svgWidth / svgHeight
+  canvas.width = size.width
+  canvas.height = size.width / svgAspectRatio
+
+  // Set canvas background (optional)
+  context.fillStyle = '#ffffff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  context.fillStyle = '#000000'
+
+  // Render each path from the SVG into the canvas
+  result.paths.forEach((path) => {
+    const shapes = path.toShapes(true)
+    shapes.forEach((shape) => {
+      context.beginPath()
+      const points = shape.getPoints(64)
+      points.forEach((point, index) => {
+        if (index === 0) {
+          context.moveTo(point.x, point.y)
+        } else {
+          context.lineTo(point.x, point.y)
+        }
+      })
+      context.closePath()
+      context.fill()
+
+      // Handle holes
+      if (shape.holes.length > 0) {
+        shape.holes.forEach((hole) => {
+          context.beginPath()
+          const holePoints = hole.getPoints()
+          holePoints.forEach((point, index) => {
+            if (index === 0) {
+              context.moveTo(point.x, point.y)
+            } else {
+              context.lineTo(point.x, point.y)
+            }
+          })
+          context.closePath()
+          context.fillStyle = '#ffffff'
+
+          context.fill()
+        })
+      }
+    })
+  })
+
+  // Create a Texture from the Canvas
+  const texture = new CanvasTexture(canvas)
+
+  // ---  Calculate mesh dimensions for full screen ---
+  const fovInRadians = (camera.fov * Math.PI) / 180
+  const dist = camera.position.z
+  const height = 2 * Math.tan(fovInRadians / 2) * dist // visible height
+  const width = height * camera.aspect // visible width
+
+  const geometry = new PlaneGeometry(width, width / svgAspectRatio)
+  const material = new MeshBasicMaterial({ map: texture })
+  const mesh = new Mesh(geometry, material)
 
   return (
     <>
-      <Center
-        onCentered={({ container, width }) => {
-          container.scale.setScalar(viewport.width / (width + 48.0))
-        }}
-      >
-        <Svg
-          fillMaterial={{
-            wireframe: false,
-          }}
-          src='/pedro.svg'
-          strokeMaterial={{
-            wireframe: false,
-          }}
-        />
-      </Center>
-      <gridHelper args={[10, 10]} rotation={[1.5707963267948966, 0, 0]} />
       <Common color={0xf1efeb} />
+      <primitive object={mesh} />
+      <gridHelper args={[10, 10]} rotation={[1.5707963267948966, 0, 0]} />
     </>
   )
 }
-
-// I want to render a particle-based text in my react web app. To achieve this, I'll be using Three.js along with @react-three/fiber and @react-three/drei. The particles are going to fill up the text entirely, hence I'm using GPGPU particles to get better performance.
-
-// To make the particles, I'm using a really high-poly 3D model of the text made in Blender, then extracting its geometry and using each vertex to generate a particle. The problem lies in that, not only I have to load heavy models just for generating the point cloud, the outline of the text isn't as sharp as if I was using a font.
-
-// Since i'm already using an FBO to generate the particles, I want to know how I can skip the load of the model and use a texture that has the format of the text already, and then use that base texture as a mask to hide particles that are not within the text shape, thus make it more sharp as if using a font.
