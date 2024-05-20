@@ -1,12 +1,12 @@
 'use client'
 
 import localFont from 'next/font/local'
-import { Layout } from '@/components/dom/Layout'
 import gsap from 'gsap'
 import '@/global.css'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Script from 'next/script'
 import { Header } from './Header'
+import dynamic from 'next/dynamic'
 
 const neue_montreal = localFont({
   src: './assets/fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
@@ -20,6 +20,8 @@ const neue_montreal = localFont({
     },
   ],
 })
+
+const Layout = dynamic(() => import('@/components/dom/Layout').then((mod) => mod.Layout), { ssr: false })
 
 export default function RootLayout({ children }) {
   return (
