@@ -1,14 +1,15 @@
 'use client'
 
-import { Canvas } from '@react-three/fiber'
+import { Canvas, CanvasProps } from '@react-three/fiber'
 import { Preload } from '@react-three/drei'
 import { r3f } from '@/helpers/global'
-import { NoToneMapping } from 'three'
 
-export default function Scene({ ...props }) {
+type CanvasPropsWithoutChildren = Omit<CanvasProps, 'children'>
+
+export default function Scene({ ...props }: CanvasPropsWithoutChildren) {
   // Everything defined in here will persist between route changes, only children are swapped
   return (
-    <Canvas {...props} onCreated={(state) => (state.gl.toneMapping = NoToneMapping)}>
+    <Canvas {...props}>
       {/* @ts-ignore */}
       <r3f.Out />
       <Preload all />

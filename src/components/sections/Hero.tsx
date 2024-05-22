@@ -4,23 +4,10 @@ import dynamic from 'next/dynamic'
 
 import Pedro from '@/assets/pedro.svg'
 import DownArrow from '@/assets/down-arrow.svg'
-import { Suspense, useEffect, useRef } from 'react'
-import { Center, MeshDistortMaterial } from '@react-three/drei'
-import { useLoader, useThree } from '@react-three/fiber'
-import {
-  Mesh,
-  PlaneGeometry,
-  CanvasTexture,
-  MeshBasicMaterial,
-  BufferGeometry,
-  Vector3,
-  PerspectiveCamera,
-  Points,
-  PointsMaterial,
-  Color,
-  Float32BufferAttribute,
-} from 'three'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
+import { Suspense } from 'react'
+import { Center, useTexture } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
+import { BufferGeometry, Float32BufferAttribute, PerspectiveCamera, Points, PointsMaterial, Vector3 } from 'three'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -38,8 +25,6 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
   ),
 })
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
-
-const TEXTURE_ASPECT_RATIO = 3.053232333713811
 
 const Hero = () => {
   return (
@@ -71,68 +56,24 @@ export { Hero }
 
 const ThreeComponent = () => {
   const camera = useThree((state) => state.camera as PerspectiveCamera)
-  const result = useLoader(SVGLoader, '/pedro.svg')
+  const texture = useTexture('/pedro-rgb.png')
 
-  const viewBox: string[] = result.xml.attributes.viewBox.value.split(' ') // ['0','0','1493','489']
+  // ---  Calculate screen dimensions ---
+  const fovInRadians = (camera.fov * Math.PI) / 180
+  const dist = camera.position.z
+  const visibleHeight = 2 * Math.tan(fovInRadians / 2) * dist
+  const visibleWidth = visibleHeight * camera.aspect
+
+  const textureHeight = (texture.image.height * visibleWidth) / texture.image.width
 
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')
 
-  // Determine canvas size and set it
-  const svgWidth = Number(viewBox[2])
-  const svgHeight = Number(viewBox[3])
-  const svgAspectRatio = svgWidth / svgHeight
-  canvas.width = svgWidth
-  canvas.height = svgHeight
+  canvas.width = texture.image.width
+  canvas.height = texture.image.height
 
-  // Set canvas background (optional)
-  context.fillStyle = '#000000'
-  context.fillRect(0, 0, canvas.width, canvas.height)
-
-  context.fillStyle = '#ffffff'
-
-  // Render each path from the SVG into the canvas
-  result.paths.forEach((path) => {
-    const shapes = path.toShapes(true)
-    shapes.forEach((shape) => {
-      context.beginPath()
-      const points = shape.getPoints(64)
-      points.forEach((point, index) => {
-        if (index === 0) {
-          context.moveTo(point.x, point.y)
-        } else {
-          context.lineTo(point.x, point.y)
-        }
-      })
-      context.closePath()
-      context.fill()
-
-      // Handle holes
-      if (shape.holes.length > 0) {
-        shape.holes.forEach((hole) => {
-          context.beginPath()
-          const holePoints = hole.getPoints()
-          holePoints.forEach((point, index) => {
-            if (index === 0) {
-              context.moveTo(point.x, point.y)
-            } else {
-              context.lineTo(point.x, point.y)
-            }
-          })
-          context.closePath()
-          context.fillStyle = '#000000'
-
-          context.fill()
-        })
-      }
-    })
-  })
-
-  // ---  Calculate mesh dimensions ---
-  const fovInRadians = (camera.fov * Math.PI) / 180
-  const dist = camera.position.z
-  const height = 2 * Math.tan(fovInRadians / 2) * dist // visible height
-  const width = height * camera.aspect // visible width
+  // draw image on offscreen canvas i.e. web worker
+  context.drawImage(texture.image, 0, 0, texture.image.width, texture.image.height, 0, 0, canvas.width, canvas.height)
 
   // --- Get canvas data ---
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
@@ -143,26 +84,42 @@ const ThreeComponent = () => {
   const positions = []
   const colors = []
 
-  for (let y = 0; y < canvas.height; y += 4) {
-    for (let x = 0; x < canvas.width; x += 4) {
-      let isBlack = true
-      for (let i = 0; i < 9; i++) {
-        const index = (x + y * canvas.width + i) * 4
+  const pixelGrouping = 6
+
+  for (let y = 0; y < canvas.height; y += pixelGrouping) {
+    for (let x = 0; x < canvas.width; x += pixelGrouping) {
+      let hasColoredPixel = false
+      let offsetY = y
+
+      if (offsetY + pixelGrouping * 2 >= canvas.height) break
+
+      for (let i = 0; i < pixelGrouping ** 2; i++) {
+        const clampedX = x + (i % pixelGrouping)
+
+        if (i > 0 && clampedX === x) {
+          offsetY++
+        }
+
+        const index = (clampedX + offsetY * canvas.width) * 4
+
         if (data[index] !== 0) {
-          isBlack = false // Found non-black pixel
+          hasColoredPixel = true // Found non-black pixel
           break
         }
       }
 
-      if (!isBlack) {
+      if (hasColoredPixel) {
         // Add point position and color
+        const textureAspect = texture.image.width / texture.image.height
+
         const position = new Vector3(
-          (x / canvas.width) * width - width / 2,
-          -(y / canvas.height) * (width / svgAspectRatio) + width / svgAspectRatio / 2,
+          ((x + pixelGrouping / 2) / canvas.width) * visibleWidth - visibleWidth / 2,
+          -((y + pixelGrouping / 2) / canvas.height) * (visibleWidth / textureAspect) +
+            visibleWidth / textureAspect / 2,
           0,
         )
         positions.push(position.x, position.y, position.z)
-        colors.push(0.2, 0.6, 0.8, 1.0) // Example blue color
+        colors.push(0.239, 0.341, 0.855, 1.0)
       }
     }
   }
@@ -171,7 +128,7 @@ const ThreeComponent = () => {
   geometry.setAttribute('color', new Float32BufferAttribute(colors, 4))
 
   const material = new PointsMaterial({
-    size: 0.05, // Adjust particle size
+    size: 0.135, // Adjust particle size
     vertexColors: true, // Enable vertex colors
   })
 
@@ -179,9 +136,12 @@ const ThreeComponent = () => {
 
   return (
     <>
-      <Common color={0xf1efeb} />
-      <primitive object={points} />
-      <gridHelper args={[10, 10]} rotation={[1.5707963267948966, 0, 0]} />
+      {/* <mesh position={[0, visibleHeight / 2 - textureHeight / 2, 0]}>
+        <planeGeometry args={[visibleWidth, textureHeight]} />
+        <meshBasicMaterial map={texture} />
+      </mesh> */}
+      <primitive position={[0, visibleHeight / 2 - textureHeight / 2, 0.001]} object={points} />
+      {/* <gridHelper args={[visibleHeight, 10]} rotation={[1.5707963267948966, 0, 0]} /> */}
     </>
   )
 }
