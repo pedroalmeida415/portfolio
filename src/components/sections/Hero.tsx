@@ -15,6 +15,10 @@ import {
   BufferGeometry,
   Vector3,
   PerspectiveCamera,
+  Points,
+  PointsMaterial,
+  Color,
+  Float32BufferAttribute,
 } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 
@@ -66,15 +70,10 @@ const Hero = () => {
 export { Hero }
 
 const ThreeComponent = () => {
-  const { camera, size } = useThree(({ camera, size }) => {
-    return {
-      camera: camera as PerspectiveCamera,
-      size,
-    }
-  })
+  const camera = useThree((state) => state.camera as PerspectiveCamera)
   const result = useLoader(SVGLoader, '/pedro.svg')
 
-  const viewBox: string[] = (result.xml as any).attributes.viewBox.value.split(' ') // ['0','0','1493','489']
+  const viewBox: string[] = result.xml.attributes.viewBox.value.split(' ') // ['0','0','1493','489']
 
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')
@@ -83,14 +82,14 @@ const ThreeComponent = () => {
   const svgWidth = Number(viewBox[2])
   const svgHeight = Number(viewBox[3])
   const svgAspectRatio = svgWidth / svgHeight
-  canvas.width = size.width
-  canvas.height = size.width / svgAspectRatio
+  canvas.width = svgWidth
+  canvas.height = svgHeight
 
   // Set canvas background (optional)
-  context.fillStyle = '#ffffff'
+  context.fillStyle = '#000000'
   context.fillRect(0, 0, canvas.width, canvas.height)
 
-  context.fillStyle = '#000000'
+  context.fillStyle = '#ffffff'
 
   // Render each path from the SVG into the canvas
   result.paths.forEach((path) => {
@@ -121,7 +120,7 @@ const ThreeComponent = () => {
             }
           })
           context.closePath()
-          context.fillStyle = '#ffffff'
+          context.fillStyle = '#000000'
 
           context.fill()
         })
@@ -129,23 +128,59 @@ const ThreeComponent = () => {
     })
   })
 
-  // Create a Texture from the Canvas
-  const texture = new CanvasTexture(canvas)
-
-  // ---  Calculate mesh dimensions for full screen ---
+  // ---  Calculate mesh dimensions ---
   const fovInRadians = (camera.fov * Math.PI) / 180
   const dist = camera.position.z
   const height = 2 * Math.tan(fovInRadians / 2) * dist // visible height
   const width = height * camera.aspect // visible width
 
-  const geometry = new PlaneGeometry(width, width / svgAspectRatio)
-  const material = new MeshBasicMaterial({ map: texture })
-  const mesh = new Mesh(geometry, material)
+  // --- Get canvas data ---
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+  const data = imageData.data // RGBA data (4 values per pixel)
+
+  // --- Create points for Three.js ---
+  const geometry = new BufferGeometry()
+  const positions = []
+  const colors = []
+
+  for (let y = 0; y < canvas.height; y += 4) {
+    for (let x = 0; x < canvas.width; x += 4) {
+      let isBlack = true
+      for (let i = 0; i < 9; i++) {
+        const index = (x + y * canvas.width + i) * 4
+        if (data[index] !== 0) {
+          isBlack = false // Found non-black pixel
+          break
+        }
+      }
+
+      if (!isBlack) {
+        // Add point position and color
+        const position = new Vector3(
+          (x / canvas.width) * width - width / 2,
+          -(y / canvas.height) * (width / svgAspectRatio) + width / svgAspectRatio / 2,
+          0,
+        )
+        positions.push(position.x, position.y, position.z)
+        colors.push(0.2, 0.6, 0.8, 1.0) // Example blue color
+      }
+    }
+  }
+
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('color', new Float32BufferAttribute(colors, 4))
+
+  const material = new PointsMaterial({
+    size: 0.05, // Adjust particle size
+    vertexColors: true, // Enable vertex colors
+  })
+
+  const points = new Points(geometry, material)
 
   return (
     <>
       <Common color={0xf1efeb} />
-      <primitive object={mesh} />
+      <primitive object={points} />
       <gridHelper args={[10, 10]} rotation={[1.5707963267948966, 0, 0]} />
     </>
   )
