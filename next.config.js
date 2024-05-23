@@ -42,11 +42,17 @@ const nextConfig = {
       ],
     })
 
-    // shader support
     config.module.rules.push({
       test: /\.(glsl|vs|fs|vert|frag)$/,
       exclude: /node_modules/,
-      use: ['raw-loader', 'glslify-loader'],
+      use: {
+        loader: 'webpack-glsl-minify',
+        options: {
+          output: 'source',
+          stripVersion: false,
+          preserveAll: true,
+        },
+      },
     })
 
     // svg
@@ -55,6 +61,8 @@ const nextConfig = {
       issuer: /\.[jt]sx?$/,
       use: ['@svgr/webpack'],
     })
+
+    config.resolve.extensions.push('.glsl')
 
     return config
   },
