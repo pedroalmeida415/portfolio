@@ -87,28 +87,31 @@ const ThreeComponent = () => {
   const pixelGrouping = 6
 
   for (let y = 0; y < canvas.height; y += pixelGrouping) {
+    if (canvas.height - y <= 24) break
+
     for (let x = 0; x < canvas.width; x += pixelGrouping) {
-      let hasColoredPixel = false
-      let offsetY = y
+      let colorSum = { r: 0, g: 0, b: 0 }
+      let count = 0
 
-      if (offsetY + pixelGrouping * 2 >= canvas.height) break
-
-      for (let i = 0; i < pixelGrouping ** 2; i++) {
-        const clampedX = x + (i % pixelGrouping)
-
-        if (i > 0 && clampedX === x) {
-          offsetY++
-        }
-
-        const index = (clampedX + offsetY * canvas.width) * 4
-
-        if (data[index] !== 0) {
-          hasColoredPixel = true // Found non-black pixel
-          break
+      for (let dy = 0; dy < pixelGrouping; dy++) {
+        for (let dx = 0; dx < pixelGrouping; dx++) {
+          const index = (x + dx + (y + dy) * canvas.width) * 4
+          if (data[index] === 0) continue
+          colorSum.r += data[index]
+          colorSum.g += data[index + 1]
+          colorSum.b += data[index + 2]
+          count++
         }
       }
 
-      if (hasColoredPixel) {
+      if (count > 0) {
+        let avgColor = {
+          r: colorSum.r / count,
+          g: colorSum.g / count,
+          b: colorSum.b / count,
+        }
+        if (avgColor.r < 100) continue
+
         // Add point position and color
         const textureAspect = texture.image.width / texture.image.height
 
@@ -119,7 +122,7 @@ const ThreeComponent = () => {
           0,
         )
         positions.push(position.x, position.y, position.z)
-        colors.push(0.239, 0.341, 0.855, 1.0)
+        colors.push(avgColor.r / 255, avgColor.g / 255, avgColor.b / 255, 1.0) // Normalize the color values
       }
     }
   }
