@@ -36,10 +36,7 @@ const Hero = () => {
       <Pedro id='pedro' className='invisible mt-1 h-auto w-full' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
-        <h2 className='mr-8 text-5xl font-extralight'>
-          Creative Developer
-          <br />& Designer
-        </h2>
+        <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
       </div>
       <p className='absolute bottom-6 left-1/2 -translate-x-1/2 text-sm uppercase leading-none'>
         Keep Scrolling
@@ -47,7 +44,7 @@ const Hero = () => {
         <DownArrow className='absolute -right-12 top-0 h-full w-auto' />
       </p>
 
-      <View className='absolute left-0 top-0 -z-10 size-full'>
+      <View className='absolute left-0 top-0 size-full'>
         <Suspense fallback={null}>
           <ThreeComponent />
         </Suspense>
@@ -69,7 +66,7 @@ const ThreeComponent = () => {
   // ---  Calculate screen dimensions ---
   const fovInRadians = (camera.fov * Math.PI) / 180
   const dist = camera.position.z
-  const visibleHeight = 2 * Math.tan(fovInRadians / 2) * dist
+  const visibleHeight = 2 * Math.tan(fovInRadians / 2) * Math.abs(dist)
   const visibleWidth = visibleHeight * camera.aspect
   const textureHeight = (texture.image.height * visibleWidth) / texture.image.width
 
@@ -168,8 +165,8 @@ const ThreeComponent = () => {
   //   getBinary()
   // }, [])
 
-  const gpgpu = useRef<GPUComputationRenderer>()
-  const particlesVariableRef = useRef<Variable>()
+  // --- Translate base geometry instead of points geometry for accurate raycast ---
+  baseGeometry.translate(0, -textureHeight / 2 + visibleHeight / 2, 0)
 
   // --- GPU Compute ---
   const baseGeometryCount = baseGeometry.attributes.position.count
@@ -197,19 +194,14 @@ const ThreeComponent = () => {
   gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
   // Uniforms
+  particlesVariable.material.uniforms.uMouse = new THREE.Uniform(new THREE.Vector2(0, 0))
+  particlesVariable.material.uniforms.uMouseStrength = new THREE.Uniform(0.5)
   particlesVariable.material.uniforms.uTime = new THREE.Uniform(0)
   particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0)
   particlesVariable.material.uniforms.uBase = new THREE.Uniform(baseParticlesTexture)
-  particlesVariable.material.uniforms.uFlowFieldInfluence = new THREE.Uniform(0.5)
-  particlesVariable.material.uniforms.uFlowFieldStrength = new THREE.Uniform(2)
-  particlesVariable.material.uniforms.uFlowFieldFrequency = new THREE.Uniform(0.5)
 
   // Init
   gpgpuCompute.init()
-
-  // Save refs
-  gpgpu.current = gpgpuCompute
-  particlesVariableRef.current = particlesVariable
 
   // Geometry
   const particlesUvArray = new Float32Array(baseGeometryCount * 2)
@@ -261,20 +253,44 @@ const ThreeComponent = () => {
 
   const points = new THREE.Points(particlesGeometry, material)
 
+  // Raycaster and plane for interaction
+  const raycaster = new THREE.Raycaster()
+
+  const mouseIntersectionRef = useRef(new THREE.Vector2(0, 0))
+  const planeArea = useRef<THREE.Mesh | null>()
+
+  const onMouseMove = (e) => {
+    mouseIntersectionRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
+    mouseIntersectionRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1
+  }
+
   useFrame((state, delta) => {
+    raycaster.setFromCamera(mouseIntersectionRef.current, camera)
+    const intersects = raycaster.intersectObject(planeArea.current)
+
+    if (intersects.length > 0) {
+      particlesVariable.material.uniforms.uMouse.value = new THREE.Vector2(intersects[0].point.x, intersects[0].point.y)
+    }
+
     // --- Update GPU Compute ---
     const elapsedTime = state.clock.getElapsedTime()
-    particlesVariableRef.current.material.uniforms.uTime.value = elapsedTime
-    particlesVariableRef.current.material.uniforms.uDeltaTime.value = delta
-    gpgpu.current.compute()
-    material.uniforms.uParticlesTexture.value = gpgpu.current.getCurrentRenderTarget(
-      particlesVariableRef.current,
-    ).texture
+    particlesVariable.material.uniforms.uTime.value = elapsedTime
+    particlesVariable.material.uniforms.uDeltaTime.value = delta
+    gpgpuCompute.compute()
+    material.uniforms.uParticlesTexture.value = gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture
   })
 
   return (
     <>
-      <primitive position={[0, visibleHeight / 2 - textureHeight / 2, 0.001]} object={points} />
+      <primitive object={points} />
+      <mesh ref={planeArea} onPointerMove={onMouseMove}>
+        <planeGeometry args={[visibleWidth, visibleHeight]} />
+        <meshBasicMaterial color={0x00ff00} visible={true} />
+      </mesh>
+      {/* <mesh>
+        <planeGeometry args={[visibleWidth, visibleHeight]} />
+        <meshBasicMaterial map={gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture} />
+      </mesh> */}
     </>
   )
 }
