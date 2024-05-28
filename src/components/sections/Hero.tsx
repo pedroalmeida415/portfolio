@@ -62,6 +62,8 @@ const ThreeComponent = () => {
   const camera = useThree((state) => state.camera as THREE.PerspectiveCamera)
   const renderer = useThree((state) => state.gl)
 
+  // console.time('canvas')
+  // const canvast0 = performance.now()
   const texture = useTexture('/pedro-rgb.png')
 
   // ---  Calculate screen dimensions ---
@@ -89,10 +91,10 @@ const ThreeComponent = () => {
   const positions = []
   const colors = []
 
-  const pixelGrouping = 6
+  const pixelGrouping = 3
 
   for (let y = 0; y < canvas.height; y += pixelGrouping) {
-    if (canvas.height - y <= 24) break
+    if (canvas.height - y <= pixelGrouping) break
 
     for (let x = 0; x < canvas.width; x += pixelGrouping) {
       let colorSum = { r: 0, g: 0, b: 0 }
@@ -101,7 +103,7 @@ const ThreeComponent = () => {
       for (let dy = 0; dy < pixelGrouping; dy++) {
         for (let dx = 0; dx < pixelGrouping; dx++) {
           const index = (x + dx + (y + dy) * canvas.width) * 4
-          if (data[index] === 0) continue
+          if (data[index] !== 255) continue
           colorSum.r += data[index]
           colorSum.g += data[index + 1]
           colorSum.b += data[index + 2]
@@ -135,10 +137,41 @@ const ThreeComponent = () => {
   baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   baseGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4))
 
-  // --- GPU Compute ---
+  // const canvast1 = performance.now()
+  // console.timeEnd('canvas')
+  // console.log(`Fetch texture + canvas parsing took ${canvast1 - canvast0} milliseconds.`)
+
+  // useEffect(() => {
+  //   const getBinary = async () => {
+  //     // console.time('fetch')
+  //     const fetcht0 = performance.now()
+  //     try {
+  //       const response = await fetch('/data.dat')
+  //       const data = new DataView(await response.arrayBuffer())
+  //       const tempArray = new Float32Array(data.byteLength / Float32Array.BYTES_PER_ELEMENT)
+  //       const len = tempArray.length
+  //       // Incoming data is raw floating point values
+  //       // with little-endian byte ordering.
+  //       for (let jj = 0; jj < len; ++jj) {
+  //         tempArray[jj] = data.getFloat32(jj * Float32Array.BYTES_PER_ELEMENT, true)
+  //       }
+  //       console.log(tempArray)
+  //     } catch (error) {
+  //       console.log(error)
+  //     } finally {
+  //       // console.timeEnd('fetch')
+  //       const fetcht1 = performance.now()
+  //       console.log(`Fetch and parsing took ${fetcht1 - fetcht0} milliseconds.`)
+  //     }
+  //   }
+
+  //   getBinary()
+  // }, [])
+
   const gpgpu = useRef<GPUComputationRenderer>()
   const particlesVariableRef = useRef<Variable>()
 
+  // --- GPU Compute ---
   const baseGeometryCount = baseGeometry.attributes.position.count
   const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
@@ -216,12 +249,14 @@ const ThreeComponent = () => {
     vertexShader: particlesVertexShader,
     fragmentShader: particlesFragmentShader,
     uniforms: {
-      uSize: new THREE.Uniform(0.135),
+      uSize: new THREE.Uniform(0.05),
       uResolution: new THREE.Uniform(
         new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio),
       ),
       uParticlesTexture: new THREE.Uniform(null),
     },
+    depthTest: false,
+    transparent: true,
   })
 
   const points = new THREE.Points(particlesGeometry, material)
