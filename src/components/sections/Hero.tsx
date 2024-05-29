@@ -30,6 +30,8 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
 })
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
 
+let isLMBDown = false
+
 const Hero = () => {
   return (
     <section className='relative h-screen p-6'>
@@ -44,7 +46,11 @@ const Hero = () => {
         <DownArrow className='absolute -right-12 top-0 h-full w-auto' />
       </p>
 
-      <View className='absolute left-0 top-0 size-full'>
+      <View
+        onPointerDown={() => (isLMBDown = true)}
+        onPointerUp={() => (isLMBDown = false)}
+        className='absolute left-0 top-0 size-full'
+      >
         <Suspense fallback={null}>
           <ThreeComponent />
         </Suspense>
@@ -86,36 +92,27 @@ const ThreeComponent = () => {
   // --- Create base geomerty ---
   const baseGeometry = new THREE.BufferGeometry()
   const positions = []
-  const colors = []
+  const order = []
 
   const pixelGrouping = 3
 
   for (let y = 0; y < canvas.height; y += pixelGrouping) {
-    if (canvas.height - y <= pixelGrouping) break
+    if (canvas.height - y <= 24) break
 
     for (let x = 0; x < canvas.width; x += pixelGrouping) {
-      let colorSum = { r: 0, g: 0, b: 0 }
+      let greenColorSum = 0
       let count = 0
 
       for (let dy = 0; dy < pixelGrouping; dy++) {
         for (let dx = 0; dx < pixelGrouping; dx++) {
           const index = (x + dx + (y + dy) * canvas.width) * 4
           if (data[index] !== 255) continue
-          colorSum.r += data[index]
-          colorSum.g += data[index + 1]
-          colorSum.b += data[index + 2]
+          greenColorSum += data[index + 1]
           count++
         }
       }
 
       if (count > 0) {
-        let avgColor = {
-          r: colorSum.r / count,
-          g: colorSum.g / count,
-          b: colorSum.b / count,
-        }
-        if (avgColor.r < 100) continue
-
         // Add point position and color
         const textureAspect = texture.image.width / texture.image.height
 
@@ -126,13 +123,13 @@ const ThreeComponent = () => {
           0,
         )
         positions.push(position.x, position.y, position.z)
-        colors.push(avgColor.r / 255, avgColor.g / 255, avgColor.b / 255, 1.0) // Normalize the color values
+        order.push(greenColorSum / count / 255) // Normalize the color values
       }
     }
   }
 
   baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-  baseGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4))
+  baseGeometry.setAttribute('_order', new THREE.Float32BufferAttribute(order, 1))
 
   // const canvast1 = performance.now()
   // console.timeEnd('canvas')
@@ -168,6 +165,9 @@ const ThreeComponent = () => {
   // --- Translate base geometry instead of points geometry for accurate raycast ---
   baseGeometry.translate(0, -textureHeight / 2 + visibleHeight / 2, 0)
 
+  const orderAtt = baseGeometry.attributes._order
+  const totalStaggerDuration = 2.5
+
   // --- GPU Compute ---
   const baseGeometryCount = baseGeometry.attributes.position.count
   const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
@@ -186,7 +186,7 @@ const ThreeComponent = () => {
     baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i3 + 0]
     baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i3 + 1]
     baseParticlesTexture.image.data[i4 + 2] = baseGeometry.attributes.position.array[i3 + 2]
-    baseParticlesTexture.image.data[i4 + 3] = Math.random()
+    baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * orderAtt.array[i]
   }
 
   // Particles variable
@@ -194,6 +194,7 @@ const ThreeComponent = () => {
   gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
   // Uniforms
+  particlesVariable.material.uniforms.uIsLMBDown = new THREE.Uniform(isLMBDown)
   particlesVariable.material.uniforms.uMouse = new THREE.Uniform(new THREE.Vector2(0, 0))
   particlesVariable.material.uniforms.uMouseStrength = new THREE.Uniform(0.5)
   particlesVariable.material.uniforms.uTime = new THREE.Uniform(0)
@@ -205,7 +206,6 @@ const ThreeComponent = () => {
 
   // Geometry
   const particlesUvArray = new Float32Array(baseGeometryCount * 2)
-  const sizesArray = new Float32Array(baseGeometryCount)
 
   for (let y = 0; y < gpgpuSize; y++) {
     for (let x = 0; x < gpgpuSize; x++) {
@@ -218,17 +218,12 @@ const ThreeComponent = () => {
 
       particlesUvArray[i2 + 0] = uvX
       particlesUvArray[i2 + 1] = uvY
-
-      // Size
-      sizesArray[i] = Math.random()
     }
   }
 
   const particlesGeometry = new THREE.BufferGeometry()
   particlesGeometry.setDrawRange(0, baseGeometryCount)
   particlesGeometry.setAttribute('aParticlesUv', new THREE.BufferAttribute(particlesUvArray, 2))
-  particlesGeometry.setAttribute('aColor', baseGeometry.attributes.color)
-  particlesGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizesArray, 1))
 
   const sizes = {
     width: window.innerWidth,
@@ -276,6 +271,7 @@ const ThreeComponent = () => {
     const elapsedTime = state.clock.getElapsedTime()
     particlesVariable.material.uniforms.uTime.value = elapsedTime
     particlesVariable.material.uniforms.uDeltaTime.value = delta
+    particlesVariable.material.uniforms.uIsLMBDown.value = isLMBDown
     gpgpuCompute.compute()
     material.uniforms.uParticlesTexture.value = gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture
   })
@@ -285,7 +281,7 @@ const ThreeComponent = () => {
       <primitive object={points} />
       <mesh ref={planeArea} onPointerMove={onMouseMove}>
         <planeGeometry args={[visibleWidth, visibleHeight]} />
-        <meshBasicMaterial color={0x00ff00} visible={true} />
+        <meshBasicMaterial color={0x00ff00} visible={false} />
       </mesh>
       {/* <mesh>
         <planeGeometry args={[visibleWidth, visibleHeight]} />
