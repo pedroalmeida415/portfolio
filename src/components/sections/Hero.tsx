@@ -35,7 +35,7 @@ let isLMBDown = false
 const Hero = () => {
   return (
     <section className='relative h-screen p-6'>
-      <Pedro id='pedro' className='invisible mt-1 h-auto w-full' />
+      <Pedro id='pedro' className='visible h-auto w-full opacity-20' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
@@ -196,7 +196,6 @@ const ThreeComponent = () => {
   // Uniforms
   particlesVariable.material.uniforms.uIsLMBDown = new THREE.Uniform(isLMBDown)
   particlesVariable.material.uniforms.uMouse = new THREE.Uniform(new THREE.Vector2(0, 0))
-  particlesVariable.material.uniforms.uMouseStrength = new THREE.Uniform(0.5)
   particlesVariable.material.uniforms.uTime = new THREE.Uniform(0)
   particlesVariable.material.uniforms.uDeltaTime = new THREE.Uniform(0)
   particlesVariable.material.uniforms.uBase = new THREE.Uniform(baseParticlesTexture)
