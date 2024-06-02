@@ -166,7 +166,7 @@ const ThreeComponent = () => {
   baseGeometry.translate(0, -textureHeight / 2 + visibleHeight / 2, 0)
 
   const orderAtt = baseGeometry.attributes._order
-  const totalStaggerDuration = 2.5
+  const totalStaggerDuration = 3.0
 
   // --- GPU Compute ---
   const baseGeometryCount = baseGeometry.attributes.position.count
@@ -176,6 +176,7 @@ const ThreeComponent = () => {
 
   // Texture to store particles position
   const baseParticlesTexture = gpgpuCompute.createTexture()
+  baseParticlesTexture.internalFormat = 'RGBA32F'
 
   // Fill texture with particles values
   for (let i = 0; i < baseGeometryCount; i++) {
@@ -225,9 +226,9 @@ const ThreeComponent = () => {
   particlesGeometry.setAttribute('aParticlesUv', new THREE.BufferAttribute(particlesUvArray, 2))
 
   const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight,
-    pixelRatio: Math.min(window.devicePixelRatio, 2),
+    width: renderer.domElement.clientWidth,
+    height: renderer.domElement.clientHeight,
+    pixelRatio: renderer.getPixelRatio(),
   }
 
   // ---  Particle shader  ---
@@ -241,7 +242,7 @@ const ThreeComponent = () => {
       ),
       uParticlesTexture: new THREE.Uniform(null),
     },
-    depthTest: false,
+    depthWrite: false,
     transparent: true,
   })
 
@@ -254,13 +255,16 @@ const ThreeComponent = () => {
   const planeArea = useRef<THREE.Mesh | null>()
 
   const onMouseMove = (e) => {
-    mouseIntersectionRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
-    mouseIntersectionRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1
+    mouseIntersectionRef.current.x = (e.clientX / sizes.width) * 2 - 1
+    mouseIntersectionRef.current.y = -(e.clientY / sizes.height) * 2 + 1
   }
 
   useFrame((state, delta) => {
     raycaster.setFromCamera(mouseIntersectionRef.current, camera)
     const intersects = raycaster.intersectObject(planeArea.current)
+
+    // Simulation area
+    // vec2(-10.0, -5.0) vec2(10.0, 5.0)
 
     if (intersects.length > 0) {
       particlesVariable.material.uniforms.uMouse.value = new THREE.Vector2(intersects[0].point.x, intersects[0].point.y)
