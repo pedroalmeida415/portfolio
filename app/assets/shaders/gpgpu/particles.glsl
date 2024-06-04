@@ -4,53 +4,50 @@ uniform sampler2D uBase;
 uniform vec2 uMouse;
 uniform bool uIsLMBDown;
 
-// @include "../includes/simplexNoise4d.glsl"
+@include "../includes/encode_decode.glsl"
 
 void main()
 {
     float time = uTime * 0.2;
     vec2 uv = gl_FragCoord.xy / resolution.xy;
-    vec4 particle = texture(uParticles, uv);
+    Particle particle = decode_particle(texture(uParticles, uv));
     vec4 base = texture(uBase, uv);
-
-    float mouseDist = distance(uMouse, particle.xy);
-    float originDist = distance(base.xy, particle.xy);
+    
+    float mouseDist = distance(uMouse, particle.pos);
+    float originDist = distance(base.xy, particle.pos);
     float mouseOriginDist = distance(base.xy, uMouse);
 
     if (mouseDist <= 1.0) {
-        particle.z = 1.0;
+        particle.is_touched = true;
     }
+
     if (uIsLMBDown){
-        particle.z = 0.0;
+        particle.is_touched = false;
     }
 
-    bool isTouched = particle.z > 0.0;
-
-    if (isTouched){
+    if (particle.is_touched){
         if(mouseDist <= 1.0) {
             vec2 originDirection = normalize(uMouse - base.xy);
 
-            particle.xy += originDirection * 0.1 * (1.0 - mouseDist);
+            particle.pos += originDirection * 0.1 * (1.0 - mouseDist);
         } else {
-            vec2 mouseDirection = normalize(particle.xy - uMouse);
+            vec2 mouseDirection = normalize(particle.pos - uMouse);
 
-            particle.xy += mouseDirection * 0.1 * -mouseDist;
+            particle.pos += mouseDirection * 0.1 * -mouseDist;
         }
     } else {
         float easeFactor = 1.0 - pow(0.9, uDeltaTime * 60.0);
 
-        float delay = particle.a;
-
-        if (delay <= 0.0){
-            particle.xy = mix(particle.xy, base.xy, easeFactor);
+        if (particle.delay <= 0.0){
+            particle.pos = mix(particle.pos, base.xy, easeFactor);
         } else {
-            particle.a -= mod(uDeltaTime, 1.0);
+            particle.delay -= mod(uDeltaTime, 1.0);
         }
     }
 
     if(originDist < 0.001){
-        particle.a = base.a;
+        particle.delay = base.a;
     }
     
-    gl_FragColor = particle;
+    gl_FragColor = encode_particle(particle);
 }
