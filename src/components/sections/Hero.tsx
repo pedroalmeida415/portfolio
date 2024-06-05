@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 
 import Pedro from '@/assets/pedro.svg'
 import DownArrow from '@/assets/down-arrow.svg'
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useRef } from 'react'
 import { useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -35,7 +35,7 @@ let isLMBDown = false
 const Hero = () => {
   return (
     <section className='relative h-screen p-6'>
-      <Pedro id='pedro' className='visible h-auto w-full opacity-20' />
+      <Pedro id='pedro' className='invisible h-auto w-full' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
@@ -176,7 +176,6 @@ const ThreeComponent = () => {
 
   // Texture to store particles position
   const baseParticlesTexture = gpgpuCompute.createTexture()
-  baseParticlesTexture.internalFormat = 'RGBA32F'
 
   // Fill texture with particles values
   for (let i = 0; i < baseGeometryCount; i++) {
@@ -251,7 +250,7 @@ const ThreeComponent = () => {
   // Raycaster and plane for interaction
   const raycaster = new THREE.Raycaster()
 
-  const mouseIntersectionRef = useRef(new THREE.Vector2(0, 0))
+  const mouseIntersectionRef = useRef(new THREE.Vector2(-0.75, -0.75))
   const planeArea = useRef<THREE.Mesh | null>()
 
   const onMouseMove = (e) => {
@@ -262,9 +261,6 @@ const ThreeComponent = () => {
   useFrame((state, delta) => {
     raycaster.setFromCamera(mouseIntersectionRef.current, camera)
     const intersects = raycaster.intersectObject(planeArea.current)
-
-    // Simulation area
-    // vec2(-10.0, -5.0) vec2(10.0, 5.0)
 
     if (intersects.length > 0) {
       particlesVariable.material.uniforms.uMouse.value = new THREE.Vector2(intersects[0].point.x, intersects[0].point.y)

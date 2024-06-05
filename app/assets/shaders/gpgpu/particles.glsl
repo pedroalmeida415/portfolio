@@ -8,10 +8,22 @@ uniform bool uIsLMBDown;
 
 void main()
 {
-    float time = uTime * 0.2;
+    Particle particle;
+    
     vec2 uv = gl_FragCoord.xy / resolution.xy;
-    Particle particle = decode_particle(texture(uParticles, uv));
     vec4 base = texture(uBase, uv);
+    vec4 current = texture(uParticles, uv);
+
+    if (base == current) {
+        particle.pos = vec2(0.0, -3.0);
+        particle.delay = current.a;
+        particle.is_touched = false;
+
+        gl_FragColor = encode_particle(particle);
+        return;
+    }
+
+    particle = decode_particle(current); 
     
     float mouseDist = distance(uMouse, particle.pos);
     float originDist = distance(base.xy, particle.pos);
@@ -45,7 +57,7 @@ void main()
         }
     }
 
-    if(originDist < 0.001){
+    if (originDist < 0.001) {
         particle.delay = base.a;
     }
     
