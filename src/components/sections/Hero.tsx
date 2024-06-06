@@ -5,13 +5,15 @@ import dynamic from 'next/dynamic'
 import Pedro from '@/assets/pedro.svg'
 import DownArrow from '@/assets/down-arrow.svg'
 import { Suspense, useRef } from 'react'
-import { useTexture } from '@react-three/drei'
+import { ScreenQuad, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GPUComputationRenderer, Variable } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
+import backgroundFragShader from '@/assets/shaders/reverberation/fragment.glsl'
+import backgroundVertShader from '@/assets/shaders/reverberation/vertex.glsl'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -35,7 +37,7 @@ let isLMBDown = false
 const Hero = () => {
   return (
     <section className='relative h-screen p-6'>
-      <Pedro id='pedro' className='invisible h-auto w-full' />
+      <Pedro id='pedro' className='visible h-auto w-full opacity-20' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
@@ -45,14 +47,14 @@ const Hero = () => {
         <DownArrow className='absolute -left-12 top-0 h-full w-auto' />
         <DownArrow className='absolute -right-12 top-0 h-full w-auto' />
       </p>
-
       <View
         onPointerDown={() => (isLMBDown = true)}
         onPointerUp={() => (isLMBDown = false)}
         className='absolute left-0 top-0 size-full'
       >
         <Suspense fallback={null}>
-          <ThreeComponent />
+          <Background />
+          <Particles />
         </Suspense>
       </View>
     </section>
@@ -61,7 +63,8 @@ const Hero = () => {
 
 export { Hero }
 
-const ThreeComponent = () => {
+const Particles = () => {
+  const size = useThree((state) => state.size)
   const camera = useThree((state) => state.camera as THREE.PerspectiveCamera)
   const renderer = useThree((state) => state.gl)
 
@@ -224,12 +227,6 @@ const ThreeComponent = () => {
   particlesGeometry.setDrawRange(0, baseGeometryCount)
   particlesGeometry.setAttribute('aParticlesUv', new THREE.BufferAttribute(particlesUvArray, 2))
 
-  const sizes = {
-    width: renderer.domElement.clientWidth,
-    height: renderer.domElement.clientHeight,
-    pixelRatio: renderer.getPixelRatio(),
-  }
-
   // ---  Particle shader  ---
   const material = new THREE.ShaderMaterial({
     vertexShader: particlesVertexShader,
@@ -237,7 +234,7 @@ const ThreeComponent = () => {
     uniforms: {
       uSize: new THREE.Uniform(0.05),
       uResolution: new THREE.Uniform(
-        new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio),
+        new THREE.Vector2(size.width * renderer.getPixelRatio(), size.height * renderer.getPixelRatio()),
       ),
       uParticlesTexture: new THREE.Uniform(null),
     },
@@ -254,21 +251,22 @@ const ThreeComponent = () => {
   const planeArea = useRef<THREE.Mesh | null>()
 
   const onMouseMove = (e) => {
-    mouseIntersectionRef.current.x = (e.clientX / sizes.width) * 2 - 1
-    mouseIntersectionRef.current.y = -(e.clientY / sizes.height) * 2 + 1
+    mouseIntersectionRef.current.x = (e.clientX / size.width) * 2 - 1
+    mouseIntersectionRef.current.y = -(e.clientY / size.height) * 2 + 1
   }
+
+  const uMouseVec = new THREE.Vector2()
 
   useFrame((state, delta) => {
     raycaster.setFromCamera(mouseIntersectionRef.current, camera)
     const intersects = raycaster.intersectObject(planeArea.current)
 
     if (intersects.length > 0) {
-      particlesVariable.material.uniforms.uMouse.value = new THREE.Vector2(intersects[0].point.x, intersects[0].point.y)
+      particlesVariable.material.uniforms.uMouse.value = uMouseVec.set(intersects[0].point.x, intersects[0].point.y)
     }
 
     // --- Update GPU Compute ---
-    const elapsedTime = state.clock.getElapsedTime()
-    particlesVariable.material.uniforms.uTime.value = elapsedTime
+    particlesVariable.material.uniforms.uTime.value = state.clock.elapsedTime
     particlesVariable.material.uniforms.uDeltaTime.value = delta
     particlesVariable.material.uniforms.uIsLMBDown.value = isLMBDown
     gpgpuCompute.compute()
@@ -287,5 +285,40 @@ const ThreeComponent = () => {
         <meshBasicMaterial map={gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture} />
       </mesh> */}
     </>
+  )
+}
+
+const Background = () => {
+  const size = useThree((state) => state.size)
+  const renderer = useThree((state) => state.gl)
+
+  const materialRef = useRef<THREE.ShaderMaterial | null>(null)
+
+  useFrame((state, delta) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
+      materialRef.current.uniforms.uDeltaTime.value = delta
+    }
+  })
+
+  return (
+    <ScreenQuad position={[0, 0, -1]} scale={[11, 11, 0]}>
+      <shaderMaterial
+        ref={materialRef}
+        vertexShader={backgroundVertShader}
+        fragmentShader={backgroundFragShader}
+        transparent
+        depthTest={false}
+        depthWrite={false}
+        uniforms={{
+          uTime: new THREE.Uniform(0),
+          uDeltaTime: new THREE.Uniform(0),
+          uSeed: new THREE.Uniform(Math.random() * 100),
+          uResolution: new THREE.Uniform(
+            new THREE.Vector2(size.width * renderer.getPixelRatio(), size.height * renderer.getPixelRatio()),
+          ),
+        }}
+      />
+    </ScreenQuad>
   )
 }
