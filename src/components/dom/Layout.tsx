@@ -31,9 +31,12 @@ const Layout = ({ children }) => {
             pointerEvents: 'none',
             zIndex: '-1',
           }}
+          gl={{
+            antialias: false,
+            toneMapping: NoToneMapping,
+          }}
           eventSource={ref}
           eventPrefix='client'
-          onCreated={(state) => (state.gl.toneMapping = NoToneMapping)}
           camera={{ position: [0, 0, 10], fov: 50, near: 0.1, far: 1000 }}
         />,
         document.body,
