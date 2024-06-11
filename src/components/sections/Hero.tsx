@@ -287,10 +287,10 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
 
   return (
     <>
-      <primitive object={points} />
+      <primitive object={points} position={[0, 0, 0.001]} />
       <mesh ref={planeArea} onPointerMove={onMouseMove}>
         <planeGeometry args={[visibleWidth, visibleHeight]} />
-        <meshBasicMaterial map={backgroundTexture} />
+        <meshBasicMaterial map={backgroundTexture} transparent />
       </mesh>
     </>
   )
@@ -326,6 +326,7 @@ const Background = ({ renderTarget }: { renderTarget: THREE.WebGLRenderTarget<TH
           fragmentShader={backgroundFragShader}
           depthTest={false}
           depthWrite={false}
+          transparent
           uniforms={{
             uTime: new THREE.Uniform(0),
             uDeltaTime: new THREE.Uniform(0),

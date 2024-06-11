@@ -96,10 +96,17 @@ void main() {
     float mt = mod(uTime, 1000.0);
     float hue1 = 180.0 + 30.0 * (1.0 + sin(mt + uSeed + 1000.0));
     float hue2 = 320.0 + 20.0 * (1.0 + cos(mt + uSeed + 1000.0));
+    
+    // use OkLab color space and complex numbers
     vec3 rgb = vec3(0.0);
     rgb += gradation(hue1 / 360.0, uv, 1.2, mt * 0.1 + uSeed + 1000.0);
     rgb += gradation(hue2 / 360.0, uv, 1.2, mt * 0.1 + uSeed + 2000.0);
+    
+    // Calculate alpha based on the intensity of rgb
+    float alpha = 1.0 - dot(rgb, vec3(0.333)); 
+    
     float grain = 0.1 * random(uv * 5.0);
     rgb -= grain;
-    gl_FragColor = vec4(rgb, 1.);
+    
+    gl_FragColor = vec4(rgb, alpha);
 }
