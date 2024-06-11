@@ -2,8 +2,7 @@ precision highp float;
 precision lowp int;
 
 void main(void) {
-    float x = float((gl_VertexID & 1) << 2);
-    float y = float((gl_VertexID & 2) << 1);
-    
-    gl_Position = vec4(x - 1., y - 1., 1., 1.);
+    gl_Position.x = (gl_VertexID == 2) ?  3. : -1.;
+    gl_Position.y = (gl_VertexID == 1) ? -3. : 1.;
+    gl_Position.zw = vec2(1.);
 }
