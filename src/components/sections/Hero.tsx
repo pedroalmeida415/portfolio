@@ -3,11 +3,11 @@
 import dynamic from 'next/dynamic'
 
 import Pedro from '@/assets/pedro.svg'
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { useFBO, useTexture } from '@react-three/drei'
 import { createPortal, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
+import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
@@ -268,6 +268,10 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
     gpgpuCompute.compute()
     material.uniforms.uParticlesTexture.value = gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture
   })
+
+  useEffect(() => {
+    return () => gpgpuCompute.dispose()
+  }, [gpgpuCompute])
 
   return (
     <>
