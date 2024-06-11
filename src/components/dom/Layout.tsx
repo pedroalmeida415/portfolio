@@ -33,8 +33,8 @@ const Layout = ({ children }) => {
           }}
           gl={{
             antialias: false,
-            toneMapping: NoToneMapping,
           }}
+          flat
           eventSource={ref}
           eventPrefix='client'
           camera={{ position: [0, 0, 10], fov: 50, near: 0.1, far: 1000 }}

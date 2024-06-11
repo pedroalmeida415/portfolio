@@ -3,12 +3,11 @@
 import dynamic from 'next/dynamic'
 
 import Pedro from '@/assets/pedro.svg'
-import DownArrow from '@/assets/down-arrow.svg'
 import { Suspense, useMemo, useRef } from 'react'
-import { PerspectiveCamera, ScreenQuad, useCamera, useFBO, useTexture } from '@react-three/drei'
+import { useFBO, useTexture } from '@react-three/drei'
 import { createPortal, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GPUComputationRenderer, Variable } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
+import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer.js'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
@@ -42,11 +41,6 @@ const Hero = () => {
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
       </div>
-      <p className='absolute bottom-6 left-1/2 -translate-x-1/2 text-sm uppercase leading-none'>
-        Keep Scrolling
-        <DownArrow className='absolute -left-12 top-0 h-full w-auto' />
-        <DownArrow className='absolute -right-12 top-0 h-full w-auto' />
-      </p>
       <View
         onPointerDown={() => (isLMBDown = true)}
         onPointerUp={() => (isLMBDown = false)}
@@ -76,20 +70,19 @@ const SceneWrapper = () => {
 }
 
 const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) => {
-  const size = useThree((state) => state.size)
-  const camera = useThree((state) => state.camera as THREE.PerspectiveCamera)
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
+  const pointer = useThree((state) => state.pointer)
+  pointer.setY(-100)
+
+  const resolution = useMemo(() => renderer.getDrawingBufferSize(new THREE.Vector2()), [renderer])
+
+  const visibleWidth = viewport.width
+  const visibleHeight = viewport.height
 
   // console.time('canvas')
   // const canvast0 = performance.now()
   const texture = useTexture('/pedro-rgb.png')
-
-  // ---  Calculate screen dimensions ---
-  const fovInRadians = (camera.fov * Math.PI) / 180
-  const dist = camera.position.z
-  const visibleHeight = 2 * Math.tan(fovInRadians / 2) * Math.abs(dist)
-  const visibleWidth = visibleHeight * camera.aspect
   const textureHeight = (texture.image.height * visibleWidth) / texture.image.width
 
   const canvas = document.createElement('canvas')
@@ -246,7 +239,7 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
     fragmentShader: particlesFragmentShader,
     uniforms: {
       uSize: new THREE.Uniform(0.035),
-      uResolution: new THREE.Uniform(new THREE.Vector2(size.width * viewport.dpr, size.height * viewport.dpr)),
+      uResolution: new THREE.Uniform(new THREE.Vector2(resolution.x, resolution.y)),
       uParticlesTexture: new THREE.Uniform(null),
       uBaseParticlesTexture: new THREE.Uniform(baseParticlesTexture),
       uBackgroundTexture: new THREE.Uniform(backgroundTexture),
@@ -256,22 +249,13 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
   })
 
   const points = new THREE.Points(particlesGeometry, material)
-
-  // Raycaster and plane for interaction
-  const raycaster = new THREE.Raycaster()
-
-  const uMouseVec = new THREE.Vector2()
-  const mouseIntersectionRef = useRef(new THREE.Vector2(0, 100))
   const planeArea = useRef<THREE.Mesh | null>()
 
-  const onMouseMove = (e) => {
-    mouseIntersectionRef.current.x = (e.clientX / size.width) * 2 - 1
-    mouseIntersectionRef.current.y = -(e.clientY / size.height) * 2 + 1
-  }
+  const uMouseVec = new THREE.Vector2()
 
   useFrame((state, delta) => {
-    raycaster.setFromCamera(mouseIntersectionRef.current, camera)
-    const intersects = raycaster.intersectObject(planeArea.current)
+    state.raycaster.setFromCamera(state.pointer, state.camera)
+    const intersects = state.raycaster.intersectObject(planeArea.current)
 
     if (intersects.length > 0) {
       particlesVariable.material.uniforms.uMouse.value = uMouseVec.set(intersects[0].point.x, intersects[0].point.y)
@@ -288,7 +272,7 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
   return (
     <>
       <primitive object={points} position={[0, 0, 0.001]} />
-      <mesh ref={planeArea} onPointerMove={onMouseMove}>
+      <mesh ref={planeArea}>
         <planeGeometry args={[visibleWidth, visibleHeight]} />
         <meshBasicMaterial map={backgroundTexture} transparent />
       </mesh>
@@ -297,45 +281,39 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
 }
 
 const Background = ({ renderTarget }: { renderTarget: THREE.WebGLRenderTarget<THREE.Texture> }) => {
-  const size = useThree((state) => state.size)
-  const viewport = useThree((state) => state.viewport)
+  const renderer = useThree((state) => state.gl)
 
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null)
-
-  const cam = useRef<THREE.PerspectiveCamera>(null!)
+  const resolution = useMemo(() => renderer.getDrawingBufferSize(new THREE.Vector2()), [renderer])
+  const cam = useMemo(() => new THREE.OrthographicCamera(), [])
   const scene = useMemo(() => new THREE.Scene(), [])
 
-  useFrame((state, delta) => {
+  const materialRef = useRef<THREE.RawShaderMaterial | null>(null)
+
+  useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
-      materialRef.current.uniforms.uDeltaTime.value = delta
     }
 
     state.gl.setRenderTarget(renderTarget)
-    state.gl.render(scene, cam.current)
+    state.gl.render(scene, cam)
     state.gl.setRenderTarget(null)
   })
 
   return createPortal(
-    <>
-      <PerspectiveCamera ref={cam} position={[0, 0, 1]} />
-      <ScreenQuad>
-        <shaderMaterial
-          ref={materialRef}
-          vertexShader={backgroundVertShader}
-          fragmentShader={backgroundFragShader}
-          depthTest={false}
-          depthWrite={false}
-          transparent
-          uniforms={{
-            uTime: new THREE.Uniform(0),
-            uDeltaTime: new THREE.Uniform(0),
-            uSeed: new THREE.Uniform(Math.random() * 100),
-            uResolution: new THREE.Uniform(new THREE.Vector2(size.width * viewport.dpr, size.height * viewport.dpr)),
-          }}
-        />
-      </ScreenQuad>
-    </>,
+    <mesh frustumCulled={false}>
+      <bufferGeometry drawRange={{ start: 0, count: 3 }} />
+      <rawShaderMaterial
+        ref={materialRef}
+        glslVersion={THREE.GLSL3}
+        vertexShader={backgroundVertShader}
+        fragmentShader={backgroundFragShader}
+        uniforms={{
+          uTime: new THREE.Uniform(0),
+          uSeed: new THREE.Uniform(Math.random() * 100),
+          uResolution: new THREE.Uniform(new THREE.Vector2(resolution.x, resolution.y)),
+        }}
+      />
+    </mesh>,
     scene,
   )
 }

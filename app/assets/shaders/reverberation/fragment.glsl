@@ -1,6 +1,11 @@
+precision highp float;
+
 uniform float uTime;
 uniform float uSeed;
 uniform vec2 uResolution;
+
+// Declare an output variable for the fragment color
+out vec4 fragColor;
 
 float random(vec2 p) {
     return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -108,5 +113,5 @@ void main() {
     float grain = 0.1 * random(uv * 5.0);
     rgb -= grain;
     
-    gl_FragColor = vec4(rgb, alpha);
+    fragColor = vec4(rgb, alpha);
 }
