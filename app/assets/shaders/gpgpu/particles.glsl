@@ -40,17 +40,18 @@ void main() {
         
         particle.pos = pos_mapped_origin;
         particle.delay = current.a;
-        particle.is_touched = false;
+        particle.is_touched = uIsLMBDown;
         
         gl_FragColor = encode_particle(particle);
         return;
     }
     
     particle = decode_particle(current);
+    particle.is_touched = uIsLMBDown;
     
     float mouseDist = distance(uMouse, particle.pos);
     
-    vec2 direction = normalize(particle.pos - uMouse);
+    vec2 direction = particle.is_touched ? normalize(uMouse - particle.pos) : normalize(particle.pos - uMouse);
     
     float force = 0.7 / mouseDist / (1.0 - exp(-mouseDist)); // Central Force
     
