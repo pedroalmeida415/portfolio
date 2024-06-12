@@ -56,9 +56,8 @@ export { Hero }
 
 const SceneWrapper = () => {
   const backgroundRenderTarget = useFBO({
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
     stencilBuffer: false,
+    depthBuffer: false,
   })
 
   return (
@@ -244,7 +243,7 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
       uBaseParticlesTexture: new THREE.Uniform(baseParticlesTexture),
       uBackgroundTexture: new THREE.Uniform(backgroundTexture),
     },
-    depthWrite: false,
+    depthTest: false,
     transparent: true,
   })
 
@@ -311,6 +310,8 @@ const Background = ({ renderTarget }: { renderTarget: THREE.WebGLRenderTarget<TH
         glslVersion={THREE.GLSL3}
         vertexShader={backgroundVertShader}
         fragmentShader={backgroundFragShader}
+        transparent
+        depthTest={false}
         uniforms={{
           uTime: new THREE.Uniform(0),
           uSeed: new THREE.Uniform(Math.random() * 100),
