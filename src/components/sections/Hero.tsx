@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 
 import Pedro from '@/assets/pedro.svg'
+import DownArrow from '@/assets/down-arrow.svg'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { useFBO, useTexture } from '@react-three/drei'
 import { createPortal, useFrame, useThree } from '@react-three/fiber'
@@ -41,6 +42,11 @@ const Hero = () => {
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
       </div>
+      {/* <p className='absolute bottom-6 left-1/2 -translate-x-1/2 text-sm uppercase leading-none'>
+        Keep Scrolling
+        <DownArrow className='absolute -left-12 top-0 h-full w-auto' />
+        <DownArrow className='absolute -right-12 top-0 h-full w-auto' />
+      </p> */}
       <View
         onPointerDown={() => (isLMBDown = true)}
         onPointerUp={() => (isLMBDown = false)}
@@ -62,7 +68,7 @@ const SceneWrapper = () => {
 
   return (
     <Suspense fallback={null}>
-      <Background renderTarget={backgroundRenderTarget} />
+      {/* <Background renderTarget={backgroundRenderTarget} /> */}
       <Particles backgroundTexture={backgroundRenderTarget.texture} />
     </Suspense>
   )
@@ -180,7 +186,7 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
   const baseGeometryCount = baseGeometry.attributes.position.count
   const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
-  const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
+  const gpgpuCompute = useMemo(() => new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer), [gpgpuSize, renderer])
 
   // Texture to store particles position
   const baseParticlesTexture = gpgpuCompute.createTexture()
