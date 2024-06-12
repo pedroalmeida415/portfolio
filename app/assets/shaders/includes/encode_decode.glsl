@@ -1,4 +1,3 @@
-#define MAX_POS_X 10.0
 #define POS_BIT_RANGE 0xffffff
 
 struct Particle {
@@ -10,18 +9,13 @@ struct Particle {
 Particle decode_particle(vec4 encoded_particle) {
     Particle particle;
     
-    float pos_x_sign = sign(encoded_particle.x);
-    uint iPos_x = uint(abs(encoded_particle.x));
+    float encoded_flags = encoded_particle.z;
+    uint flags_aggregate = uint(encoded_flags);
     
-    uint iFlag_is_touched = iPos_x & uint(0x1);
+    uint iFlag_is_touched = flags_aggregate & uint(0x1);
     particle.is_touched = bool(iFlag_is_touched);
     
-    iPos_x = (iPos_x >> 1 << 1);
-    
-    particle.pos.x = float(iPos_x) / float(POS_BIT_RANGE);
-    particle.pos.x *= MAX_POS_X;
-    particle.pos.x *= pos_x_sign;
-    
+    particle.pos.x = encoded_particle.x;
     particle.pos.y = encoded_particle.y;
     particle.delay = encoded_particle.a;
     
@@ -29,12 +23,9 @@ Particle decode_particle(vec4 encoded_particle) {
 }
 
 vec4 encode_particle(Particle particle) {
-    uint iPos_x = uint((min(abs(particle.pos.x), MAX_POS_X - 0.001) / MAX_POS_X) * float(POS_BIT_RANGE));
-    iPos_x = (iPos_x >> 1 << 1) | uint(particle.is_touched);
-    float pos_x_sign = sign(particle.pos.x);
-    float encoded_pos_x = float(iPos_x) * pos_x_sign;
+    uint flags_aggregate = uint(POS_BIT_RANGE);
+    flags_aggregate = flags_aggregate & uint(particle.is_touched) << 0;
+    float encoded_flags = float(flags_aggregate);
     
-    particle.pos.y = clamp(particle.pos.y, -10.0, 10.0);
-    
-    return vec4(encoded_pos_x, particle.pos.y, 0.0, particle.delay);
+    return vec4(particle.pos.x, particle.pos.y, encoded_flags, particle.delay);
 }
