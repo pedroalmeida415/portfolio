@@ -3,10 +3,9 @@
 import dynamic from 'next/dynamic'
 
 import Pedro from '@/assets/pedro.svg'
-import DownArrow from '@/assets/down-arrow.svg'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { useFBO, useTexture } from '@react-three/drei'
-import { createPortal, useFrame, useThree } from '@react-three/fiber'
+import { useTexture } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
@@ -56,20 +55,15 @@ const Hero = () => {
 export { Hero }
 
 const SceneWrapper = () => {
-  const backgroundRenderTarget = useFBO({
-    stencilBuffer: false,
-    depthBuffer: false,
-  })
-
   return (
     <Suspense fallback={null}>
-      <Background renderTarget={backgroundRenderTarget} />
-      <Particles backgroundTexture={backgroundRenderTarget.texture} />
+      <Background />
+      <Particles />
     </Suspense>
   )
 }
 
-const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) => {
+const Particles = () => {
   const texture = useTexture('/pedro-rgb.png')
 
   const renderer = useThree((state) => state.gl)
@@ -147,7 +141,7 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
     baseGeometry.translate(0, -textureHeight / 2 + visibleHeight / 2, 0)
 
     const orderAtt = baseGeometry.attributes._order
-    const totalStaggerDuration = 3.0
+    const totalStaggerDuration = 2.5
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
@@ -247,51 +241,33 @@ const Particles = ({ backgroundTexture }: { backgroundTexture: THREE.Texture }) 
             uResolution: { value: null },
             uParticlesTexture: { value: null },
             uBaseParticlesTexture: { value: baseParticlesTexture },
-            uBackgroundTexture: { value: backgroundTexture },
           }}
         >
           <vector2 attach='uniforms-uResolution-value' args={[resolution.x, resolution.y]} />
         </shaderMaterial>
       </points>
-      <mesh ref={planeAreaRef}>
+      <mesh ref={planeAreaRef} visible={false}>
         <planeGeometry args={[visibleWidth, visibleHeight]} />
-        <meshBasicMaterial map={backgroundTexture} transparent />
+        <rawShaderMaterial />
       </mesh>
     </>
   )
 }
 
-const Background = ({ renderTarget }: { renderTarget: THREE.WebGLRenderTarget<THREE.Texture> }) => {
+const Background = () => {
   const renderer = useThree((state) => state.gl)
 
   const resolution = useMemo(() => renderer.getDrawingBufferSize(new THREE.Vector2()), [renderer])
-  const cam = useMemo(() => new THREE.OrthographicCamera(), [])
-  const scene = useMemo(() => new THREE.Scene(), [])
-
   const materialRef = useRef<THREE.RawShaderMaterial | null>(null)
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
     }
-
-    const currentXrEnabled = renderer.xr.enabled
-    const currentShadowAutoUpdate = renderer.shadowMap.autoUpdate
-
-    renderer.xr.enabled = false // Avoid camera modification
-    renderer.shadowMap.autoUpdate = false // Avoid re-computing shadows
-
-    state.gl.setRenderTarget(renderTarget)
-    state.gl.render(scene, cam)
-
-    renderer.xr.enabled = currentXrEnabled
-    renderer.shadowMap.autoUpdate = currentShadowAutoUpdate
-
-    state.gl.setRenderTarget(null)
   })
 
-  return createPortal(
-    <mesh frustumCulled={false}>
+  return (
+    <mesh>
       <bufferGeometry ref={(ref) => ref?.setDrawRange(0, 3)} />
       <rawShaderMaterial
         ref={materialRef}
@@ -308,7 +284,6 @@ const Background = ({ renderTarget }: { renderTarget: THREE.WebGLRenderTarget<TH
       >
         <vector2 attach='uniforms-uResolution-value' args={[resolution.x, resolution.y]} />
       </rawShaderMaterial>
-    </mesh>,
-    scene,
+    </mesh>
   )
 }
