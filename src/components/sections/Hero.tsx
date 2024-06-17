@@ -36,7 +36,7 @@ let isLMBDown = false
 const Hero = () => {
   return (
     <section className='relative h-screen p-6'>
-      <Pedro id='pedro' className='invisible h-auto w-full opacity-20' />
+      <Pedro id='pedro' className='visible h-auto w-full opacity-20' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
@@ -57,7 +57,7 @@ export { Hero }
 const SceneWrapper = () => {
   return (
     <Suspense fallback={null}>
-      <Background />
+      {/* <Background /> */}
       <Particles />
     </Suspense>
   )
@@ -76,9 +76,6 @@ const Particles = () => {
   const planeAreaRef = useRef<THREE.Mesh | null>()
   const pointsRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null>()
 
-  const visibleWidth = viewport.width
-  const visibleHeight = viewport.height
-
   const { gpgpuCompute, baseGeometryCount, baseParticlesTexture, particlesVariable, particlesUvArray } = useMemo(() => {
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('2d')
@@ -87,21 +84,19 @@ const Particles = () => {
     canvas.height = texture.image.height
 
     // TODO draw image on offscreen canvas i.e. web worker
-    context.drawImage(texture.image, 0, 0, texture.image.width, texture.image.height)
+    context.drawImage(texture.image, 0, 0, canvas.width, canvas.height)
 
     // --- Get canvas data ---
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
     const data = imageData.data // RGBA data (4 values per pixel)
 
     // --- Create base geomerty ---
+    const textureHeightInViewport = (canvas.height * viewport.width) / canvas.width
     const positions = []
-    const order = []
 
     const pixelGrouping = 2
 
     for (let y = 0; y < canvas.height; y += pixelGrouping) {
-      if (canvas.height - y <= 24) break
-
       for (let x = 0; x < canvas.width; x += pixelGrouping) {
         let greenColorSum = 0
         let count = 0
@@ -116,17 +111,18 @@ const Particles = () => {
         }
 
         if (count > 0) {
-          // Add point position and color
-          const textureAspect = texture.image.width / texture.image.height
+          // Calculate the normalized device coordinates (NDC)
+          const ndcX = ((x + pixelGrouping / 2) / canvas.width) * 2 - 1
+          const ndcY = (-(y + pixelGrouping / 2) / canvas.height) * 2 + 1
 
+          // Adjust the NDC to viewport coordinates considering the aspect ratio
           const position = new THREE.Vector3(
-            ((x + pixelGrouping / 2) / canvas.width) * visibleWidth - visibleWidth / 2,
-            -((y + pixelGrouping / 2) / canvas.height) * (visibleWidth / textureAspect) +
-              visibleWidth / textureAspect / 2,
-            0,
+            (ndcX * viewport.width) / 2,
+            (ndcY * textureHeightInViewport) / 2,
+            greenColorSum / count / 255,
           )
+
           positions.push(position.x, position.y, position.z)
-          order.push(greenColorSum / count / 255) // Normalize the color values
         }
       }
     }
@@ -134,14 +130,9 @@ const Particles = () => {
 
     const baseGeometry = new THREE.BufferGeometry()
     baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-    baseGeometry.setAttribute('_order', new THREE.Float32BufferAttribute(order, 1))
 
     // --- Translate base geometry instead of points geometry for accurate raycast ---
-    const textureHeight = (texture.image.height * visibleWidth) / texture.image.width
-    baseGeometry.translate(0, -textureHeight / 2 + visibleHeight / 2, 0)
-
-    const orderAtt = baseGeometry.attributes._order
-    const totalStaggerDuration = 2.5
+    baseGeometry.translate(0, -textureHeightInViewport / 2 + viewport.height / 2, 0)
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
@@ -168,6 +159,7 @@ const Particles = () => {
     // Texture to store particles position
     const baseParticlesTexture = gpgpuCompute.createTexture()
 
+    const totalStaggerDuration = 2.5
     // Fill texture with particles values
     for (let i = 0; i < baseGeometryCount; i++) {
       const i3 = i * 3
@@ -176,8 +168,8 @@ const Particles = () => {
       // RGBA values for FBO texture from base geometry position
       baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i3 + 0]
       baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i3 + 1]
-      baseParticlesTexture.image.data[i4 + 2] = baseGeometry.attributes.position.array[i3 + 2]
-      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * orderAtt.array[i]
+      baseParticlesTexture.image.data[i4 + 2] = 0
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * baseGeometry.attributes.position.array[i3 + 2]
     }
     baseGeometry.dispose()
 
@@ -212,7 +204,7 @@ const Particles = () => {
     state.raycaster.setFromCamera(state.pointer, state.camera)
     const intersects = state.raycaster.intersectObject(planeAreaRef.current)
 
-    if (intersects.length > 0) {
+    if (intersects.length) {
       particlesVariable.material.uniforms.uMouse.value = uMouseVec.set(intersects[0].point.x, intersects[0].point.y)
     }
 
@@ -227,7 +219,7 @@ const Particles = () => {
 
   return (
     <>
-      <points ref={pointsRef} position={[0, 0, 0.001]}>
+      <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false}>
         <bufferGeometry ref={(ref) => ref?.setDrawRange(0, baseGeometryCount)}>
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
         </bufferGeometry>
@@ -237,17 +229,15 @@ const Particles = () => {
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
           uniforms={{
-            uSize: { value: 0.035 },
-            uResolution: { value: null },
+            uSize: { value: 0.025 },
+            uResolution: { value: [resolution.x, resolution.y] },
             uParticlesTexture: { value: null },
             uBaseParticlesTexture: { value: baseParticlesTexture },
           }}
-        >
-          <vector2 attach='uniforms-uResolution-value' args={[resolution.x, resolution.y]} />
-        </shaderMaterial>
+        />
       </points>
       <mesh ref={planeAreaRef} visible={false}>
-        <planeGeometry args={[visibleWidth, visibleHeight]} />
+        <planeGeometry args={[viewport.width, viewport.height]} />
         <rawShaderMaterial />
       </mesh>
     </>
@@ -279,11 +269,9 @@ const Background = () => {
         uniforms={{
           uTime: { value: 0 },
           uSeed: { value: Math.random() * 100 },
-          uResolution: { value: null },
+          uResolution: { value: [resolution.x, resolution.y] },
         }}
-      >
-        <vector2 attach='uniforms-uResolution-value' args={[resolution.x, resolution.y]} />
-      </rawShaderMaterial>
+      />
     </mesh>
   )
 }
