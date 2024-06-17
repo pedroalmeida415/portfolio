@@ -229,8 +229,7 @@ const Particles = () => {
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
           uniforms={{
-            uSize: { value: 0.025 },
-            uResolution: { value: [resolution.x, resolution.y] },
+            uSize: { value: resolution.x * 0.017 },
             uParticlesTexture: { value: null },
             uBaseParticlesTexture: { value: baseParticlesTexture },
           }}
