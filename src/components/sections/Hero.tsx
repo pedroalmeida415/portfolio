@@ -256,6 +256,7 @@ const Particles = () => {
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
         </bufferGeometry>
         <shaderMaterial
+          transparent
           depthTest={false}
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
