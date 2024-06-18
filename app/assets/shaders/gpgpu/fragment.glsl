@@ -1,8 +1,7 @@
 varying float vColor;
-
 void main() {
-    gl_FragColor.rgb = vec3(0.114);
+    gl_FragColor = vec4(0.114, 0.114, 0.114, 1.0);
     
     float distanceToCenter = length(gl_PointCoord - 0.5);
-    gl_FragColor.a = 1.0 - step(0.5, distanceToCenter);
+    if (distanceToCenter > 0.5) discard;
 }

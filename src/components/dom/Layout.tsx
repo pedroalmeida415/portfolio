@@ -33,6 +33,8 @@ const Layout = ({ children }) => {
           }}
           gl={{
             antialias: false,
+            stencil: false,
+            depth: false,
           }}
           flat
           eventSource={ref}

@@ -29,14 +29,13 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
     </div>
   ),
 })
-const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
 
 let isLMBDown = false
 
 const Hero = () => {
   return (
     <section className='relative h-screen p-6'>
-      <Pedro id='pedro' className='visible h-auto w-full opacity-20' />
+      <Pedro id='pedro' className='invisible h-auto w-full opacity-20' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
@@ -64,7 +63,7 @@ const SceneWrapper = () => {
 }
 
 const Particles = () => {
-  const texture = useTexture('/pedro-rgb.png')
+  const texture = useTexture('/pedro-rgb-2.png')
 
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
@@ -94,7 +93,40 @@ const Particles = () => {
     const textureHeightInViewport = (canvas.height * viewport.width) / canvas.width
     const positions = []
 
-    const pixelGrouping = 2
+    const pixelGrouping = 1
+
+    for (let y = 0; y < canvas.height; y += pixelGrouping) {
+      for (let x = 0; x < canvas.width; x += pixelGrouping) {
+        let blueColorSum = 0
+        let greenColorSum = 0
+        let count = 0
+
+        for (let dy = 0; dy < pixelGrouping; dy++) {
+          for (let dx = 0; dx < pixelGrouping; dx++) {
+            const index = (x + dx + (y + dy) * canvas.width) * 4
+            if (data[index + 2] === 0) continue
+            greenColorSum += data[index + 1]
+            blueColorSum += data[index + 2]
+            count++
+          }
+        }
+
+        if (count) {
+          // Calculate the normalized device coordinates (NDC)
+          const ndcX = ((x + pixelGrouping / 2) / canvas.width) * 2 - 1
+          const ndcY = (-(y + pixelGrouping / 2) / canvas.height) * 2 + 1
+
+          // Adjust the NDC to viewport coordinates considering the aspect ratio
+          const position = new THREE.Vector3(
+            (ndcX * viewport.width) / 2,
+            (ndcY * textureHeightInViewport) / 2,
+            greenColorSum / count / 255,
+          )
+
+          positions.push(position.x, position.y, position.z)
+        }
+      }
+    }
 
     for (let y = 0; y < canvas.height; y += pixelGrouping) {
       for (let x = 0; x < canvas.width; x += pixelGrouping) {
@@ -104,13 +136,13 @@ const Particles = () => {
         for (let dy = 0; dy < pixelGrouping; dy++) {
           for (let dx = 0; dx < pixelGrouping; dx++) {
             const index = (x + dx + (y + dy) * canvas.width) * 4
-            if (data[index] !== 255) continue
+            if (data[index] !== 255 || data[index + 2] !== 0) continue
             greenColorSum += data[index + 1]
             count++
           }
         }
 
-        if (count > 0) {
+        if (count === pixelGrouping ** 2) {
           // Calculate the normalized device coordinates (NDC)
           const ndcX = ((x + pixelGrouping / 2) / canvas.width) * 2 - 1
           const ndcY = (-(y + pixelGrouping / 2) / canvas.height) * 2 + 1
@@ -224,7 +256,6 @@ const Particles = () => {
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
         </bufferGeometry>
         <shaderMaterial
-          transparent
           depthTest={false}
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
@@ -235,7 +266,7 @@ const Particles = () => {
           }}
         />
       </points>
-      <mesh ref={planeAreaRef} visible={false}>
+      <mesh ref={planeAreaRef} visible={false} frustumCulled={false}>
         <planeGeometry args={[viewport.width, viewport.height]} />
         <rawShaderMaterial />
       </mesh>
