@@ -32,7 +32,6 @@ const Layout = ({ children }) => {
             zIndex: '-1',
           }}
           gl={{
-            antialias: false,
             stencil: false,
             depth: false,
           }}

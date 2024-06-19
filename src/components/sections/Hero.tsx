@@ -205,7 +205,7 @@ const Particles = () => {
 
   return (
     <>
-      <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false}>
+      <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
         <bufferGeometry ref={(ref) => ref?.setDrawRange(0, baseGeometryCount)}>
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
         </bufferGeometry>
@@ -221,9 +221,9 @@ const Particles = () => {
           }}
         />
       </points>
-      <mesh ref={planeAreaRef} visible={false} frustumCulled={false}>
+      <mesh ref={planeAreaRef} visible={false} frustumCulled={false} matrixAutoUpdate={false}>
         <planeGeometry args={[viewport.width, viewport.height]} />
-        <rawShaderMaterial />
+        <rawShaderMaterial depthTest={false} />
       </mesh>
     </>
   )
