@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import Pedro from '@/assets/pedro.svg'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { useTexture } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
@@ -13,6 +13,8 @@ import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
 import backgroundFragShader from '@/assets/shaders/reverberation/fragment.glsl'
 import backgroundVertShader from '@/assets/shaders/reverberation/vertex.glsl'
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
+import { generateGeometryPoints } from '@/helpers/generate-geometry-points'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -64,6 +66,7 @@ const SceneWrapper = () => {
 
 const Particles = () => {
   const texture = useTexture('/pedro-rgb-2.png')
+  const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
@@ -76,95 +79,18 @@ const Particles = () => {
   const pointsRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null>()
 
   const { gpgpuCompute, baseGeometryCount, baseParticlesTexture, particlesVariable, particlesUvArray } = useMemo(() => {
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
+    // --- Create base geometry ---
+    const svgWidth = Number((textSvg.xml as any).attributes.width.value)
+    const svgHeight = Number((textSvg.xml as any).attributes.height.value)
+    const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-    canvas.width = texture.image.width
-    canvas.height = texture.image.height
-
-    // TODO draw image on offscreen canvas i.e. web worker
-    context.drawImage(texture.image, 0, 0, canvas.width, canvas.height)
-
-    // --- Get canvas data ---
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-    const data = imageData.data // RGBA data (4 values per pixel)
-
-    // --- Create base geomerty ---
-    const textureHeightInViewport = (canvas.height * viewport.width) / canvas.width
-    const positions = []
-
-    const pixelGrouping = 1
-
-    for (let y = 0; y < canvas.height; y += pixelGrouping) {
-      for (let x = 0; x < canvas.width; x += pixelGrouping) {
-        let blueColorSum = 0
-        let greenColorSum = 0
-        let count = 0
-
-        for (let dy = 0; dy < pixelGrouping; dy++) {
-          for (let dx = 0; dx < pixelGrouping; dx++) {
-            const index = (x + dx + (y + dy) * canvas.width) * 4
-            if (data[index + 2] === 0) continue
-            greenColorSum += data[index + 1]
-            blueColorSum += data[index + 2]
-            count++
-          }
-        }
-
-        if (count) {
-          // Calculate the normalized device coordinates (NDC)
-          const ndcX = ((x + pixelGrouping / 2) / canvas.width) * 2 - 1
-          const ndcY = (-(y + pixelGrouping / 2) / canvas.height) * 2 + 1
-
-          // Adjust the NDC to viewport coordinates considering the aspect ratio
-          const position = new THREE.Vector3(
-            (ndcX * viewport.width) / 2,
-            (ndcY * textureHeightInViewport) / 2,
-            greenColorSum / count / 255,
-          )
-
-          positions.push(position.x, position.y, position.z)
-        }
-      }
-    }
-
-    for (let y = 0; y < canvas.height; y += pixelGrouping) {
-      for (let x = 0; x < canvas.width; x += pixelGrouping) {
-        let greenColorSum = 0
-        let count = 0
-
-        for (let dy = 0; dy < pixelGrouping; dy++) {
-          for (let dx = 0; dx < pixelGrouping; dx++) {
-            const index = (x + dx + (y + dy) * canvas.width) * 4
-            if (data[index] !== 255 || data[index + 2] !== 0) continue
-            greenColorSum += data[index + 1]
-            count++
-          }
-        }
-
-        if (count === pixelGrouping ** 2) {
-          // Calculate the normalized device coordinates (NDC)
-          const ndcX = ((x + pixelGrouping / 2) / canvas.width) * 2 - 1
-          const ndcY = (-(y + pixelGrouping / 2) / canvas.height) * 2 + 1
-
-          // Adjust the NDC to viewport coordinates considering the aspect ratio
-          const position = new THREE.Vector3(
-            (ndcX * viewport.width) / 2,
-            (ndcY * textureHeightInViewport) / 2,
-            greenColorSum / count / 255,
-          )
-
-          positions.push(position.x, position.y, position.z)
-        }
-      }
-    }
-    canvas.remove()
+    const positions = generateGeometryPoints(textSvg, viewport)
 
     const baseGeometry = new THREE.BufferGeometry()
     baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
 
     // --- Translate base geometry instead of points geometry for accurate raycast ---
-    baseGeometry.translate(0, -textureHeightInViewport / 2 + viewport.height / 2, 0)
+    baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
