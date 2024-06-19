@@ -65,7 +65,7 @@ const SceneWrapper = () => {
 }
 
 const Particles = () => {
-  const texture = useTexture('/pedro-rgb-2.png')
+  const gradientTexture = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
   const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
@@ -84,7 +84,7 @@ const Particles = () => {
     const svgHeight = Number((textSvg.xml as any).attributes.height.value)
     const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-    const positions = generateGeometryPoints(textSvg, viewport)
+    const positions = generateGeometryPoints(textSvg, viewport, gradientTexture)
 
     const baseGeometry = new THREE.BufferGeometry()
     baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
@@ -187,7 +187,7 @@ const Particles = () => {
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
           uniforms={{
-            uSize: { value: resolution.x * 0.017 },
+            uSize: { value: resolution.x * 0.018 },
             uParticlesTexture: { value: null },
             uBaseParticlesTexture: { value: baseParticlesTexture },
           }}

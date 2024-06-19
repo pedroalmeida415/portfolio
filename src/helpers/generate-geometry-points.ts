@@ -1,6 +1,19 @@
 import * as THREE from 'three'
 
-export const generateGeometryPoints = (textSvg, viewport) => {
+export const generateGeometryPoints = (textSvg, viewport, gradientTexture) => {
+  // Create a canvas element
+  const canvas = document.createElement('canvas')
+  canvas.width = gradientTexture.width
+  canvas.height = gradientTexture.height
+
+  // Get the 2D drawing context
+  const ctx = canvas.getContext('2d', {
+    willReadFrequently: true,
+  })
+
+  // Draw the ImageBitmap onto the canvas
+  ctx.drawImage(gradientTexture, 0, 0)
+
   const svgWidth = Number((textSvg.xml as any).attributes.width.value)
   const svgHeight = Number((textSvg.xml as any).attributes.height.value)
   const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
@@ -18,8 +31,14 @@ export const generateGeometryPoints = (textSvg, viewport) => {
       const ndcX = (point.x / svgWidth) * 2 - 1
       const ndcY = (-point.y / svgHeight) * 2 + 1
 
+      const gradientImageData = ctx.getImageData(point.x, point.y, 1, 1).data
+
       // Adjust the NDC to viewport coordinates considering the aspect ratio
-      const position = new THREE.Vector3((ndcX * viewport.width) / 2, (ndcY * svgHeightInViewport) / 2, 0.1)
+      const position = new THREE.Vector3(
+        (ndcX * viewport.width) / 2,
+        (ndcY * svgHeightInViewport) / 2,
+        gradientImageData[1] / 255,
+      )
 
       positions.push(position.x, position.y, position.z)
     })
@@ -68,14 +87,22 @@ export const generateGeometryPoints = (textSvg, viewport) => {
           const ndcX = ((x + 0.5) / svgWidth) * 2 - 1
           const ndcY = (-(y + 0.5) / svgHeight) * 2 + 1
 
+          const gradientImageData = ctx.getImageData(x, y, 1, 1).data
+
           // Adjust the NDC to viewport coordinates considering the aspect ratio
-          const position = new THREE.Vector3((ndcX * viewport.width) / 2, (ndcY * svgHeightInViewport) / 2, 0.1)
+          const position = new THREE.Vector3(
+            (ndcX * viewport.width) / 2,
+            (ndcY * svgHeightInViewport) / 2,
+            gradientImageData[1] / 255,
+          )
 
           positions.push(position.x, position.y, position.z)
         }
       }
     }
   })
+
+  canvas.remove()
 
   return positions
 }
