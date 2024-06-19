@@ -55,7 +55,7 @@ void main() {
     
     float force = 0.7 / mouseDist / (1.0 - exp(-mouseDist)); // Central Force
     
-    particle.pos += force * direction * 0.1;
+    particle.pos += direction * (force *  0.1);
     
     if (particle.delay <= 0.0) {
         particle.pos += (base.xy - particle.pos) * 0.05;

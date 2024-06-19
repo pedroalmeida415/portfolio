@@ -42,6 +42,9 @@ const Hero = () => {
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
+        <button id='generateButton' className='rounded-lg bg-slate-800 px-4 py-2 text-white'>
+          Generate Geometry Binary
+        </button>
       </div>
       <View
         onPointerDown={() => (isLMBDown = true)}
@@ -67,7 +70,7 @@ const SceneWrapper = () => {
 
 const Particles = () => {
   // const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
-  const positions: Float32Array = useGetBinary()
+  const positionsBinary: Float32Array = useGetBinary()
   const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
@@ -80,14 +83,7 @@ const Particles = () => {
   const planeAreaRef = useRef<THREE.Mesh | null>()
   const pointsRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null>()
 
-  const {
-    gpgpuCompute,
-    baseGeometryCount,
-    baseParticlesTexture,
-    particlesVariable,
-    particlesUvArray,
-    baseGeometryPosition,
-  } = useMemo(() => {
+  const { gpgpuCompute, baseGeometryCount, baseParticlesTexture, particlesVariable, particlesUvArray } = useMemo(() => {
     // --- Create base geometry ---
     const svgWidth = Number((textSvg.xml as any).attributes.width.value)
     const svgHeight = Number((textSvg.xml as any).attributes.height.value)
@@ -96,10 +92,19 @@ const Particles = () => {
     // const positions = new Float32Array(generateGeometryPoints(textSvg, viewport, gradientTextureBitmap))
 
     const baseGeometry = new THREE.BufferGeometry()
-    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positionsBinary, 3))
 
     // --- Translate base geometry instead of points geometry for accurate raycast ---
     // baseGeometry.translate(0, -svgHeightInViewport / 2 - viewport.height / 2, 0)
+
+    document.getElementById('generateButton').onclick = async () => {
+      await fetch(
+        new Request('/api', {
+          method: 'POST',
+          body: baseGeometry.attributes.position.array,
+        }),
+      )
+    }
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
@@ -160,28 +165,9 @@ const Particles = () => {
       baseParticlesTexture,
       particlesVariable,
       particlesUvArray,
-      baseGeometryPosition: baseGeometry.attributes.position.array,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // useEffect(() => {
-  //   const controller = new AbortController()
-  //   const handlePositionsPOST = async () => {
-  //     await fetch(
-  //       new Request('/api', {
-  //         method: 'POST',
-  //         body: baseGeometryPosition,
-  //         signal: controller.signal,
-  //       }),
-  //     )
-  //   }
-  //   handlePositionsPOST()
-
-  //   return () => {
-  //     controller.abort()
-  //   }
-  // }, [])
 
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
