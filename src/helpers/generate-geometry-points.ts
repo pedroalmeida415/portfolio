@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 
-export const generateGeometryPoints = (textSvg, viewport, gradientTexture) => {
+export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap) => {
   // Create a canvas element
   const canvas = document.createElement('canvas')
-  canvas.width = gradientTexture.width
-  canvas.height = gradientTexture.height
+  canvas.width = gradientTextureBitmap.width
+  canvas.height = gradientTextureBitmap.height
 
   // Get the 2D drawing context
   const ctx = canvas.getContext('2d', {
@@ -12,7 +12,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTexture) => {
   })
 
   // Draw the ImageBitmap onto the canvas
-  ctx.drawImage(gradientTexture, 0, 0)
+  ctx.drawImage(gradientTextureBitmap, 0, 0)
 
   const svgWidth = Number((textSvg.xml as any).attributes.width.value)
   const svgHeight = Number((textSvg.xml as any).attributes.height.value)

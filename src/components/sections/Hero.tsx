@@ -15,6 +15,7 @@ import backgroundFragShader from '@/assets/shaders/reverberation/fragment.glsl'
 import backgroundVertShader from '@/assets/shaders/reverberation/vertex.glsl'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { generateGeometryPoints } from '@/helpers/generate-geometry-points'
+import { useGetBinary } from '@/helpers/use-get-binary'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -65,7 +66,8 @@ const SceneWrapper = () => {
 }
 
 const Particles = () => {
-  const gradientTexture = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
+  // const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
+  const positions: Float32Array = useGetBinary()
   const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
@@ -78,19 +80,26 @@ const Particles = () => {
   const planeAreaRef = useRef<THREE.Mesh | null>()
   const pointsRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null>()
 
-  const { gpgpuCompute, baseGeometryCount, baseParticlesTexture, particlesVariable, particlesUvArray } = useMemo(() => {
+  const {
+    gpgpuCompute,
+    baseGeometryCount,
+    baseParticlesTexture,
+    particlesVariable,
+    particlesUvArray,
+    baseGeometryPosition,
+  } = useMemo(() => {
     // --- Create base geometry ---
     const svgWidth = Number((textSvg.xml as any).attributes.width.value)
     const svgHeight = Number((textSvg.xml as any).attributes.height.value)
     const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-    const positions = generateGeometryPoints(textSvg, viewport, gradientTexture)
+    // const positions = new Float32Array(generateGeometryPoints(textSvg, viewport, gradientTextureBitmap))
 
     const baseGeometry = new THREE.BufferGeometry()
-    baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
     // --- Translate base geometry instead of points geometry for accurate raycast ---
-    baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
+    // baseGeometry.translate(0, -svgHeightInViewport / 2 - viewport.height / 2, 0)
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
@@ -151,9 +160,28 @@ const Particles = () => {
       baseParticlesTexture,
       particlesVariable,
       particlesUvArray,
+      baseGeometryPosition: baseGeometry.attributes.position.array,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // useEffect(() => {
+  //   const controller = new AbortController()
+  //   const handlePositionsPOST = async () => {
+  //     await fetch(
+  //       new Request('/api', {
+  //         method: 'POST',
+  //         body: baseGeometryPosition,
+  //         signal: controller.signal,
+  //       }),
+  //     )
+  //   }
+  //   handlePositionsPOST()
+
+  //   return () => {
+  //     controller.abort()
+  //   }
+  // }, [])
 
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
