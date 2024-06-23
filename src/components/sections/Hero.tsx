@@ -101,14 +101,14 @@ const Particles = () => {
     baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
 
     document.getElementById('generateButton').onclick = async () => {
-      // await fetch(
-      //   new Request('/api/encode-position', {
-      //     method: 'POST',
-      //     body: baseGeometry.attributes.position.array,
-      //   }),
-      // )
       await fetch(
-        new Request('/api/encode-delay', {
+        new Request('/api/encode?output=position', {
+          method: 'POST',
+          body: baseGeometry.attributes.position.array,
+        }),
+      )
+      await fetch(
+        new Request('/api/encode?output=delay', {
           method: 'POST',
           body: new Uint8Array(delays),
         }),

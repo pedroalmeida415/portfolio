@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { promisify } from 'util'
+import { URL } from 'url'
 
 const writeFileAsync = promisify(fs.writeFile)
 
@@ -7,8 +8,8 @@ export async function POST(request: Request) {
   try {
     const data = await request.arrayBuffer()
 
-    // Write the 8-bit array to the file
-    const filePath = `pedro-delay-${Date.now()}.bin`
+    const outputName = new URL(request.url).searchParams.get('output')
+    const filePath = `encoded-${outputName}-${new Date().toLocaleTimeString('pt-BR').replace(/:/g, '-')}.bin`
     await writeFileAsync(filePath, Buffer.from(data))
 
     return Response.json({ status: 200 })
