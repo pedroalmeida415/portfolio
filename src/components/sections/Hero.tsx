@@ -42,7 +42,10 @@ const Hero = () => {
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
-        <button id='generateButton' className='rounded-lg bg-slate-800 px-4 py-2 text-white'>
+        <button
+          id='generateButton'
+          className='absolute bottom-1/4 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-slate-800 px-4 py-2 text-white'
+        >
           Generate Geometry Binary
         </button>
       </div>
@@ -69,8 +72,8 @@ const SceneWrapper = () => {
 }
 
 const Particles = () => {
-  // const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
-  const positionsBinary: Float32Array = useGetBinary()
+  const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
+  // const positionsBinary: Float32Array = useGetBinary()
   const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
@@ -89,19 +92,25 @@ const Particles = () => {
     const svgHeight = Number((textSvg.xml as any).attributes.height.value)
     const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-    // const positions = new Float32Array(generateGeometryPoints(textSvg, viewport, gradientTextureBitmap))
+    const [positions, delays] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
 
     const baseGeometry = new THREE.BufferGeometry()
-    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positionsBinary, 3))
+    baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 2))
 
     // --- Translate base geometry instead of points geometry for accurate raycast ---
-    // baseGeometry.translate(0, -svgHeightInViewport / 2 - viewport.height / 2, 0)
+    baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
 
     document.getElementById('generateButton').onclick = async () => {
+      // await fetch(
+      //   new Request('/api/encode-position', {
+      //     method: 'POST',
+      //     body: baseGeometry.attributes.position.array,
+      //   }),
+      // )
       await fetch(
-        new Request('/api', {
+        new Request('/api/encode-delay', {
           method: 'POST',
-          body: baseGeometry.attributes.position.array,
+          body: new Int32Array(delays),
         }),
       )
     }
@@ -134,14 +143,14 @@ const Particles = () => {
     const totalStaggerDuration = 2.5
     // Fill texture with particles values
     for (let i = 0; i < baseGeometryCount; i++) {
-      const i3 = i * 3
+      const i2 = i * 2
       const i4 = i * 4
 
       // RGBA values for FBO texture from base geometry position
-      baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i3 + 0]
-      baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i3 + 1]
+      baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i2 + 0]
+      baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i2 + 1]
       baseParticlesTexture.image.data[i4 + 2] = 0
-      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * baseGeometry.attributes.position.array[i3 + 2]
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * (delays[i] / 255)
     }
     baseGeometry.dispose()
 

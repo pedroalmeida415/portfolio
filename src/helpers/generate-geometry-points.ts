@@ -19,6 +19,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
   const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
   const positions = []
+  const delays = []
 
   let inner_o_shape_points
 
@@ -34,13 +35,11 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
       const gradientImageData = ctx.getImageData(point.x, point.y, 1, 1).data
 
       // Adjust the NDC to viewport coordinates considering the aspect ratio
-      const position = new THREE.Vector3(
-        (ndcX * viewport.width) / 2,
-        (ndcY * svgHeightInViewport) / 2,
-        gradientImageData[1] / 255,
-      )
+      const positionX = (ndcX * viewport.width) / 2
+      const positionY = (ndcY * svgHeightInViewport) / 2
 
-      positions.push(position.x, position.y, position.z)
+      positions.push(positionX, positionY)
+      delays.push(gradientImageData[1]) // green content of pixel
     })
 
     if (index === 0) {
@@ -90,13 +89,12 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
           const gradientImageData = ctx.getImageData(x, y, 1, 1).data
 
           // Adjust the NDC to viewport coordinates considering the aspect ratio
-          const position = new THREE.Vector3(
-            (ndcX * viewport.width) / 2,
-            (ndcY * svgHeightInViewport) / 2,
-            gradientImageData[1] / 255,
-          )
 
-          positions.push(position.x, position.y, position.z)
+          const positionX = (ndcX * viewport.width) / 2
+          const positionY = (ndcY * svgHeightInViewport) / 2
+
+          positions.push(positionX, positionY)
+          delays.push(gradientImageData[1]) // green content of pixel
         }
       }
     }
@@ -104,7 +102,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
 
   canvas.remove()
 
-  return positions
+  return [positions, delays]
 }
 
 // Helper function to check if a point is inside a polygon
