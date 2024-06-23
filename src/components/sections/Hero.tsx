@@ -110,7 +110,7 @@ const Particles = () => {
       await fetch(
         new Request('/api/encode-delay', {
           method: 'POST',
-          body: new Int32Array(delays),
+          body: new Uint8Array(delays),
         }),
       )
     }
