@@ -73,7 +73,7 @@ const SceneWrapper = () => {
 
 const Particles = () => {
   // const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
-  const positions = useGetBinary()
+  const [positions, staggerMultipliers] = useGetBinary()
   // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
@@ -95,7 +95,7 @@ const Particles = () => {
     // const [positions, delays] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
 
     const baseGeometry = new THREE.BufferGeometry()
-    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 2))
 
     // // --- Translate base geometry instead of points geometry for accurate raycast ---
     // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
@@ -143,14 +143,15 @@ const Particles = () => {
     const totalStaggerDuration = 2.5
     // Fill texture with particles values
     for (let i = 0; i < baseGeometryCount; i++) {
-      const i2 = i * 3
+      const i2 = i * 2
       const i4 = i * 4
+      const normalizedMultiplier = staggerMultipliers[i] / 255
 
       // RGBA values for FBO texture from base geometry position
       baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i2 + 0]
       baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i2 + 1]
       baseParticlesTexture.image.data[i4 + 2] = 0
-      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * positions[i2 + 2]
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
     }
     baseGeometry.dispose()
 
