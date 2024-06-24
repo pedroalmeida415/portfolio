@@ -72,9 +72,9 @@ const SceneWrapper = () => {
 }
 
 const Particles = () => {
-  const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
-  // const positionsBinary: Float32Array = useGetBinary()
-  const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
+  // const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
+  const positions = useGetBinary()
+  // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
@@ -88,32 +88,32 @@ const Particles = () => {
 
   const { gpgpuCompute, baseGeometryCount, baseParticlesTexture, particlesVariable, particlesUvArray } = useMemo(() => {
     // --- Create base geometry ---
-    const svgWidth = Number((textSvg.xml as any).attributes.width.value)
-    const svgHeight = Number((textSvg.xml as any).attributes.height.value)
-    const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
+    // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
+    // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
+    // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-    const [positions, delays] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
+    // const [positions, delays] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
 
     const baseGeometry = new THREE.BufferGeometry()
-    baseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 2))
+    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
-    // --- Translate base geometry instead of points geometry for accurate raycast ---
-    baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
+    // // --- Translate base geometry instead of points geometry for accurate raycast ---
+    // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
 
-    document.getElementById('generateButton').onclick = async () => {
-      await fetch(
-        new Request('/api/encode?output=position', {
-          method: 'POST',
-          body: baseGeometry.attributes.position.array,
-        }),
-      )
-      await fetch(
-        new Request('/api/encode?output=delay', {
-          method: 'POST',
-          body: new Uint8Array(delays),
-        }),
-      )
-    }
+    // document.getElementById('generateButton').onclick = async () => {
+    //   await fetch(
+    //     new Request('/api/encode?output=position', {
+    //       method: 'POST',
+    //       body: baseGeometry.attributes.position.array,
+    //     }),
+    //   )
+    //   await fetch(
+    //     new Request('/api/encode?output=delay', {
+    //       method: 'POST',
+    //       body: new Uint8Array(delays),
+    //     }),
+    //   )
+    // }
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
@@ -143,14 +143,14 @@ const Particles = () => {
     const totalStaggerDuration = 2.5
     // Fill texture with particles values
     for (let i = 0; i < baseGeometryCount; i++) {
-      const i2 = i * 2
+      const i2 = i * 3
       const i4 = i * 4
 
       // RGBA values for FBO texture from base geometry position
       baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i2 + 0]
       baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i2 + 1]
       baseParticlesTexture.image.data[i4 + 2] = 0
-      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * (delays[i] / 255)
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * positions[i2 + 2]
     }
     baseGeometry.dispose()
 
