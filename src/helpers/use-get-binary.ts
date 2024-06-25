@@ -40,7 +40,7 @@ const getBinaries = async () => {
 }
 
 export const useGetBinary = () => {
-  const [positions, staggerMultipliers] = suspend<[], () => Promise<[Float32Array, Uint8Array]>>(getBinaries(), [])
+  const [positions, staggerMultipliers] = suspend(getBinaries, [])
 
-  return [positions, staggerMultipliers] as const
+  return [positions, staggerMultipliers]
 }
