@@ -3,13 +3,24 @@
 import dynamic from 'next/dynamic'
 import Pedro from '@/assets/pedro.svg'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import { type Points, type Mesh, type ShaderMaterial, Vector2, BufferGeometry, BufferAttribute } from 'three'
+import { useFrame, useThree, extend } from '@react-three/fiber'
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 import { useGetBinary } from '@/helpers/use-get-binary'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
+
+import {
+  Mesh,
+  Points,
+  ShaderMaterial,
+  BufferGeometry,
+  BufferAttribute,
+  PlaneGeometry,
+  RawShaderMaterial,
+  Vector2,
+} from 'three'
+extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
