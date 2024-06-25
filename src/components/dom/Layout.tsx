@@ -3,7 +3,6 @@
 import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import dynamic from 'next/dynamic'
-import { NoToneMapping } from 'three'
 const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false })
 
 const Layout = ({ children }) => {

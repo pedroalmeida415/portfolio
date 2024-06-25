@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Box2 } from 'three'
 
 export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap) => {
   // Create a canvas element
@@ -47,7 +47,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
       return
     }
 
-    const boundingBox = new THREE.Box2().setFromPoints(shape.getPoints())
+    const boundingBox = new Box2().setFromPoints(shape.getPoints())
 
     // Fill shape without adding doubles on outline
     for (let y = boundingBox.min.y; y < boundingBox.max.y; y++) {

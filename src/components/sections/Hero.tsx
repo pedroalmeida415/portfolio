@@ -1,21 +1,15 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-
 import Pedro from '@/assets/pedro.svg'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { useTexture } from '@react-three/drei'
-import { useFrame, useLoader, useThree } from '@react-three/fiber'
-import * as THREE from 'three'
+import { useFrame, useThree } from '@react-three/fiber'
+import { type Points, type Mesh, type ShaderMaterial, Vector2, BufferGeometry, BufferAttribute } from 'three'
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
+import { useGetBinary } from '@/helpers/use-get-binary'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
-import backgroundFragShader from '@/assets/shaders/reverberation/fragment.glsl'
-import backgroundVertShader from '@/assets/shaders/reverberation/vertex.glsl'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
-import { generateGeometryPoints } from '@/helpers/generate-geometry-points'
-import { useGetBinary } from '@/helpers/use-get-binary'
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -65,55 +59,27 @@ export { Hero }
 const SceneWrapper = () => {
   return (
     <Suspense fallback={null}>
-      {/* <Background /> */}
       <Particles />
     </Suspense>
   )
 }
 
 const Particles = () => {
-  // const gradientTextureBitmap = useLoader(THREE.ImageBitmapLoader, '/pedro-green-gradient.png')
   const [positions, staggerMultipliers] = useGetBinary()
-  // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
 
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
   const pointer = useThree((state) => state.pointer)
   pointer.setY(-100)
 
-  const resolution = useMemo(() => renderer.getDrawingBufferSize(new THREE.Vector2()), [renderer])
+  const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
-  const planeAreaRef = useRef<THREE.Mesh | null>()
-  const pointsRef = useRef<THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial> | null>()
+  const planeAreaRef = useRef<Mesh | null>()
+  const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
   const { gpgpuCompute, baseGeometryCount, baseParticlesTexture, particlesVariable, particlesUvArray } = useMemo(() => {
-    // --- Create base geometry ---
-    // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
-    // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
-    // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
-
-    // const [positions, delays] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
-
-    const baseGeometry = new THREE.BufferGeometry()
-    baseGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 2))
-
-    // // --- Translate base geometry instead of points geometry for accurate raycast ---
-    // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
-
-    // document.getElementById('generateButton').onclick = async () => {
-    //   await fetch(
-    //     new Request('/api/encode?output=position', {
-    //       method: 'POST',
-    //       body: baseGeometry.attributes.position.array,
-    //     }),
-    //   )
-    //   await fetch(
-    //     new Request('/api/encode?output=delay', {
-    //       method: 'POST',
-    //       body: new Uint8Array(delays),
-    //     }),
-    //   )
-    // }
+    const baseGeometry = new BufferGeometry()
+    baseGeometry.setAttribute('position', new BufferAttribute(positions, 2))
 
     // --- GPU Compute ---
     const baseGeometryCount = baseGeometry.attributes.position.count
@@ -161,7 +127,7 @@ const Particles = () => {
 
     // Uniforms
     particlesVariable.material.uniforms.uIsLMBDown = { value: isLMBDown }
-    particlesVariable.material.uniforms.uMouse = { value: new THREE.Vector2(0, -100) }
+    particlesVariable.material.uniforms.uMouse = { value: new Vector2(0, -100) }
     particlesVariable.material.uniforms.uTime = { value: 0 }
     particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
     particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
@@ -181,7 +147,7 @@ const Particles = () => {
 
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
-  const uMouseVec = new THREE.Vector2()
+  const uMouseVec = new Vector2()
   useFrame((state, delta) => {
     state.raycaster.setFromCamera(state.pointer, state.camera)
     const intersects = state.raycaster.intersectObject(planeAreaRef.current)
@@ -222,37 +188,5 @@ const Particles = () => {
         <rawShaderMaterial depthTest={false} />
       </mesh>
     </>
-  )
-}
-
-const Background = () => {
-  const renderer = useThree((state) => state.gl)
-
-  const resolution = useMemo(() => renderer.getDrawingBufferSize(new THREE.Vector2()), [renderer])
-  const materialRef = useRef<THREE.RawShaderMaterial | null>(null)
-
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
-    }
-  })
-
-  return (
-    <mesh>
-      <bufferGeometry ref={(ref) => ref?.setDrawRange(0, 3)} />
-      <rawShaderMaterial
-        ref={materialRef}
-        glslVersion={THREE.GLSL3}
-        vertexShader={backgroundVertShader}
-        fragmentShader={backgroundFragShader}
-        transparent
-        depthTest={false}
-        uniforms={{
-          uTime: { value: 0 },
-          uSeed: { value: Math.random() * 100 },
-          uResolution: { value: [resolution.x, resolution.y] },
-        }}
-      />
-    </mesh>
   )
 }
