@@ -45,8 +45,8 @@
   "scripts": {
     "lint": "next lint --fix --dir app",
     "dev": "next dev",
-    "build": "next build",
-    "analyze": "ANALYZE=true next build",
+    "build": "rm -rf ./next && next build",
+    "analyze": "rm -rf ./next && ANALYZE=true next build",
     "start": "next start",
     "prettier": "npx prettier --list-different \"./src/**/*.{ts,tsx,md}\" \"./app/**/*.{ts,tsx,md}\"\""
   }

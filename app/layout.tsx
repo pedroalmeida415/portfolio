@@ -1,12 +1,12 @@
 'use client'
 
+import Script from 'next/script'
+import dynamic from 'next/dynamic'
 import localFont from 'next/font/local'
 import gsap from 'gsap'
-import '@/global.css'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import Script from 'next/script'
 import { Header } from './Header'
-import dynamic from 'next/dynamic'
+import '@/global.css'
 
 const neue_montreal = localFont({
   src: './assets/fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
@@ -43,15 +43,15 @@ export default function RootLayout({ children }) {
           onReady={() => {
             requestIdleCallback(
               () => {
-              gsap.registerPlugin(ScrollTrigger, window.ScrollSmoother)
+                gsap.registerPlugin(ScrollTrigger, window.ScrollSmoother)
 
-              window.ScrollSmoother.create({
-                smooth: 0.8,
-                smoothTouch: 0.1,
-              })
+                window.ScrollSmoother.create({
+                  smooth: 0.8,
+                  smoothTouch: 0.1,
+                })
               },
               {
-                timeout: 1000,
+                timeout: 1500,
               },
             )
           }}
