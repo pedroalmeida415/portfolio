@@ -21,8 +21,7 @@ const getBinaries = async () => {
     for (const response of responses) {
       const buffer = await response.arrayBuffer()
 
-      const inStream = new LZMA.iStream(buffer)
-      const outStream = await LZMA.decompressFile(inStream)
+      const outStream = await LZMA.decompressFile(buffer)
       const bytes: Uint8Array = outStream.toUint8Array()
 
       const typedArray = response.url.includes('positions') ? new Float32Array(bytes.buffer) : bytes
