@@ -47,12 +47,6 @@ const Hero = () => {
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
-        <button
-          id='generateButton'
-          className='absolute bottom-1/4 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-slate-800 px-4 py-2 text-white'
-        >
-          Generate Geometry Binary
-        </button>
       </div>
       <View
         onPointerDown={() => (isLMBDown = true)}
@@ -188,7 +182,7 @@ const Particles = () => {
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
           uniforms={{
-            uSize: { value: resolution.x * 0.018 },
+            uSize: { value: resolution.x * 0.016 },
             uParticlesTexture: { value: null },
             uBaseParticlesTexture: { value: baseParticlesTexture },
           }}
