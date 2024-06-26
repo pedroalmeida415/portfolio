@@ -1,39 +1,36 @@
 import { suspend } from 'suspend-react'
-import { decompress } from '@blu3r4y/lzma/src/lzma-d-min.mjs'
 
-const files = [
-  {
-    path: '/pedro-positions.lzma',
-    type: Float32Array,
-  },
-  {
-    path: '/pedro-stagger-multipliers.lzma',
-    type: Uint8Array,
-  },
-]
+import { LZMA } from '@/helpers/lzma'
+
+const files = ['/pedro-positions.lzma', '/pedro-stagger-multipliers.lzma']
 
 const getBinaries = async () => {
   try {
     const responses = await Promise.all(
-      files.map(async (file) => {
-        const response = await fetch(
-          new Request(file.path, {
+      files.map((path) =>
+        fetch(
+          new Request(path, {
             method: 'GET',
           }),
-        )
-
-        const buffer = await response.arrayBuffer()
-
-        // Decompress LZMA
-        const decompressed = decompress(new Uint8Array(buffer))
-
-        const dataArray = new file.type(new Int8Array(decompressed).buffer)
-
-        return dataArray
-      }),
+        ),
+      ),
     )
 
-    return responses
+    const arrAggregated = []
+
+    for (const response of responses) {
+      const buffer = await response.arrayBuffer()
+
+      const inStream = new LZMA.iStream(buffer)
+      const outStream = await LZMA.decompressFile(inStream)
+      const bytes: Uint8Array = outStream.toUint8Array()
+
+      const typedArray = response.url.includes('positions') ? new Float32Array(bytes.buffer) : bytes
+
+      arrAggregated.push(typedArray)
+    }
+
+    return arrAggregated
   } catch (error) {
     console.log(error)
   }
