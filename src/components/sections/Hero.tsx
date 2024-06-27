@@ -1,11 +1,14 @@
 'use client'
 
+import gsap from 'gsap'
 import dynamic from 'next/dynamic'
 import Pedro from '@/assets/pedro.svg'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 import { useGetBinary } from '@/helpers/use-get-binary'
+import { useGSAP } from '@gsap/react'
+
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
@@ -41,12 +44,20 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
 let isLMBDown = false
 
 const Hero = () => {
+  const subtitleRef = useRef<HTMLHeadingElement | null>()
+
+  useGSAP(() => {
+    gsap.from(subtitleRef.current, { opacity: 0, yPercent: 120, duration: 1, ease: 'power3.out', delay: 3.5 })
+  })
+
   return (
     <section className='relative h-screen p-6'>
       <Pedro id='pedro' className='invisible h-auto w-full opacity-20' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
-        <h2 className='mr-20 text-5xl font-extralight'>Creative Developer</h2>
+        <h2 ref={subtitleRef} className='mr-20 text-5xl font-extralight'>
+          Creative Developer
+        </h2>
       </div>
       <View
         onPointerDown={() => (isLMBDown = true)}
