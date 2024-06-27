@@ -13,6 +13,7 @@ const nextConfig = {
       config.externals.push('sharp')
     }
 
+    config.resolve.extensions.push('.glsl')
     config.module.rules.push({
       test: /\.(glsl|vs|fs|vert|frag)$/,
       exclude: /node_modules/,
@@ -20,7 +21,6 @@ const nextConfig = {
         loader: 'webpack-glsl-minify',
         options: {
           output: 'source',
-          stripVersion: false,
           preserveAll: true,
         },
       },
