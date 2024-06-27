@@ -1,5 +1,3 @@
-'use client'
-
 import { forwardRef, useImperativeHandle, useRef } from 'react'
 import { View as ViewImpl } from '@react-three/drei'
 import { Three } from '@/helpers/components/Three'
