@@ -40,6 +40,7 @@ export default function RootLayout({ children }) {
         </div>
         <Script
           id='scroll-smoother'
+          strategy='lazyOnload'
           onReady={() => {
             requestIdleCallback(
               () => {
@@ -51,7 +52,7 @@ export default function RootLayout({ children }) {
                 })
               },
               {
-                timeout: 1500,
+                timeout: 2500,
               },
             )
           }}
