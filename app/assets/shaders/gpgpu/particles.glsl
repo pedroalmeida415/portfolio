@@ -5,6 +5,10 @@ uniform bool uIsLMBDown;
 
 @include "../includes/encode_decode.glsl"
 
+float random(vec2 p) {
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 void main() {
     Particle particle;
     
@@ -12,39 +16,19 @@ void main() {
     vec4 base = texture(uBase, uv);
     vec4 current = texture(uParticles, uv);
     
-#pragma unroll
     if (base == current) {
-        vec2 pos_mapped_origin = vec2(0.0, -5.0);
+        // Generate a random angle
+        float angle = random(base.xy) * 2.0 * 3.14159265359;
+        // Set the base position to be on the circumference of a circle with radius x
+        vec2 basePos = vec2(cos(angle), sin(angle)) * 3.5;
         
-        float pX_threshold = -9.6043;
-        float eX_threshold = -5.1738;
-        float dX_threshold = -0.9457;
-        float roX_threshold = 3.3531;
-        
-        if (base.x > roX_threshold) {
-            vec2 ro_origin = vec2(7.2677, 1.3225);
-            pos_mapped_origin = ro_origin;
-        } else if (
-            base.x > dX_threshold) {
-            vec2 d_origin = vec2(1.1581, 1.3225);
-            pos_mapped_origin = d_origin;
-        } else if (
-            base.x > eX_threshold) {
-            vec2 e_origin = vec2(-3.0901, 1.3225);
-            pos_mapped_origin = e_origin;
-        } else if (
-            base.x > pX_threshold) {
-            vec2 p_origin = vec2(-7.3688, 1.3225);
-            pos_mapped_origin = p_origin;
-        }
-        
-        particle.pos = pos_mapped_origin;
-        particle.delay = base.a;
+        particle.pos = basePos;
+        particle.delay = base.a - fract(uDeltaTime);
         particle.is_touched = uIsLMBDown;
         
         gl_FragColor = encode_particle(particle);
         return;
-    }
+    } 
     
     particle = decode_particle(current);
     particle.is_touched = uIsLMBDown;
@@ -58,7 +42,7 @@ void main() {
     particle.pos += direction * (force *  0.1);
     
     particle.pos += particle.delay <= 0.0 ? (base.xy - particle.pos) * 0.05 : vec2(0.0);
-    particle.delay -= mod(uDeltaTime, 1.0);
+    particle.delay -= fract(uDeltaTime);
     
     gl_FragColor = encode_particle(particle);
 }
