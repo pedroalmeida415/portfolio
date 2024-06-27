@@ -131,11 +131,10 @@ const Particles = () => {
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
     // Uniforms
-    particlesVariable.material.uniforms.uIsLMBDown = { value: isLMBDown }
-    particlesVariable.material.uniforms.uMouse = { value: new Vector2(0, -100) }
-    particlesVariable.material.uniforms.uTime = { value: 0 }
     particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
     particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
+    particlesVariable.material.uniforms.uMouse = { value: new Vector2(0, -100) }
+    particlesVariable.material.uniforms.uIsLMBDown = { value: isLMBDown }
 
     // Init
     gpgpuCompute.init()
@@ -162,7 +161,6 @@ const Particles = () => {
     }
 
     // --- Update GPU Compute ---
-    particlesVariable.material.uniforms.uTime.value = state.clock.elapsedTime
     particlesVariable.material.uniforms.uDeltaTime.value = delta
     particlesVariable.material.uniforms.uIsLMBDown.value = isLMBDown
     gpgpuCompute.compute()
@@ -184,7 +182,6 @@ const Particles = () => {
           uniforms={{
             uSize: { value: resolution.x * 0.016 },
             uParticlesTexture: { value: null },
-            uBaseParticlesTexture: { value: baseParticlesTexture },
           }}
         />
       </points>

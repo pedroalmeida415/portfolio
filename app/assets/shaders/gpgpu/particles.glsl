@@ -1,4 +1,3 @@
-uniform float uTime;
 uniform float uDeltaTime;
 uniform sampler2D uBase;
 uniform vec2 uMouse;
@@ -13,6 +12,7 @@ void main() {
     vec4 base = texture(uBase, uv);
     vec4 current = texture(uParticles, uv);
     
+#pragma unroll
     if (base == current) {
         vec2 pos_mapped_origin = vec2(0.0, -5.0);
         
@@ -39,7 +39,7 @@ void main() {
         }
         
         particle.pos = pos_mapped_origin;
-        particle.delay = current.a;
+        particle.delay = base.a;
         particle.is_touched = uIsLMBDown;
         
         gl_FragColor = encode_particle(particle);
@@ -57,11 +57,8 @@ void main() {
     
     particle.pos += direction * (force *  0.1);
     
-    if (particle.delay <= 0.0) {
-        particle.pos += (base.xy - particle.pos) * 0.05;
-    } else {
-        particle.delay -= mod(uDeltaTime, 1.0);
-    }
+    particle.pos += particle.delay <= 0.0 ? (base.xy - particle.pos) * 0.05 : vec2(0.0);
+    particle.delay -= mod(uDeltaTime, 1.0);
     
     gl_FragColor = encode_particle(particle);
 }
