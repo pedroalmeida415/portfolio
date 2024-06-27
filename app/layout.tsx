@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import localFont from 'next/font/local'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Header } from './Header'
+import { Navbar } from '@/components/navbar/navbar'
 import '@/global.css'
 
 const neue_montreal = localFont({
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
       */}
       <head />
       <body>
-        <Header />
+        <Navbar />
         <div id='smooth-wrapper'>
           <div id='smooth-content'>
             <Layout>{children}</Layout>

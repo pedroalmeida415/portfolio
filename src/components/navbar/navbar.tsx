@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import logo from '@/assets/logo.png'
 
-const Header = () => {
+const Navbar = () => {
   return (
     <header className='absolute left-0 top-0 w-full p-6'>
       <nav className='flex w-full justify-start text-sm uppercase'>
@@ -28,4 +28,4 @@ const Header = () => {
   )
 }
 
-export { Header }
+export { Navbar }
