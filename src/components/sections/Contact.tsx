@@ -1,5 +1,3 @@
-'use client'
-
 import SayHello from '@/assets/say-hello.svg'
 import PedroOutline from '@/assets/pedro-outline.svg'
 

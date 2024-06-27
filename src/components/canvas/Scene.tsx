@@ -1,5 +1,3 @@
-'use client'
-
 import { Canvas, CanvasProps } from '@react-three/fiber'
 import { Preload } from '@react-three/drei'
 import { r3f } from '@/helpers/global'
