@@ -1,8 +1,8 @@
 import localFont from 'next/font/local'
-import { Layout } from '@/components/dom/Layout'
 import { Navbar } from '@/components/navbar/navbar'
 import './global.css'
 import { Metadata, Viewport } from 'next'
+import Canvas from '@/components/canvas/canvas'
 
 const neue_montreal = localFont({
   src: '../assets/fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
@@ -83,6 +83,7 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: true,
   },
+  metadataBase: new URL('http://localhost:3000/'),
   other: {
     language: 'english',
     distribution: 'web',
@@ -102,7 +103,7 @@ export default function RootLayout({ children }) {
     <html lang='en' className={`${neue_montreal.variable}`}>
       <body>
         <Navbar />
-        <Layout>{children}</Layout>
+        <Canvas>{children}</Canvas>
       </body>
     </html>
   )

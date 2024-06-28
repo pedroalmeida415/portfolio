@@ -2,11 +2,7 @@ import { forwardRef, useImperativeHandle, useRef } from 'react'
 import { View as ViewImpl } from '@react-three/drei'
 import { Three } from '@/helpers/components/Three'
 
-type Props = JSX.IntrinsicElements['div'] & {
-  orbit?: boolean
-}
-
-const View = forwardRef<HTMLDivElement, Props>(({ children, orbit, ...props }, ref) => {
+const View = forwardRef<HTMLDivElement, JSX.IntrinsicElements['div']>(({ children, ...props }, ref) => {
   const localRef = useRef(null)
   useImperativeHandle(ref, () => localRef.current)
 

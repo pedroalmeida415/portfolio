@@ -9,7 +9,6 @@ import { useGSAP } from '@gsap/react'
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
-import { View } from '@/components/canvas/View'
 
 import {
   Mesh,
@@ -21,9 +20,13 @@ import {
   RawShaderMaterial,
   Vector2,
 } from 'three'
+import dynamic from 'next/dynamic'
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
 
 let isLMBDown = false
+
+// useful during development to reload view, otherwise it goes blank
+const View = dynamic(() => import('@/components/view/view').then((mod) => mod.View))
 
 const Hero = () => {
   const subtitleRef = useRef<HTMLHeadingElement | null>()
@@ -50,21 +53,15 @@ const Hero = () => {
         onPointerUp={() => (isLMBDown = false)}
         className='absolute left-0 top-0 size-full'
       >
-        <SceneWrapper />
+        <Suspense fallback={null}>
+          <Particles />
+        </Suspense>
       </View>
     </section>
   )
 }
 
 export { Hero }
-
-const SceneWrapper = () => {
-  return (
-    <Suspense fallback={null}>
-      <Particles />
-    </Suspense>
-  )
-}
 
 const Particles = () => {
   const [positions, staggerMultipliers] = useGetBinary()
@@ -182,7 +179,7 @@ const Particles = () => {
         />
       </points>
       <mesh ref={planeAreaRef} visible={false} frustumCulled={false} matrixAutoUpdate={false}>
-        <planeGeometry args={[viewport.width, viewport.height]} />
+        <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
         <rawShaderMaterial depthTest={false} />
       </mesh>
     </>

@@ -1,9 +1,11 @@
 'use client'
+import { PropsWithChildren, useRef } from 'react'
+import { Canvas as CanvasImpl } from '@react-three/fiber'
+import { Preload } from '@react-three/drei'
+import { r3f } from '@/helpers/global'
+// import { Perf } from 'r3f-perf'
 
-import { useRef } from 'react'
-import Scene from '@/components/canvas/Scene'
-
-const Layout = ({ children }) => {
+export default function Canvas({ children }: PropsWithChildren) {
   const ref = useRef<HTMLDivElement | null>()
 
   return (
@@ -16,10 +18,8 @@ const Layout = ({ children }) => {
         touchAction: 'auto',
       }}
     >
-      <div id='smooth-wrapper'>
-        <div id='smooth-content'>{children}</div>
-      </div>
-      <Scene
+      {children}
+      <CanvasImpl
         style={{
           position: 'fixed',
           top: '0',
@@ -37,9 +37,12 @@ const Layout = ({ children }) => {
         eventSource={ref}
         eventPrefix='client'
         camera={{ position: [0, 0, 10], fov: 50, near: 0.1, far: 1000 }}
-      />
+      >
+        {/* <Perf /> */}
+        {/* @ts-ignore */}
+        <r3f.Out />
+        <Preload all />
+      </CanvasImpl>
     </div>
   )
 }
-
-export { Layout }
