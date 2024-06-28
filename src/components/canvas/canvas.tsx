@@ -9,7 +9,7 @@ export default function Canvas({ children }: PropsWithChildren) {
   const ref = useRef<HTMLDivElement | null>()
 
   return (
-    <div
+    <main
       ref={ref}
       style={{
         position: 'relative',
@@ -43,6 +43,6 @@ export default function Canvas({ children }: PropsWithChildren) {
         <r3f.Out />
         <Preload all />
       </CanvasImpl>
-    </div>
+    </main>
   )
 }
