@@ -29,7 +29,11 @@ const Hero = () => {
   const subtitleRef = useRef<HTMLHeadingElement | null>()
 
   useGSAP(() => {
-    gsap.from(subtitleRef.current, { opacity: 0, yPercent: 120, duration: 1, ease: 'power3.out', delay: 3.5 })
+    gsap.fromTo(
+      subtitleRef.current,
+      { yPercent: 120 },
+      { autoAlpha: 1, yPercent: 0, duration: 1, ease: 'power3.out', delay: 3.5 },
+    )
   })
 
   return (
@@ -37,7 +41,7 @@ const Hero = () => {
       <Pedro id='pedro' className='invisible h-auto w-full opacity-20' />
       <div className='-mt-11 flex w-full justify-end'>
         <h1 className='sr-only'>Pedro Almeida</h1>
-        <h2 ref={subtitleRef} className='mr-20 text-5xl font-extralight'>
+        <h2 ref={subtitleRef} className='invisible mr-20 text-5xl font-extralight opacity-0'>
           Creative Developer
         </h2>
       </div>
