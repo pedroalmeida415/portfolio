@@ -39,7 +39,7 @@ void main() {
     
     float force = 0.7 / mouseDist / (1.0 - exp(-mouseDist)); // Central Force
     
-    particle.pos += direction * (force *  0.1);
+    particle.pos += particle.delay <= 0.0 ? direction * (force *  0.1) : vec2(0.0);
     
     particle.pos += particle.delay <= 0.0 ? (base.xy - particle.pos) * 0.05 : vec2(0.0);
     particle.delay -= fract(uDeltaTime);

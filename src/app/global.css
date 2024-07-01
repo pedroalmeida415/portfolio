@@ -25,7 +25,7 @@
   }
 
   body {
-    background-color: #e8e8e8;
+    background-color: #F1EFEB;
   }
 }
 
@@ -51,4 +51,53 @@
     .font-bold {
         font-variation-settings: 'wght' 800;
     }
+}
+@property --s {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+.countdown {
+  display: grid;
+  width: 615px;
+  height: 615px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  font-size: 72px;
+  transform: translate(-50%, -50%);
+  &:not(.stopped) {
+    animation: t 3s linear infinite;
+  }
+}
+.countdown::after {
+  grid-column: 1;
+  grid-row: 1;
+  place-self: center;
+  counter-reset: s var(--s);
+  content: counter(s, decimal-leading-zero);
+}
+
+@keyframes t {
+  to {
+    --s: 99 ;
+  }
+}
+svg {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+[r] {
+  fill: none;
+  stroke: silver;
+}
+[r] + [r] {
+  --k: calc(var(--s)/100);
+  transform: rotate(-90deg);
+  stroke-linecap: square;
+  /* stroke: color-mix(in hsl shorter hue, #1d1d1d calc(var(--k)*100%), #3d57da); */
+  stroke: #1d1d1d;
+  stroke-dasharray: var(--k) 1;
 }

@@ -1,5 +1,4 @@
 import localFont from 'next/font/local'
-import { Navbar } from '@/components/navbar/navbar'
 import './global.css'
 import { Metadata, Viewport } from 'next'
 import Canvas from '@/components/canvas/canvas'
@@ -102,7 +101,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en' className={`${neue_montreal.variable}`}>
       <body>
-        <Navbar />
         <Canvas>{children}</Canvas>
       </body>
     </html>

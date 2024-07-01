@@ -123,7 +123,12 @@ export const Particles = ({
   return (
     <>
       <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
-        <bufferGeometry ref={(ref) => ref?.setDrawRange(0, baseGeometryCount)}>
+        <bufferGeometry
+          ref={(ref) => {
+            ref?.setDrawRange(0, baseGeometryCount)
+            document.getElementById('countdown')?.firstElementChild?.remove()
+          }}
+        >
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
         </bufferGeometry>
         <shaderMaterial
@@ -132,7 +137,7 @@ export const Particles = ({
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
           uniforms={{
-            uSize: { value: resolution.x * 0.016 },
+            uSize: { value: resolution.x * 0.0016 },
             uParticlesTexture: { value: null },
           }}
         />

@@ -14,6 +14,7 @@ export default function Canvas({ children }: PropsWithChildren) {
       style={{
         position: 'relative',
         width: ' 100%',
+        minHeight: '100vh',
         overflow: 'auto',
         touchAction: 'auto',
       }}
