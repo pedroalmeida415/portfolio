@@ -27,10 +27,9 @@ export const Particles = ({
 }) => {
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
+  const size = useThree((state) => state.size)
   const pointer = useThree((state) => state.pointer)
   pointer.setY(-100)
-
-  const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
   const planeAreaRef = useRef<Mesh | null>()
   const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
@@ -137,7 +136,7 @@ export const Particles = ({
           vertexShader={particlesVertexShader}
           fragmentShader={particlesFragmentShader}
           uniforms={{
-            uSize: { value: resolution.x * 0.0016 },
+            uSize: { value: size.width * 0.002 },
             uParticlesTexture: { value: null },
           }}
         />
