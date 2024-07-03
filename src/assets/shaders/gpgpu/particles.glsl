@@ -9,6 +9,13 @@ float random(vec2 p) {
     return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+float sdRoundedBox(in vec2 p, in vec2 b, in vec4 r) {
+    r.xy = (p.x>0.0)?r.xy : r.zw;
+    r.x  = (p.y>0.0)?r.x  : r.y;
+    vec2 q = abs(p)-b+r.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+}
+
 void main() {
     Particle particle;
     
@@ -17,10 +24,27 @@ void main() {
     vec4 current = texture(uParticles, uv);
     
     if (base == current) {
-        // Generate a random angle
-        float angle = random(base.xy) * 2.0 * 3.14159265359;
-        // Set the base position to be on the circumference of a circle with radius x
-        vec2 basePos = vec2(cos(angle), sin(angle)) * 3.5;
+        vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0;
+        basePos.y -= 1.0;
+        basePos.x -= 1.0;
+        
+        basePos.x *= 2.2625;
+        basePos.y *= .185;
+        
+        // Check if the particle is inside the rounded box
+        vec2 boxSize = vec2(1.); // Adjust these values as needed
+        boxSize.x *= 2.2625;
+        boxSize.y *= .185;
+        vec4 boxRadius = vec4(0.2); // Adjust these values as needed
+        float d = sdRoundedBox(basePos, boxSize, boxRadius);
+        
+        // If the particle is outside the box, project it back to the border
+        if (d >= 0.0) {
+            vec2 gradient = normalize(basePos); // Approximate gradient for projection
+            basePos -= gradient * (d + 0.1);
+        }
+        
+        basePos.y -= 4.045;
         
         particle.pos = basePos;
         particle.delay = base.a - fract(uDeltaTime);

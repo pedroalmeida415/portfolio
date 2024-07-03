@@ -55,10 +55,16 @@ export const Home = () => {
     )
 
     gsap.to('#ping', { rotateX: 180, rotateY: 180, duration: 0.75, ease: 'power1.inOut', repeat: -1, yoyo: true })
+    gsap.to('#progress-bar', {
+      autoAlpha: 0,
+      duration: 1.5,
+      ease: 'power3.inOut',
+    })
   })
 
   return (
     <section className='relative flex h-screen w-full items-end justify-start p-6'>
+      <div className='absolute left-6 top-6'>© 2024</div>
       <ul className='absolute right-6 top-6 flex w-80 items-center justify-between leading-none'>
         {socials.map(({ link, label }) => (
           <li key={label}>
@@ -91,7 +97,9 @@ export const Home = () => {
           ))}
         </ul>
       </nav>
-      <div className='absolute left-6 top-6'>© 2024</div>
+      <div id='progress-bar' className='progress completed'>
+        <div className='progress-value completed'></div>
+      </div>
     </section>
   )
 }

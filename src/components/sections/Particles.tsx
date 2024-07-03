@@ -125,7 +125,7 @@ export const Particles = ({
         <bufferGeometry
           ref={(ref) => {
             ref?.setDrawRange(0, baseGeometryCount)
-            document.getElementById('countdown')?.firstElementChild?.remove()
+            document.getElementById('progress-bar')?.firstElementChild?.remove()
           }}
         >
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
