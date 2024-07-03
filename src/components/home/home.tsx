@@ -2,26 +2,30 @@
 import gsap from 'gsap'
 import { useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import dynamic from 'next/dynamic'
-import { suspend } from 'suspend-react'
-import { Particles } from '@/components/sections/Particles'
 
-import { LZMA } from '@/helpers/lzma'
+import HomeIcon from '@/assets/home-icon.svg'
 
-// useful during development to reload view, otherwise it goes blank
-const View = dynamic(() => import('@/components/view/view').then((mod) => mod.View), { ssr: false })
+const routes = [
+  {
+    path: '/',
+    label: 'home',
+    icon: HomeIcon,
+  },
+  {
+    path: '/work',
+    label: 'work',
+  },
+  {
+    path: '/about',
+    label: 'about',
+  },
+  {
+    path: '/contact',
+    label: 'contact',
+  },
+]
 
 export const Home = () => {
-  const { positions, multipliers } = suspend(async () => {
-    // Initiate both requests in parallel
-    const positionsData = getPositions()
-    const multipliersData = getMultipliers()
-
-    const [positions, multipliers] = await Promise.all([positionsData, multipliersData])
-
-    return { positions, multipliers }
-  }, [])
-
   const subtitleRef = useRef<HTMLHeadingElement | null>()
   const countdownRef = useRef<HTMLHeadingElement | null>()
 
@@ -42,66 +46,36 @@ export const Home = () => {
   } as React.CSSProperties
 
   return (
-    <section className='relative flex h-screen w-full flex-col p-6'>
+    <section className='relative flex h-screen w-full items-end justify-start p-6'>
       <div ref={countdownRef} id='countdown' className='countdown stopped' style={countdownVars}>
         <svg viewBox='-50 -50 100 100' strokeWidth='1.5'>
           <circle r='45'></circle>
           <circle r='45' pathLength='1'></circle>
         </svg>
       </div>
-      <div className='mt-auto flex w-full justify-start'>
-        <div className='w-1/12'></div>
-        <div>
-          <h1 className='sr-only'>Pedro Almeida</h1>
-          <h2 ref={subtitleRef} className='invisible mb-5 text-5xl font-extralight opacity-0'>
-            Creative Developer
-          </h2>
-
-          <nav>
-            <ul className='mb-14 flex flex-col gap-y-4 leading-none *:z-10'>
-              <li>
-                <span className='block size-2 rounded-full bg-[#1d1d1d]'></span>
-              </li>
-              <li>
-                <a href='#about'>About</a>
-              </li>
-              <li>
-                <a href='#about'>Work</a>
-              </li>
-              <li>
-                <a href='#about'>Contact</a>
-              </li>
-            </ul>
-          </nav>
-          <div className='flex items-center'>
-            <h3>
-              <strong className='mr-2 font-normal tracking-wide'>Available for new projects</strong>
-            </h3>
-            <span id='ping' className='size-[10px] rounded-full bg-lime-500'></span>
-          </div>
+      <div className='absolute left-[10%] top-[62.55%]'>
+        <h1 className='sr-only'>Pedro Almeida</h1>
+        <h2 ref={subtitleRef} className='invisible mb-1 text-5xl font-extralight opacity-0'>
+          Creative Developer
+        </h2>
+        <div className='ml-1 flex items-center'>
+          <h3>
+            <strong className='mr-2 font-normal tracking-wide'>Available for new projects</strong>
+          </h3>
+          <span id='ping' className='size-[10px] rounded-full bg-lime-500'></span>
         </div>
       </div>
-      <View className='absolute left-0 top-0 size-full'>
-        <Particles positions={positions} staggerMultipliers={multipliers} />
-      </View>
+      <nav className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-[#D9D9D9] p-2'>
+        <ul className='flex items-center gap-x-2 leading-none'>
+          {routes.map(({ path, label, icon: Icon }) => (
+            <li key={path}>
+              <a href={path} className='block rounded-full px-6 py-2 hover:bg-orange-600 hover:text-white'>
+                {Icon ? <Icon /> : label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </section>
   )
-}
-
-async function getPositions() {
-  const res = await fetch(`/positions.bin`)
-  const buffer = await res.arrayBuffer()
-  const decompressedStreamBuffer = LZMA.decompressFile(buffer)
-  const rawBytes: Uint8Array = decompressedStreamBuffer.toUint8Array()
-
-  return new Float32Array(rawBytes.buffer)
-}
-
-async function getMultipliers() {
-  const res = await fetch(`/multipliers.bin`)
-  const buffer = await res.arrayBuffer()
-  const decompressedStreamBuffer = LZMA.decompressFile(buffer)
-  const rawBytes: Uint8Array = decompressedStreamBuffer.toUint8Array()
-
-  return rawBytes
 }

@@ -1,7 +1,7 @@
 import localFont from 'next/font/local'
 import './global.css'
 import { Metadata, Viewport } from 'next'
-import Canvas from '@/components/canvas/canvas'
+import dynamic from 'next/dynamic'
 
 const neue_montreal = localFont({
   src: '../assets/fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
@@ -96,6 +96,18 @@ export const viewport: Viewport = {
   width: 'device-width',
   userScalable: false,
 }
+
+const Canvas = dynamic(() => import('@/components/canvas/canvas'), {
+  ssr: false,
+  loading: () => (
+    <div className='countdown'>
+      <svg viewBox='-50 -50 100 100' strokeWidth='1.5'>
+        <circle r='45'></circle>
+        <circle r='45' pathLength='1'></circle>
+      </svg>
+    </div>
+  ),
+})
 
 export default function RootLayout({ children }) {
   return (
