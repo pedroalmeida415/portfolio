@@ -25,9 +25,27 @@ const routes = [
   },
 ]
 
+const socials = [
+  {
+    link: '',
+    label: 'labs',
+  },
+  {
+    link: '',
+    label: 'blog',
+  },
+  {
+    link: '',
+    label: 'twitter',
+  },
+  {
+    link: '',
+    label: 'read.cv',
+  },
+]
+
 export const Home = () => {
   const subtitleRef = useRef<HTMLHeadingElement | null>()
-  const countdownRef = useRef<HTMLHeadingElement | null>()
 
   useGSAP(() => {
     gsap.fromTo(
@@ -37,22 +55,19 @@ export const Home = () => {
     )
 
     gsap.to('#ping', { rotateX: 180, rotateY: 180, duration: 0.75, ease: 'power1.inOut', repeat: -1, yoyo: true })
-
-    gsap.to(countdownRef.current, { autoAlpha: 0, duration: 2.5, ease: 'none' })
   })
-
-  const countdownVars = {
-    '--s': 100,
-  } as React.CSSProperties
 
   return (
     <section className='relative flex h-screen w-full items-end justify-start p-6'>
-      <div ref={countdownRef} id='countdown' className='countdown stopped' style={countdownVars}>
-        <svg viewBox='-50 -50 100 100' strokeWidth='1.5'>
-          <circle r='45'></circle>
-          <circle r='45' pathLength='1'></circle>
-        </svg>
-      </div>
+      <ul className='absolute right-6 top-6 flex w-80 items-center justify-between leading-none'>
+        {socials.map(({ link, label }) => (
+          <li key={label}>
+            <a className='underline-offset-8 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
       <div className='absolute left-[10%] top-[62.55%]'>
         <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 ref={subtitleRef} className='invisible mb-1 text-5xl font-extralight opacity-0'>
@@ -76,6 +91,7 @@ export const Home = () => {
           ))}
         </ul>
       </nav>
+      <div className='absolute left-6 top-6'>© 2024</div>
     </section>
   )
 }
