@@ -52,7 +52,7 @@ export default function Canvas({ children }: PropsWithChildren) {
               width: '100%',
               height: '100vh',
               // pointerEvents: 'none',
-              // zIndex: '-1',
+              zIndex: '-1',
             }}
             gl={{
               stencil: false,
@@ -61,13 +61,13 @@ export default function Canvas({ children }: PropsWithChildren) {
             flat
             eventSource={ref}
             eventPrefix='client'
-            camera={{ position: [0, 0, 10], fov: 50, near: 0.1, far: 1000 }}
+            camera={{ position: [0, 0, 10], fov: 50, near: 9, far: 11 }}
           >
             <Particles positions={particlesData.positions} staggerMultipliers={particlesData.multipliers} />
             {/* <Perf /> */}
             {/* @ts-ignore */}
             {/* <r3f.Out />
-        <Preload all /> */}
+            <Preload all /> */}
           </CanvasImpl>
         </main>
       )}

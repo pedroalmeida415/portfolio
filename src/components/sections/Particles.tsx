@@ -1,6 +1,9 @@
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 
+import cursorVertexShader from '@/assets/shaders/cursor/vertex.glsl'
+import cursorFragmentShader from '@/assets/shaders/cursor/fragment.glsl'
+
 import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
 import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
 import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
@@ -31,7 +34,9 @@ export const Particles = ({
   const pointer = useThree((state) => state.pointer)
   pointer.setY(-100)
 
-  const planeAreaRef = useRef<Mesh | null>()
+  const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
+
+  const planeAreaRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
   const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
   const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
@@ -85,7 +90,7 @@ export const Particles = ({
     // Uniforms
     particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
     particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
-    particlesVariable.material.uniforms.uMouse = { value: new Vector2(0, -100) }
+    particlesVariable.material.uniforms.uMouse = { value: new Vector2(0, -4.0435247) }
     particlesVariable.material.uniforms.uIsLMBDown = { value: false }
 
     // Init
@@ -109,6 +114,7 @@ export const Particles = ({
 
     if (intersects.length) {
       particlesVariable.material.uniforms.uMouse.value = uMouseVec.set(intersects[0].point.x, intersects[0].point.y)
+      planeAreaRef.current.material.uniforms.uMouse.value = uMouseVec
     }
 
     // --- Update GPU Compute ---
@@ -121,6 +127,19 @@ export const Particles = ({
 
   return (
     <>
+      <mesh ref={planeAreaRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
+        <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
+        <shaderMaterial
+          depthTest={false}
+          vertexShader={cursorVertexShader}
+          fragmentShader={cursorFragmentShader}
+          uniforms={{
+            uMouse: { value: [0, -4.0435247] },
+            uResolution: { value: resolution },
+            uViewport: { value: [viewport.width, viewport.height] },
+          }}
+        />
+      </mesh>
       <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
         <bufferGeometry
           ref={(ref) => {
@@ -141,10 +160,41 @@ export const Particles = ({
           }}
         />
       </points>
-      <mesh ref={planeAreaRef} visible={false} frustumCulled={false} matrixAutoUpdate={false}>
-        <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
-        <rawShaderMaterial depthTest={false} />
-      </mesh>
     </>
   )
+}
+
+function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
+  const box = element.getBoundingClientRect()
+  const bodyBoundingRect = document.body.getBoundingClientRect()
+  const bodyWidth = bodyBoundingRect.width
+  const bodyHeight = bodyBoundingRect.height
+
+  const centerX = (box.left + box.right) / 2
+  const centerY = (box.top + box.bottom) / 2
+
+  const ndcX = (centerX / bodyWidth) * 2 - 1
+  const ndcY = -(centerY / bodyHeight) * 2 + 1
+
+  const ndcWidth = (box.width - box.height + paddingX) / bodyWidth
+  const ndcHeight = (box.height + paddingY) / bodyHeight
+
+  const viewportWidth = 19.42105551423707
+  const viewportHeight = 9.326153163099972
+
+  const ndcX2 = (ndcX * viewportWidth) / 2
+  const ndcY2 = (ndcY * viewportHeight) / 2
+
+  const ndcWidth2 = (ndcWidth * viewportWidth) / 2
+  const ndcHeight2 = (ndcHeight * viewportHeight) / 2
+
+  const pointX1 = ndcX2 - ndcWidth2
+  const pointX2 = ndcX2 + ndcWidth2
+
+  return {
+    pointX1: Number(pointX1.toFixed(7)),
+    pointX2: Number(pointX2.toFixed(7)),
+    pointY: Number(ndcY2.toFixed(7)),
+    thickness: Number(ndcHeight2.toFixed(7)),
+  }
 }

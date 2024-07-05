@@ -24,26 +24,10 @@ void main() {
     vec4 current = texture(uParticles, uv);
     
     if (base == current) {
-        vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0;
-        basePos.y -= 1.0;
-        basePos.x -= 1.0;
+        vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0 - 1.0;
         
         basePos.x *= 2.2625;
         basePos.y *= .185;
-        
-        // Check if the particle is inside the rounded box
-        vec2 boxSize = vec2(1.); // Adjust these values as needed
-        boxSize.x *= 2.2625;
-        boxSize.y *= .185;
-        vec4 boxRadius = vec4(0.2); // Adjust these values as needed
-        float d = sdRoundedBox(basePos, boxSize, boxRadius);
-        
-        // If the particle is outside the box, project it back to the border
-        if (d >= 0.0) {
-            vec2 gradient = normalize(basePos); // Approximate gradient for projection
-            basePos -= gradient * (d + 0.1);
-        }
-        
         basePos.y -= 4.045;
         
         particle.pos = basePos;
