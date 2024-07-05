@@ -28,15 +28,11 @@ const routes = [
 const socials = [
   {
     link: '',
-    label: 'labs',
-  },
-  {
-    link: '',
-    label: 'blog',
-  },
-  {
-    link: '',
     label: 'twitter',
+  },
+  {
+    link: '',
+    label: 'linkedIn',
   },
   {
     link: '',
@@ -64,8 +60,8 @@ export const Home = () => {
 
   return (
     <section className='relative flex h-screen w-full items-end justify-start p-6'>
-      <div className='absolute left-6 top-6'>© 2024</div>
-      <ul className='absolute right-6 top-6 flex w-80 items-center justify-between leading-none'>
+      <h1 className='absolute left-6 top-6 leading-none'>Pedro Almeida</h1>
+      <ul className='absolute left-[65.5rem] top-6 flex items-center justify-start gap-x-10 leading-none'>
         {socials.map(({ link, label }) => (
           <li key={label}>
             <a className='underline-offset-8 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
@@ -74,8 +70,8 @@ export const Home = () => {
           </li>
         ))}
       </ul>
+      <span className='absolute right-6 top-6 leading-none'>©2024</span>
       <div className='absolute left-[10%] top-[62.55%]'>
-        <h1 className='sr-only'>Pedro Almeida</h1>
         <h2 ref={subtitleRef} className='invisible mb-1 text-5xl font-extralight opacity-0'>
           Creative Developer
         </h2>
