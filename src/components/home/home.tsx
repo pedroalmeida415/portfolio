@@ -64,7 +64,7 @@ export const Home = () => {
       <ul className='absolute left-[65.5rem] top-6 flex items-center justify-start gap-x-10 leading-none'>
         {socials.map(({ link, label }) => (
           <li key={label}>
-            <a className='underline-offset-8 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
+            <a className='underline-offset-2 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
               {label}
             </a>
           </li>

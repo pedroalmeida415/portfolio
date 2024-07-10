@@ -17,6 +17,7 @@ import {
   PlaneGeometry,
   RawShaderMaterial,
   Vector2,
+  Vector3,
 } from 'three'
 import { useEffect, useMemo, useRef } from 'react'
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
@@ -32,7 +33,7 @@ export const Particles = ({
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
   const pointer = useThree((state) => state.pointer)
-  pointer.setY(-100)
+  pointer.set(0, -4.0435247)
 
   const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
@@ -90,7 +91,7 @@ export const Particles = ({
     // Uniforms
     particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
     particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
-    particlesVariable.material.uniforms.uMouse = { value: new Vector2(0, -4.0435247) }
+    particlesVariable.material.uniforms.uMouse = { value: pointer }
     particlesVariable.material.uniforms.uIsLMBDown = { value: false }
 
     // Init
@@ -107,14 +108,29 @@ export const Particles = ({
 
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
-  const uMouseVec = new Vector2()
+  const bufferSize = 7 // Number of frames to delay
+  const middleIndex = Math.floor(bufferSize / 2)
+  let bufferIndex = 0
+
+  const mousePositions = useMemo(() => new Array<Vector3>(bufferSize).fill(new Vector3(pointer.x, pointer.y, 0)), [])
+  const P1 = useMemo(() => new Vector2(), [])
+
   useFrame((state, delta) => {
     state.raycaster.setFromCamera(state.pointer, state.camera)
     const intersects = state.raycaster.intersectObject(planeAreaRef.current)
 
     if (intersects.length) {
-      particlesVariable.material.uniforms.uMouse.value = uMouseVec.set(intersects[0].point.x, intersects[0].point.y)
-      planeAreaRef.current.material.uniforms.uMouse.value = uMouseVec
+      const { point } = intersects[0]
+
+      mousePositions[bufferIndex] = point
+      bufferIndex = (bufferIndex + 1) % bufferSize
+      calculateP1(point, mousePositions[bufferIndex], mousePositions[(bufferIndex + middleIndex) % bufferSize], P1)
+
+      particlesVariable.material.uniforms.uMouse.value = point
+
+      planeAreaRef.current.material.uniforms.uMouse.value = point
+      planeAreaRef.current.material.uniforms.uP1.value = P1
+      planeAreaRef.current.material.uniforms.uP2.value = mousePositions[bufferIndex]
     }
 
     // --- Update GPU Compute ---
@@ -134,7 +150,9 @@ export const Particles = ({
           vertexShader={cursorVertexShader}
           fragmentShader={cursorFragmentShader}
           uniforms={{
-            uMouse: { value: [0, -4.0435247] },
+            uMouse: { value: pointer },
+            uP1: { value: pointer },
+            uP2: { value: pointer },
             uResolution: { value: resolution },
             uViewport: { value: [viewport.width, viewport.height] },
           }}
@@ -197,4 +215,24 @@ function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
     pointY: Number(ndcY2.toFixed(7)),
     thickness: Number(ndcHeight2.toFixed(7)),
   }
+}
+
+function calculateP1(P0: Vector3, P2: Vector3, Pt: Vector3, P1: Vector2) {
+  const t = 0.5
+  const t2 = 0.25
+  const oneMinusT = t
+  const oneMinusT2 = t2
+
+  // Numerator components for x and y
+  const numeratorX = Pt.x - oneMinusT2 * P0.x - t2 * P2.x
+  const numeratorY = Pt.y - oneMinusT2 * P0.y - t2 * P2.y
+
+  // Denominator
+  const denominator = 2 * oneMinusT * t
+
+  // Calculate P1 components
+  const P1x = numeratorX / denominator
+  const P1y = numeratorY / denominator
+
+  P1.set(P1x, P1y)
 }
