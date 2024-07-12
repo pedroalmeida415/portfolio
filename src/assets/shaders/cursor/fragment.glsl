@@ -4,6 +4,8 @@ uniform vec2 uP2;
 uniform vec2 uResolution;
 uniform vec2 uViewport;
 
+#define SQRT3 1.732050808
+
 float smoothMax(float a, float b, float k) {
     return log(exp(k * a) + exp(k * b)) / k;
 }
@@ -27,63 +29,88 @@ float sdSegment(vec2 p, vec2 a, vec2 b) {
     return length(pa - ba*h);
 }
 
+float circularIn(float t) {
+    return 1.0 - sqrt(1.0 - t * t);
+}
+
 float dot2(vec2 v) {
     return dot(v,v);
 }
+float cos_acos_3(float x) {
+    x=sqrt(0.5+0.5*x); return x*(x*(x*(x*-0.008972+0.039071)-0.107074)+0.576975)+0.5;
+} // https://www.shadertoy.com/view/WltSD7
 
-float sdBezier(in vec2 pos, in vec2 A, in vec2 B, in vec2 C) {
+float sdBezier(vec2 pos, vec2 A, vec2 B, vec2 C, float radiusStart) {
     vec2 a = B - A;
     vec2 b = A - 2.0*B + C;
     vec2 c = a * 2.0;
     vec2 d = A - pos;
+    
     float kk = 1.0/dot(b,b);
     float kx = kk * dot(a,b);
     float ky = kk * (2.0*dot(a,a)+dot(d,b)) / 3.0;
     float kz = kk * dot(d,a);      
+    
     float res = 0.0;
+    float segmentT = 0.0;
+    
     float p = ky - kx*kx;
     float p3 = p*p*p;
     float q = kx*(2.0*kx*kx-3.0*ky) + kz;
     float h = q*q + 4.0*p3;
+    
     if(h >= 0.0) {
         h = sqrt(h);
         vec2 x = (vec2(h,-h)-q)/2.0;
+        
         vec2 uv = sign(x)*pow(abs(x), vec2(1.0/3.0));
-        float t = clamp(uv.x+uv.y-kx, 0.0, 1.0);
-        res = dot2(d + (c + b*t)*t);
+        float t = uv.x + uv.y;
+        
+        // from NinjaKoala - single newton iteration to account for cancellation
+        t -= (t*(t*t+3.0*p)+q)/(3.0*t*t+3.0*p);
+        
+        t = clamp(t-kx, 0.0,1.0);
+        vec2  w = d+(c+b*t)*t;
+        res = dot2(w);
+        segmentT = t;
     }
     else {
         float z = sqrt(-p);
-        float v = acos(q/(p*z*2.0)) / 3.0;
-        float m = cos(v);
-        float n = sin(v)*1.732050808;
-        vec3  t = clamp(vec3(m+m,-n-m,n-m)*z-kx,0.0,1.0);
-        res = min(dot2(d+(c+b*t.x)*t.x),
-            dot2(d+(c+b*t.y)*t.y));
-        // the third root cannot be the closest
-        // res = min(res,dot2(d+(c+b*t.z)*t.z));
+        float m = cos_acos_3(q/(p*z*2.0));
+        float n = sqrt(1.0-m*m) * SQRT3;
+        
+        vec2  t = clamp(vec2(m+m,-n-m)*z-kx, 0.0,1.0);
+        
+        vec2  qx=d+(c+b*t.x)*t.x;
+        float dx=dot2(qx);
+        vec2  qy=d+(c+b*t.y)*t.y;
+        float dy=dot2(qy);
+        
+        if(dx<dy) {
+            res=dx;
+            segmentT = t.x;
+        } else {
+            res=dy;
+            segmentT = t.y;
+        }
     }
-    return sqrt(res);
+    
+    float radius = mix(radiusStart, 0.0, circularIn(segmentT));
+    
+    return sqrt(res) - radius;
 }
 
 void main() {
     vec2 uv = (gl_FragCoord.xy / uResolution.xy) * 2.0 - 1.0;
     uv *= uViewport / 2.0;
     
-    // float mouseCircleDist = sdCircle(uv - uMouse, 0.4);
-    // vec3 col = vec3(1.0) - sign(mouseCircleDist)*vec3(0.1,0.4,0.7);
-    // col *= 1.0 - exp(-3.0*abs(mouseCircleDist));
-    // col *= 0.8 + 0.2*cos(120.0*mouseCircleDist);
-    // col = mix(col, vec3(1.0), 1.0-smoothstep(0.0,0.015,abs(mouseCircleDist)));
-    
     float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3000979;
     
-    // float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
-    // float mouseCircleDelayedDist = sdCircle(uv - uMouseDelayed, 0.1);
+    float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
     
-    float curveDist = sdBezier(uv, uMouse, uP1, uP2) - 0.3;
+    float curveDist = sdBezier(uv, uMouse, uP1, uP2, 0.3);
     
-    float combinedDistUnion = smin(curveDist, navSegmentDist, .25);
+    float combinedDistUnion = smin(min(curveDist,mouseCircleDist), navSegmentDist, .25);
     
     const float headerYPos = 4.2584713;
     const float normalTextSegmentThickness = 0.1390831;
