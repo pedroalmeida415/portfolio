@@ -112,7 +112,7 @@ export const Particles = ({
   const middleIndex = Math.floor(bufferSize / 2)
   let bufferIndex = 0
 
-  const mousePositions = useMemo(() => new Array<Vector3>(bufferSize).fill(new Vector3(pointer.x, pointer.y, 0)), [])
+  const mousePositions = useMemo(() => Array.from({ length: bufferSize }, () => new Vector2(pointer.x, pointer.y)), [])
   const P1 = useMemo(() => new Vector2(), [])
 
   useFrame((state, delta) => {
@@ -122,15 +122,17 @@ export const Particles = ({
     if (intersects.length) {
       const { point } = intersects[0]
 
-      mousePositions[bufferIndex] = point
+      mousePositions[bufferIndex].set(point.x, point.y)
       bufferIndex = (bufferIndex + 1) % bufferSize
-      calculateP1(point, mousePositions[bufferIndex], mousePositions[(bufferIndex + middleIndex) % bufferSize], P1)
+      const PT = mousePositions[(bufferIndex + middleIndex) % bufferSize]
+      const P2 = mousePositions[bufferIndex]
+      calculateP1(point, P2, PT, P1)
 
       particlesVariable.material.uniforms.uMouse.value = point
 
       planeAreaRef.current.material.uniforms.uMouse.value = point
-      planeAreaRef.current.material.uniforms.uP1.value = P1
-      planeAreaRef.current.material.uniforms.uP2.value = mousePositions[bufferIndex]
+      planeAreaRef.current.material.uniforms.uP1.value = P1.lerp(point, 0.01)
+      planeAreaRef.current.material.uniforms.uP2.value = P2.lerp(P1, 0.01)
     }
 
     // --- Update GPU Compute ---
@@ -217,7 +219,7 @@ function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
   }
 }
 
-function calculateP1(P0: Vector3, P2: Vector3, Pt: Vector3, P1: Vector2) {
+function calculateP1(P0: Vector3, P2: Vector2, Pt: Vector2, P1: Vector2) {
   const t = 0.5
   const t2 = 0.25
   const oneMinusT = t
