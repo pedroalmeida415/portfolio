@@ -4,8 +4,6 @@ uniform vec2 uP2;
 uniform vec2 uResolution;
 uniform vec2 uViewport;
 
-#define SQRT3 1.732050808
-
 float smoothMax(float a, float b, float k) {
     return log(exp(k * a) + exp(k * b)) / k;
 }
@@ -29,75 +27,56 @@ float sdSegment(vec2 p, vec2 a, vec2 b) {
     return length(pa - ba*h);
 }
 
-float circularIn(float t) {
-    return 1.0 - sqrt(1.0 - t * t);
+float circularOut(float t) {
+    return sqrt((2.0 - t) * t);
 }
 
-float dot2(vec2 v) {
-    return dot(v,v);
+float cro(in vec2 a, in vec2 b) {
+    return a.x*b.y - a.y*b.x;
 }
-float cos_acos_3(float x) {
-    x=sqrt(0.5+0.5*x); return x*(x*(x*(x*-0.008972+0.039071)-0.107074)+0.576975)+0.5;
-} // https://www.shadertoy.com/view/WltSD7
 
-float sdBezier(vec2 pos, vec2 A, vec2 B, vec2 C, float radiusStart) {
-    vec2 a = B - A;
-    vec2 b = A - 2.0*B + C;
-    vec2 c = a * 2.0;
-    vec2 d = A - pos;
+float sdUnevenCapsule(in vec2 p, in vec2 pa, in vec2 pb, in float ra, in float rb) {
+    p  -= pa;
+    pb -= pa;
+    float h = dot(pb,pb);
+    vec2  q = vec2(dot(p,vec2(pb.y,-pb.x)), dot(p,pb))/h;
     
-    float kk = 1.0/dot(b,b);
-    float kx = kk * dot(a,b);
-    float ky = kk * (2.0*dot(a,a)+dot(d,b)) / 3.0;
-    float kz = kk * dot(d,a);      
+    q.x = abs(q.x);
     
-    float res = 0.0;
-    float segmentT = 0.0;
+    float b = ra-rb;
+    vec2  c = vec2(sqrt(h-b*b),b);
     
-    float p = ky - kx*kx;
-    float p3 = p*p*p;
-    float q = kx*(2.0*kx*kx-3.0*ky) + kz;
-    float h = q*q + 4.0*p3;
+    float k = cro(c,q);
+    float m = dot(c,q);
+    float n = dot(q,q);
     
-    if(h >= 0.0) {
-        h = sqrt(h);
-        vec2 x = (vec2(h,-h)-q)/2.0;
-        
-        vec2 uv = sign(x)*pow(abs(x), vec2(1.0/3.0));
-        float t = uv.x + uv.y;
-        
-        // from NinjaKoala - single newton iteration to account for cancellation
-        t -= (t*(t*t+3.0*p)+q)/(3.0*t*t+3.0*p);
-        
-        t = clamp(t-kx, 0.0,1.0);
-        vec2  w = d+(c+b*t)*t;
-        res = dot2(w);
-        segmentT = t;
+    if(k < 0.0) {
+        return sqrt(h*(n)) - ra;
     }
-    else {
-        float z = sqrt(-p);
-        float m = cos_acos_3(q/(p*z*2.0));
-        float n = sqrt(1.0-m*m) * SQRT3;
+    else if(k > c.x) {
+        return sqrt(h*(n+1.0-2.0*q.y)) - rb;
+    }
+    return m - ra;
+}
+
+float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples) {
+    float dist = 1e30;
+    
+    for (int i = samples; i > 0; --i) {
+        float t0 = float(i) / float(samples);
+        float t1 = float(i + 1) / float(samples);
+        float u0 = 1.0 - t0;
+        float u1 = 1.0 - t1;
+        vec2 p0 = u0 * u0 * a + 2.0 * u0 * t0 * b + t0 * t0 * c;
+        vec2 p1 = u1 * u1 * a + 2.0 * u1 * t1 * b + t1 * t1 * c;
         
-        vec2  t = clamp(vec2(m+m,-n-m)*z-kx, 0.0,1.0);
+        float radiusA = mix(0.0, 0.3, circularOut(t0));
+        float radiusB = mix(0.0, 0.3, circularOut(t1));
         
-        vec2  qx=d+(c+b*t.x)*t.x;
-        float dx=dot2(qx);
-        vec2  qy=d+(c+b*t.y)*t.y;
-        float dy=dot2(qy);
-        
-        if(dx<dy) {
-            res=dx;
-            segmentT = t.x;
-        } else {
-            res=dy;
-            segmentT = t.y;
-        }
+        dist = min(dist, sdUnevenCapsule(p, p0, p1, radiusA, radiusB));
     }
     
-    float radius = mix(radiusStart, 0.0, circularIn(segmentT));
-    
-    return sqrt(res) - radius;
+    return dist;
 }
 
 void main() {
@@ -108,7 +87,7 @@ void main() {
     
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
     
-    float curveDist = sdBezier(uv, uMouse, uP1, uP2, 0.3);
+    float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 12);
     
     float combinedDistUnion = smin(min(curveDist,mouseCircleDist), navSegmentDist, .25);
     
