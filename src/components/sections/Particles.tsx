@@ -127,6 +127,9 @@ export const Particles = ({
       const PT = mousePositions[(bufferIndex + middleIndex) % bufferSize]
       const P2 = mousePositions[bufferIndex]
       calculateP1(point, P2, PT, P1)
+      if (PT.distanceTo(P1) > PT.distanceTo(P2)) {
+        P1.set(P2.x, P2.y)
+      }
 
       particlesVariable.material.uniforms.uMouse.value = point
 
@@ -219,22 +222,24 @@ function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
   }
 }
 
+// P1=2P(0.5)−0.5P0−0.5P2
 function calculateP1(P0: Vector3, P2: Vector2, Pt: Vector2, P1: Vector2) {
-  const t = 0.5
-  const t2 = 0.25
-  const oneMinusT = t
-  const oneMinusT2 = t2
+  let PtX = Pt.x,
+    PtY = Pt.y,
+    P0X = P0.x,
+    P0Y = P0.y,
+    P2X = P2.x,
+    P2Y = P2.y
 
-  // Numerator components for x and y
-  const numeratorX = Pt.x - oneMinusT2 * P0.x - t2 * P2.x
-  const numeratorY = Pt.y - oneMinusT2 * P0.y - t2 * P2.y
+  PtX *= 2
+  PtY *= 2
+  P0X *= 0.5
+  P0Y *= 0.5
+  P2X *= 0.5
+  P2Y *= 0.5
 
-  // Denominator
-  const denominator = 2 * oneMinusT * t
+  const x = PtX - P0X - P2X
+  const y = PtY - P0Y - P2Y
 
-  // Calculate P1 components
-  const P1x = numeratorX / denominator
-  const P1y = numeratorY / denominator
-
-  P1.set(P1x, P1y)
+  P1.set(x, y)
 }
