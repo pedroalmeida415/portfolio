@@ -64,7 +64,7 @@ export const Home = () => {
       <ul className='absolute left-[65.5rem] top-6 flex items-center justify-start gap-x-10 leading-none'>
         {socials.map(({ link, label }) => (
           <li key={label}>
-            <a className='underline-offset-2 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
+            <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
               {label}
             </a>
           </li>
@@ -82,11 +82,11 @@ export const Home = () => {
           <span id='ping' className='size-[10px] rounded-full bg-lime-500'></span>
         </div>
       </div>
-      <nav className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-[#D9D9D9] p-2'>
+      <nav className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2'>
         <ul className='flex items-center gap-x-2 leading-none'>
           {routes.map(({ path, label, icon: Icon }) => (
             <li key={path}>
-              <a href={path} className='block rounded-full px-6 py-2 hover:bg-orange-600 hover:text-white'>
+              <a href={path} className='block rounded-full px-6 py-2 underline-offset-4 hover:underline'>
                 {Icon ? <Icon /> : label}
               </a>
             </li>

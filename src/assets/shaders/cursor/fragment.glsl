@@ -11,10 +11,13 @@ float smoothMin(float a, float b, float k) {
     return -smoothMax(-a, -b, k);
 }
 
-float smin(float a, float b, float k) {
-    k *= 1.0/(1.0-sqrt(0.5));
-    float h = max(k-abs(a-b), 0.0)/k;
-    return min(a,b) - k*0.5*(1.0+h-sqrt(1.0-h*(h-2.0)));
+// cubic polynomial
+vec2 sminBlend(float a, float b, float k) {
+    float h = 1.0 - min(abs(a-b)/(6.0*k), 1.0);
+    float w = h*h*h;
+    float m = w*0.5;
+    float s = w*k; 
+    return (a<b) ? vec2(a-s,m) : vec2(b-s,1.0-m);
 }
 
 float sdCircle(vec2 p, float r) {
@@ -83,32 +86,31 @@ void main() {
     vec2 uv = (gl_FragCoord.xy / uResolution.xy) * 2.0 - 1.0;
     uv *= uViewport / 2.0;
     
-    float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3000979;
-    
+    float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3160979;
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
-    
     float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 12);
     
-    float combinedDistUnion = smin(min(curveDist,mouseCircleDist), navSegmentDist, .25);
+    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), navSegmentDist, .25);
     
     const float headerYPos = 4.2584713;
     const float normalTextSegmentThickness = 0.1390831;
     
     float nameSegmentDist = sdSegment(uv, vec2(-9.3817859, headerYPos), vec2(-8.1761885, headerYPos)) - normalTextSegmentThickness;
-    
     float twitterSegmentDist = sdSegment(uv, vec2(3.5858147, headerYPos), vec2(4.0398893, headerYPos)) - normalTextSegmentThickness;
     float linkedinSegmentDist = sdSegment(uv, vec2(4.6366828, headerYPos), vec2(5.1999693, headerYPos)) - normalTextSegmentThickness;
     float readcvSegmentDist = sdSegment(uv, vec2(5.7967621, headerYPos), vec2(6.3309676, headerYPos)) - normalTextSegmentThickness;
-    
     float creditsSegmentDist = sdSegment(uv, vec2(8.7962146, headerYPos), vec2(9.3817859, headerYPos)) - normalTextSegmentThickness;
-    
     float availableSegmentDist = sdSegment(uv, vec2(-7.6723284, -1.9795631), vec2(-5.4387805, -1.9795631)) - normalTextSegmentThickness;
     
     float combinedDistSubtract = min(availableSegmentDist, min(nameSegmentDist, min(creditsSegmentDist,min(readcvSegmentDist, min(twitterSegmentDist, linkedinSegmentDist)))));
+    float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
     
-    float combinedDist = smoothMax(combinedDistUnion, -combinedDistSubtract, 9.);
+    vec3 cursorColor = vec3(0.918, 0.345, 0.047);
+    vec3 navColor = vec3(0.851,0.851,0.851);
+    vec3 backgroundColor = vec3(0.945, 0.937, 0.922);
     
-    vec3 col = mix(vec3(0.918,0.345,0.047),vec3(0.945,0.937,0.922), smoothstep(0.0,0.015,combinedDist));
+    vec3 col = mix(cursorColor, navColor, combinedDistUnion.y);
+    col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist));
     
     gl_FragColor = vec4(col, 1.);
 }
