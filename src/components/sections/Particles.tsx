@@ -35,8 +35,6 @@ export const Particles = ({
   const pointer = useThree((state) => state.pointer)
   pointer.set(0, -4.0435247)
 
-  const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
-
   const planeAreaRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
   const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
@@ -105,15 +103,18 @@ export const Particles = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
-  const bufferSize = 7 // Number of frames to delay
-  const middleIndex = Math.floor(bufferSize / 2)
   let bufferIndex = 0
+  const bufferSize = 7 // Number of frames to delay
+  const middleBufferIndex = Math.floor(bufferSize / 2)
 
-  const mousePositions = useMemo(() => Array.from({ length: bufferSize }, () => new Vector2(pointer.x, pointer.y)), [])
   const P1 = useMemo(() => new Vector2(), [])
+  const mousePositions = useMemo(
+    () => Array.from({ length: bufferSize }, () => new Vector2(pointer.x, pointer.y)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   useFrame((state, delta) => {
     state.raycaster.setFromCamera(state.pointer, state.camera)
@@ -124,9 +125,11 @@ export const Particles = ({
 
       mousePositions[bufferIndex].set(point.x, point.y)
       bufferIndex = (bufferIndex + 1) % bufferSize
-      const PT = mousePositions[(bufferIndex + middleIndex) % bufferSize]
+      const PT = mousePositions[(bufferIndex + middleBufferIndex) % bufferSize]
       const P2 = mousePositions[bufferIndex]
+
       calculateP1(point, P2, PT, P1)
+
       if (PT.distanceTo(P1) > PT.distanceTo(P2)) {
         P1.set(P2.x, P2.y)
       }
@@ -134,8 +137,8 @@ export const Particles = ({
       particlesVariable.material.uniforms.uMouse.value = point
 
       planeAreaRef.current.material.uniforms.uMouse.value = point
-      planeAreaRef.current.material.uniforms.uP1.value = P1.lerp(point, 0.01)
-      planeAreaRef.current.material.uniforms.uP2.value = P2.lerp(P1, 0.01)
+      planeAreaRef.current.material.uniforms.uP1.value = P1
+      planeAreaRef.current.material.uniforms.uP2.value = P2
     }
 
     // --- Update GPU Compute ---
@@ -158,8 +161,7 @@ export const Particles = ({
             uMouse: { value: pointer },
             uP1: { value: pointer },
             uP2: { value: pointer },
-            uResolution: { value: resolution },
-            uViewport: { value: [viewport.width, viewport.height] },
+            uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
           }}
         />
       </mesh>

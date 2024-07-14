@@ -1,8 +1,9 @@
 uniform vec2 uMouse;
 uniform vec2 uP1;
 uniform vec2 uP2;
-uniform vec2 uResolution;
-uniform vec2 uViewport;
+uniform vec2 uUvScalar;
+
+varying vec2 vUv;
 
 float smoothMax(float a, float b, float k) {
     return log(exp(k * a) + exp(k * b)) / k;
@@ -83,8 +84,8 @@ float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples) {
 }
 
 void main() {
-    vec2 uv = (gl_FragCoord.xy / uResolution.xy) * 2.0 - 1.0;
-    uv *= uViewport / 2.0;
+    vec2 uv = vUv * 2.0 - 1.0;
+    uv *= uUvScalar;
     
     float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3160979;
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
