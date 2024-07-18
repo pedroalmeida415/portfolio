@@ -1,3 +1,6 @@
+import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
+
 module.exports = {
   mode: 'jit',
   content: ['./src/**/*.{js,ts,jsx,tsx}'], // remove unused styles in production
@@ -5,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'neue-montreal': ['var(--font-neue-montreal-variable)'],
+        'neue-montreal': ['var(--font-neue-montreal-variable)', ...defaultTheme.fontFamily.sans],
       },
     },
   },
@@ -13,4 +16,4 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-}
+} satisfies Config

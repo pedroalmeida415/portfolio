@@ -7,7 +7,6 @@ const neue_montreal = localFont({
   src: '../assets/fonts/neue-montreal/PPNeueMontreal-Variable.woff2',
   display: 'swap',
   variable: '--font-neue-montreal-variable',
-  fallback: ['sans-serif'],
   declarations: [
     {
       prop: 'font-variation-settings',

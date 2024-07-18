@@ -57,7 +57,6 @@ export default function Canvas({ children }: PropsWithChildren) {
             gl={{
               stencil: false,
               depth: false,
-              useLegacyLights: false,
             }}
             flat
             eventSource={ref}
