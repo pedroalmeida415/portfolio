@@ -1,13 +1,6 @@
+import { useEffect, useMemo, useRef } from 'react'
+
 import { useFrame, useThree, extend } from '@react-three/fiber'
-import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
-
-import cursorVertexShader from '@/assets/shaders/cursor/vertex.glsl'
-import cursorFragmentShader from '@/assets/shaders/cursor/fragment.glsl'
-
-import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
-import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
-import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
-
 import {
   Mesh,
   Points,
@@ -18,8 +11,20 @@ import {
   RawShaderMaterial,
   Vector2,
   Vector3,
+  CanvasTexture,
+  NearestFilter,
+  LinearFilter,
+  RGBAFormat,
+  FloatType,
 } from 'three'
-import { useEffect, useMemo, useRef } from 'react'
+
+import cursorFragmentShader from '@/assets/shaders/cursor/fragment.glsl'
+import cursorVertexShader from '@/assets/shaders/cursor/vertex.glsl'
+import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
+import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
+import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
+
+import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
 
 export const Particles = ({
@@ -38,7 +43,7 @@ export const Particles = ({
   const planeAreaRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
   const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
-  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
+  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray, textTexture } = useMemo(() => {
     const baseGeometry = new BufferGeometry()
     baseGeometry.setAttribute('position', new BufferAttribute(positions, 2))
 
@@ -95,11 +100,52 @@ export const Particles = ({
     // Init
     gpgpuCompute.init()
 
+    const canvas = document.createElement('canvas')
+    canvas.style.position = 'absolute'
+    canvas.style.top = '0'
+    canvas.style.left = '0'
+    canvas.style.pointerEvents = 'none'
+    canvas.style.fontVariationSettings = "'wght' 200"
+    canvas.width = 400
+    canvas.height = 68
+    document.body.appendChild(canvas)
+    const ctx = canvas.getContext('2d')
+
+    ctx.fillStyle = '#000000'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Shadow
+    ctx.shadowColor = '#ff0000'
+    ctx.shadowBlur = 1
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 0
+
+    const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
+    ctx.font = `100 48px ${font}`
+    ctx.textBaseline = 'bottom'
+    ctx.fillStyle = '#ff0000'
+    ctx.fillText('Creative Developer', 15, 58)
+
+    const repeats = 9
+    // repeatedly overdraw the blur to make it prominent
+    for (let i = 0; i < repeats; i++) {
+      // increase the size of blur
+      ctx.shadowBlur += 0.5
+      // stroke the rect (which also draws its shadow)
+      ctx.fillText('Creative Developer', 15, 58)
+    }
+
+    const textTexture = new CanvasTexture(canvas)
+    textTexture.generateMipmaps = false
+    textTexture.magFilter = NearestFilter
+    textTexture.minFilter = NearestFilter
+
     return {
       gpgpuCompute,
       baseGeometryCount,
       particlesVariable,
       particlesUvArray,
+      textTexture,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -162,6 +208,8 @@ export const Particles = ({
             uP1: { value: pointer },
             uP2: { value: pointer },
             uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
+            uTextTexture: { value: textTexture },
+            uTextTextureSize: { value: [textTexture.image.width, textTexture.image.height] },
           }}
         />
       </mesh>

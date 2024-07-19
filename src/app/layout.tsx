@@ -1,6 +1,8 @@
-import localFont from 'next/font/local'
 import { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
+
 import Canvas from '@/components/canvas/canvas'
+
 import './global.css'
 
 const neue_montreal = localFont({
@@ -98,8 +100,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang='en' className={`${neue_montreal.variable}`}>
-      <body>
+    <html lang='en'>
+      <body className={`${neue_montreal.variable}`}>
         <Canvas>{children}</Canvas>
       </body>
     </html>
