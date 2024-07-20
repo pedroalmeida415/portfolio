@@ -108,18 +108,17 @@ void main() {
     float combinedDistSubtract = min(availableSegmentDist, min(nameSegmentDist, min(creditsSegmentDist,min(readcvSegmentDist, min(twitterSegmentDist, linkedinSegmentDist)))));
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
     
-    vec2 textCoords = vec2(-7.7684221, -1.7772605);
     float textAspect = uTextTextureSize.x / uTextTextureSize.y;
     float resolutionAspect = uUvScalar.x / uUvScalar.y;
-    float textMask = texture2D(uTextTexture, vec2(vUv.x, vUv.y * textAspect / resolutionAspect) * 3.0).r;
+    float textMask = texture2D(uTextTexture, vec2(vUv.x, vUv.y * textAspect / resolutionAspect)).r;
     
     vec3 cursorColor = vec3(0.918, 0.345, 0.047);
     vec3 navColor = vec3(0.851,0.851,0.851);
     vec3 backgroundColor = vec3(0.945, 0.937, 0.922);
     
     vec3 col = mix(cursorColor, navColor, combinedDistUnion.y);
-    col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist));
-    col = mix(col, vec3(0.0), textMask);
+    col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
+    col = mix(col, vec3(1.0 - backgroundColor.r), textMask);
     
     gl_FragColor = vec4(col, 1.);
 }

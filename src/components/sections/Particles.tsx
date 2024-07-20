@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 
-import { useFrame, useThree, extend } from '@react-three/fiber'
+import { useFrame, useThree, extend, useLoader } from '@react-three/fiber'
 import {
   Mesh,
   Points,
@@ -13,9 +13,7 @@ import {
   Vector3,
   CanvasTexture,
   NearestFilter,
-  LinearFilter,
-  RGBAFormat,
-  FloatType,
+  TextureLoader,
 } from 'three'
 
 import cursorFragmentShader from '@/assets/shaders/cursor/fragment.glsl'
@@ -34,6 +32,8 @@ export const Particles = ({
   positions: Float32Array
   staggerMultipliers: Uint8Array
 }) => {
+  const gustoTexture = useLoader(TextureLoader, '/logo-gooey-effect.png')
+
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
@@ -104,35 +104,45 @@ export const Particles = ({
     canvas.style.position = 'absolute'
     canvas.style.top = '0'
     canvas.style.left = '0'
-    canvas.style.pointerEvents = 'none'
     canvas.style.fontVariationSettings = "'wght' 200"
-    canvas.width = 400
-    canvas.height = 68
     document.body.appendChild(canvas)
+
+    const text = 'Creative Developer'
+    const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
+    const fontSize = 96
+
+    const blurColor = '#ff0000'
+    const baseBlur = 1
+    const blurRepeatCount = 10
+    const blurIncrement = 1
+
     const ctx = canvas.getContext('2d')
+    ctx.font = `${fontSize}px ${font}`
+
+    const textWidth = ctx.measureText(text).width
+
+    canvas.width = textWidth + 2 * baseBlur + blurRepeatCount * blurIncrement * 2
+    canvas.height = fontSize + 2 * baseBlur + blurRepeatCount * blurIncrement * 2
+
+    const textX = baseBlur + blurRepeatCount * blurIncrement
+    const textY = canvas.height / 2
 
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    // Shadow
-    ctx.shadowColor = '#ff0000'
-    ctx.shadowBlur = 1
+    ctx.shadowColor = blurColor
+    ctx.shadowBlur = baseBlur
     ctx.shadowOffsetX = 0
     ctx.shadowOffsetY = 0
 
-    const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
-    ctx.font = `100 48px ${font}`
-    ctx.textBaseline = 'bottom'
-    ctx.fillStyle = '#ff0000'
-    ctx.fillText('Creative Developer', 15, 58)
+    ctx.font = `${fontSize}px ${font}`
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = blurColor
+    ctx.fillText(text, textX, textY)
 
-    const repeats = 9
-    // repeatedly overdraw the blur to make it prominent
-    for (let i = 0; i < repeats; i++) {
-      // increase the size of blur
-      ctx.shadowBlur += 0.5
-      // stroke the rect (which also draws its shadow)
-      ctx.fillText('Creative Developer', 15, 58)
+    for (let i = 0; i < blurRepeatCount; i++) {
+      ctx.shadowBlur += blurIncrement
+      ctx.fillText(text, textX, textY)
     }
 
     const textTexture = new CanvasTexture(canvas)
