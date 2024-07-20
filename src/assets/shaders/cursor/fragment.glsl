@@ -112,7 +112,6 @@ void main() {
     float resolutionAspect = uUvScalar.x / uUvScalar.y;
     
     vec2 textCenterCoords = vec2(-5.362759, -1.4738065);
-    textCenterCoords.y -= 0.045;
     
     uv -= textCenterCoords;
     uv *= 3.815;

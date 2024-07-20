@@ -115,14 +115,21 @@ export const Particles = ({
 
     const ctx = canvas.getContext('2d')
     ctx.font = `${fontSize}px ${font}`
+    ctx.textBaseline = 'middle'
 
-    const textWidth = ctx.measureText(text).width
+    const textMeasurements = ctx.measureText(text)
+    const textWidth = textMeasurements.width
+    const textHeight = textMeasurements.actualBoundingBoxAscent + textMeasurements.actualBoundingBoxDescent
 
-    canvas.width = textWidth + 2 * baseBlur + blurRepeatCount * blurIncrement * 2
-    canvas.height = fontSize + 2 * baseBlur + blurRepeatCount * blurIncrement * 2
+    canvas.width = textWidth + (baseBlur + blurRepeatCount * blurIncrement) * 3
+    canvas.height = textHeight + (baseBlur + blurRepeatCount * blurIncrement) * 3
 
-    const textX = baseBlur + blurRepeatCount * blurIncrement
-    const textY = canvas.height / 2
+    const topHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxAscent
+    const lowerHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxDescent
+    const textYOffset = topHalfDist - lowerHalfDist
+
+    const textX = canvas.width / 2 - textWidth / 2
+    const textY = canvas.height / 2 + textYOffset
 
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
