@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 
-import { useFrame, useThree, extend, useLoader } from '@react-three/fiber'
+import { useFrame, useThree, extend } from '@react-three/fiber'
 import {
   Mesh,
   Points,
@@ -12,8 +12,6 @@ import {
   Vector2,
   Vector3,
   CanvasTexture,
-  NearestFilter,
-  TextureLoader,
 } from 'three'
 
 import cursorFragmentShader from '@/assets/shaders/cursor/fragment.glsl'
@@ -32,8 +30,6 @@ export const Particles = ({
   positions: Float32Array
   staggerMultipliers: Uint8Array
 }) => {
-  const gustoTexture = useLoader(TextureLoader, '/logo-gooey-effect.png')
-
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
@@ -105,11 +101,12 @@ export const Particles = ({
     canvas.style.top = '0'
     canvas.style.left = '0'
     canvas.style.fontVariationSettings = "'wght' 200"
+    canvas.style.display = 'none'
     document.body.appendChild(canvas)
 
     const text = 'Creative Developer'
     const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
-    const fontSize = 96
+    const fontSize = 48
 
     const blurColor = '#ff0000'
     const baseBlur = 1
@@ -245,7 +242,7 @@ export const Particles = ({
   )
 }
 
-function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
+function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0, trimEnds = false) {
   const box = element.getBoundingClientRect()
   const bodyBoundingRect = document.body.getBoundingClientRect()
   const bodyWidth = bodyBoundingRect.width
@@ -257,7 +254,9 @@ function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
   const ndcX = (centerX / bodyWidth) * 2 - 1
   const ndcY = -(centerY / bodyHeight) * 2 + 1
 
-  const ndcWidth = (box.width - box.height + paddingX) / bodyWidth
+  const heightOffset = trimEnds ? -box.height : 0
+  paddingX += heightOffset
+  const ndcWidth = (box.width + paddingX) / bodyWidth
   const ndcHeight = (box.height + paddingY) / bodyHeight
 
   const viewportWidth = 19.42105551423707
@@ -275,8 +274,10 @@ function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0) {
   return {
     pointX1: Number(pointX1.toFixed(7)),
     pointX2: Number(pointX2.toFixed(7)),
-    pointY: Number(ndcY2.toFixed(7)),
-    thickness: Number(ndcHeight2.toFixed(7)),
+    centerY: Number(ndcY2.toFixed(7)),
+    centerX: Number(ndcX2.toFixed(7)),
+    width: Number(ndcWidth2.toFixed(7)),
+    height: Number(ndcHeight2.toFixed(7)),
   }
 }
 

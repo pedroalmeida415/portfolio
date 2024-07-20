@@ -110,7 +110,18 @@ void main() {
     
     float textAspect = uTextTextureSize.x / uTextTextureSize.y;
     float resolutionAspect = uUvScalar.x / uUvScalar.y;
-    float textMask = texture2D(uTextTexture, vec2(vUv.x, vUv.y * textAspect / resolutionAspect)).r;
+    
+    vec2 textCenterCoords = vec2(-5.362759, -1.4738065);
+    textCenterCoords.y -= 0.045;
+    
+    uv -= textCenterCoords;
+    uv *= 3.815;
+    uv.y *= textAspect / resolutionAspect;
+    
+    uv /= uUvScalar;
+    uv = uv * 0.5 + 0.5;
+    
+    float textMask = texture2D(uTextTexture, uv).r;
     
     vec3 cursorColor = vec3(0.918, 0.345, 0.047);
     vec3 navColor = vec3(0.851,0.851,0.851);
@@ -118,7 +129,6 @@ void main() {
     
     vec3 col = mix(cursorColor, navColor, combinedDistUnion.y);
     col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
-    col = mix(col, vec3(1.0 - backgroundColor.r), textMask);
     
     gl_FragColor = vec4(col, 1.);
 }
