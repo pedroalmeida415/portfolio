@@ -147,8 +147,6 @@ export const Particles = ({
 
     const textTexture = new CanvasTexture(canvas)
     textTexture.generateMipmaps = false
-    textTexture.magFilter = NearestFilter
-    textTexture.minFilter = NearestFilter
 
     return {
       gpgpuCompute,
