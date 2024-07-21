@@ -122,8 +122,8 @@ export const Particles = ({
 
       const blurColor = '#ff0000'
       const baseBlur = 1
-      const blurRepeatCount = 10
-      const blurIncrement = 1
+      const blurRepeatCount = 8
+      const blurIncrement = 2
 
       const ctx = canvas.getContext('2d')
       ctx.font = `${fontSize}px ${font}`
