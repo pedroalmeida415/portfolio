@@ -262,7 +262,6 @@ export const Particles = ({
         <bufferGeometry
           ref={(ref) => {
             ref?.setDrawRange(0, baseGeometryCount)
-            document.getElementById('progress-bar')?.firstElementChild?.remove()
           }}
         >
           <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
@@ -339,22 +338,8 @@ function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0, trimEnds = fal
 
 // P1=2P(0.5)−0.5P0−0.5P2
 function calculateP1(P0: Vector3, P2: Vector2, Pt: Vector2, P1: Vector2) {
-  let PtX = Pt.x,
-    PtY = Pt.y,
-    P0X = P0.x,
-    P0Y = P0.y,
-    P2X = P2.x,
-    P2Y = P2.y
-
-  PtX *= 2
-  PtY *= 2
-  P0X *= 0.5
-  P0Y *= 0.5
-  P2X *= 0.5
-  P2Y *= 0.5
-
-  const x = PtX - P0X - P2X
-  const y = PtY - P0Y - P2Y
+  const x = Pt.x * 2 - P0.x * 0.5 - P2.x * 0.5,
+    y = Pt.y * 2 - P0.y * 0.5 - P2.y * 0.5
 
   P1.set(x, y)
 }
