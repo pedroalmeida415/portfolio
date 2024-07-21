@@ -6,7 +6,6 @@
         "src/*"
       ]
     },
-    "target": "ESNext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -20,7 +19,8 @@
     "incremental": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
     "isolatedModules": true,
     "jsx": "preserve",
     "resolveJsonModule": true,
@@ -31,6 +31,7 @@
     ]
   },
   "include": [
+    "global.d.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

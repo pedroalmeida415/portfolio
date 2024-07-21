@@ -428,7 +428,7 @@ class GPUComputationRenderer {
         '\n' +
         '	vec2 uv = gl_FragCoord.xy / resolution.xy;\n' +
         '\n' +
-        '	gl_FragColor = texture2D( passThruTexture, uv );\n' +
+        '	gl_FragColor = texture( passThruTexture, uv );\n' +
         '\n' +
         '}\n';
 

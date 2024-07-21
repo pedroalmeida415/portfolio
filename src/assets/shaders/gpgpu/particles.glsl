@@ -1,3 +1,5 @@
+@nomangle uParticles resolution
+
 uniform float uDeltaTime;
 uniform sampler2D uBase;
 uniform vec2 uMouse;

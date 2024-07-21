@@ -8,11 +8,7 @@ attribute vec2 aParticlesUv;
 void main() {
     Particle particle = decode_particle(texture(uParticlesTexture, aParticlesUv));
     
-    // Final position
-    vec4 modelPosition = modelMatrix * vec4(particle.pos, 0.0, 1.0);
-    vec4 viewPosition = viewMatrix * modelPosition;
-    vec4 projectedPosition = projectionMatrix * viewPosition;
-    gl_Position = projectedPosition;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(particle.pos, 0.0, 1.0);
     
     gl_PointSize = min(uSize, (uSize * abs(particle.delay)) + (uSize / 3.0));
 }

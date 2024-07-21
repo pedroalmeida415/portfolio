@@ -114,7 +114,7 @@ void main() {
     
     uv /= uUvScalar;
     uv = uv * 0.5 + 0.5;
-    float textMask = texture2D(uTextTexture, uv).r;
+    float textMask = texture(uTextTexture, uv).r;
     
     vec3 cursorColor = vec3(0.918, 0.345, 0.047);
     vec3 navColor = vec3(0.851,0.851,0.851);

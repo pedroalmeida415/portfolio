@@ -13,12 +13,13 @@ import {
   Vector3,
   CanvasTexture,
 } from 'three'
+import { GlslVariableMap } from 'webpack-glsl-minify'
 
-import cursorFragmentShader from '@/assets/shaders/cursor/fragment.glsl'
-import cursorVertexShader from '@/assets/shaders/cursor/vertex.glsl'
-import particlesFragmentShader from '@/assets/shaders/gpgpu/fragment.glsl'
-import gpgpuParticlesShader from '@/assets/shaders/gpgpu/particles.glsl'
-import particlesVertexShader from '@/assets/shaders/gpgpu/vertex.glsl'
+import { default as cursorFragmentShader } from '@/assets/shaders/cursor/fragment.glsl'
+import { default as cursorVertexShader } from '@/assets/shaders/cursor/vertex.glsl'
+import { default as particlesFragmentShader } from '@/assets/shaders/gpgpu/fragment.glsl'
+import { default as gpgpuParticlesShader } from '@/assets/shaders/gpgpu/particles.glsl'
+import { default as particlesVertexShader } from '@/assets/shaders/gpgpu/vertex.glsl'
 
 import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
@@ -85,14 +86,24 @@ export const Particles = ({
       baseGeometry.dispose()
 
       // Particles variable
-      const particlesVariable = gpgpuCompute.addVariable('uParticles', gpgpuParticlesShader, baseParticlesTexture)
+      const particlesVariable = gpgpuCompute.addVariable(
+        'uParticles',
+        gpgpuParticlesShader.sourceCode,
+        baseParticlesTexture,
+      )
       gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
       // Uniforms
-      particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
-      particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
-      particlesVariable.material.uniforms.uMouse = { value: pointer }
-      particlesVariable.material.uniforms.uIsLMBDown = { value: false }
+      const mangledUniforms = mapMangledUniforms(
+        {
+          uDeltaTime: { value: 0 },
+          uBase: { value: baseParticlesTexture },
+          uMouse: { value: pointer },
+          uIsLMBDown: { value: false },
+        },
+        gpgpuParticlesShader.uniforms,
+      )
+      particlesVariable.material.uniforms = mangledUniforms
 
       // Init
       gpgpuCompute.init()
@@ -207,18 +218,18 @@ export const Particles = ({
         P1.set(P2.x, P2.y)
       }
 
-      particlesVariable.material.uniforms.uMouse.value = point
+      particlesVariable.material.uniforms[gpgpuParticlesShader.uniforms.uMouse.variableName].value = point
 
-      planeAreaRef.current.material.uniforms.uMouse.value = point
-      planeAreaRef.current.material.uniforms.uP1.value = P1
-      planeAreaRef.current.material.uniforms.uP2.value = P2
+      planeAreaRef.current.material.uniforms[cursorFragmentShader.uniforms.uMouse.variableName].value = point
+      planeAreaRef.current.material.uniforms[cursorFragmentShader.uniforms.uP1.variableName].value = P1
+      planeAreaRef.current.material.uniforms[cursorFragmentShader.uniforms.uP2.variableName].value = P2
     }
 
     // --- Update GPU Compute ---
-    particlesVariable.material.uniforms.uDeltaTime.value = delta
-    particlesVariable.material.uniforms.uIsLMBDown.value = false
+    particlesVariable.material.uniforms[gpgpuParticlesShader.uniforms.uDeltaTime.variableName].value = delta
+    particlesVariable.material.uniforms[gpgpuParticlesShader.uniforms.uIsLMBDown.variableName].value = false
     gpgpuCompute.compute()
-    pointsRef.current.material.uniforms.uParticlesTexture.value =
+    pointsRef.current.material.uniforms[particlesVertexShader.uniforms.uParticlesTexture.variableName].value =
       gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture
   })
 
@@ -228,16 +239,19 @@ export const Particles = ({
         <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
         <shaderMaterial
           depthTest={false}
-          vertexShader={cursorVertexShader}
-          fragmentShader={cursorFragmentShader}
-          uniforms={{
-            uMouse: { value: pointer },
-            uP1: { value: pointer },
-            uP2: { value: pointer },
-            uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
-            uTextTexture: { value: textTexture },
-            uTextTextureScalar: { value: textTextureScalar },
-          }}
+          vertexShader={cursorVertexShader.sourceCode}
+          fragmentShader={cursorFragmentShader.sourceCode}
+          uniforms={mapMangledUniforms(
+            {
+              uMouse: { value: pointer },
+              uP1: { value: pointer },
+              uP2: { value: pointer },
+              uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
+              uTextTexture: { value: textTexture },
+              uTextTextureScalar: { value: textTextureScalar },
+            },
+            cursorFragmentShader.uniforms,
+          )}
         />
       </mesh>
       <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
@@ -252,15 +266,27 @@ export const Particles = ({
         <shaderMaterial
           transparent
           depthTest={false}
-          vertexShader={particlesVertexShader}
-          fragmentShader={particlesFragmentShader}
-          uniforms={{
-            uSize: { value: size.width * 0.002 },
-            uParticlesTexture: { value: null },
-          }}
+          vertexShader={particlesVertexShader.sourceCode}
+          fragmentShader={particlesFragmentShader.sourceCode}
+          uniforms={mapMangledUniforms(
+            {
+              uSize: { value: size.width * 0.002 },
+              uParticlesTexture: { value: null },
+            },
+            particlesVertexShader.uniforms,
+          )}
         />
       </points>
     </>
+  )
+}
+
+function mapMangledUniforms(uniforms: any, map: GlslVariableMap) {
+  return Object.fromEntries(
+    Object.entries(uniforms).map(([key, value]) => {
+      const mangledKey = map[key].variableName
+      return [mangledKey, value as any]
+    }),
   )
 }
 

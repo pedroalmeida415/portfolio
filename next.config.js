@@ -20,8 +20,8 @@ const nextConfig = {
       use: {
         loader: 'webpack-glsl-minify',
         options: {
-          output: 'source',
-          preserveAll: true,
+          esModule: true,
+          nomangle: ['texture', 'projectionMatrix', 'modelViewMatrix'],
         },
       },
     })
