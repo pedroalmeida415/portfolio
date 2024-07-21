@@ -190,7 +190,7 @@ export const Particles = ({
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
   let bufferIndex = 0
-  const bufferSize = 7 // Number of frames to delay
+  const bufferSize = 5 // Number of frames to delay
   const middleBufferIndex = Math.floor(bufferSize / 2)
 
   const P1 = useMemo(() => new Vector2(), [])

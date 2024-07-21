@@ -65,7 +65,7 @@ float sdUnevenCapsule(in vec2 p, in vec2 pa, in vec2 pb, in float ra, in float r
     return m - ra;
 }
 
-float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples) {
+float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples, float startRadius) {
     float dist = 1e30;
     
     for (int i = samples; i > 0; --i) {
@@ -76,8 +76,8 @@ float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples) {
         vec2 p0 = u0 * u0 * a + 2.0 * u0 * t0 * b + t0 * t0 * c;
         vec2 p1 = u1 * u1 * a + 2.0 * u1 * t1 * b + t1 * t1 * c;
         
-        float radiusA = mix(0.0, 0.3, circularOut(t0));
-        float radiusB = mix(0.0, 0.3, circularOut(t1));
+        float radiusA = mix(0.0, startRadius, circularOut(t0));
+        float radiusB = mix(0.0, startRadius, circularOut(t1));
         
         dist = min(dist, sdUnevenCapsule(p, p0, p1, radiusA, radiusB));
     }
@@ -91,7 +91,7 @@ void main() {
     
     float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3160979;
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
-    float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 12);
+    float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 7, 0.3);
     
     vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), navSegmentDist, .25);
     
