@@ -39,128 +39,143 @@ export const Particles = ({
   const planeAreaRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
   const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
-  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray, textTexture } = useMemo(() => {
-    const baseGeometry = new BufferGeometry()
-    baseGeometry.setAttribute('position', new BufferAttribute(positions, 2))
+  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray, textTexture, textTextureScalar } =
+    useMemo(() => {
+      const baseGeometry = new BufferGeometry()
+      baseGeometry.setAttribute('position', new BufferAttribute(positions, 2))
 
-    // --- GPU Compute ---
-    const baseGeometryCount = baseGeometry.attributes.position.count
-    const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
+      // --- GPU Compute ---
+      const baseGeometryCount = baseGeometry.attributes.position.count
+      const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
-    const particlesUvArray = new Float32Array(baseGeometryCount * 2)
+      const particlesUvArray = new Float32Array(baseGeometryCount * 2)
 
-    for (let y = 0; y < gpgpuSize; y++) {
-      for (let x = 0; x < gpgpuSize; x++) {
-        const i = y * gpgpuSize + x
-        const i2 = i * 2
+      for (let y = 0; y < gpgpuSize; y++) {
+        for (let x = 0; x < gpgpuSize; x++) {
+          const i = y * gpgpuSize + x
+          const i2 = i * 2
 
-        // UV
-        const uvX = (x + 0.5) / gpgpuSize
-        const uvY = (y + 0.5) / gpgpuSize
+          // UV
+          const uvX = (x + 0.5) / gpgpuSize
+          const uvY = (y + 0.5) / gpgpuSize
 
-        particlesUvArray[i2 + 0] = uvX
-        particlesUvArray[i2 + 1] = uvY
+          particlesUvArray[i2 + 0] = uvX
+          particlesUvArray[i2 + 1] = uvY
+        }
       }
-    }
 
-    const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
+      const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
 
-    // Texture to store particles position
-    const baseParticlesTexture = gpgpuCompute.createTexture()
+      // Texture to store particles position
+      const baseParticlesTexture = gpgpuCompute.createTexture()
 
-    const totalStaggerDuration = 2.5
-    // Fill texture with particles values
-    for (let i = 0; i < baseGeometryCount; i++) {
-      const i2 = i * 2
-      const i4 = i * 4
-      const normalizedMultiplier = staggerMultipliers[i] / 255
+      const totalStaggerDuration = 2.5
+      // Fill texture with particles values
+      for (let i = 0; i < baseGeometryCount; i++) {
+        const i2 = i * 2
+        const i4 = i * 4
+        const normalizedMultiplier = staggerMultipliers[i] / 255
 
-      // RGBA values for FBO texture from base geometry position
-      baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i2 + 0]
-      baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i2 + 1]
-      baseParticlesTexture.image.data[i4 + 2] = 0
-      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
-    }
-    baseGeometry.dispose()
+        // RGBA values for FBO texture from base geometry position
+        baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i2 + 0]
+        baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i2 + 1]
+        baseParticlesTexture.image.data[i4 + 2] = 0
+        baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
+      }
+      baseGeometry.dispose()
 
-    // Particles variable
-    const particlesVariable = gpgpuCompute.addVariable('uParticles', gpgpuParticlesShader, baseParticlesTexture)
-    gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
+      // Particles variable
+      const particlesVariable = gpgpuCompute.addVariable('uParticles', gpgpuParticlesShader, baseParticlesTexture)
+      gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
-    // Uniforms
-    particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
-    particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
-    particlesVariable.material.uniforms.uMouse = { value: pointer }
-    particlesVariable.material.uniforms.uIsLMBDown = { value: false }
+      // Uniforms
+      particlesVariable.material.uniforms.uDeltaTime = { value: 0 }
+      particlesVariable.material.uniforms.uBase = { value: baseParticlesTexture }
+      particlesVariable.material.uniforms.uMouse = { value: pointer }
+      particlesVariable.material.uniforms.uIsLMBDown = { value: false }
 
-    // Init
-    gpgpuCompute.init()
+      // Init
+      gpgpuCompute.init()
 
-    const canvas = document.createElement('canvas')
-    canvas.style.position = 'absolute'
-    canvas.style.top = '0'
-    canvas.style.left = '0'
-    canvas.style.fontVariationSettings = "'wght' 200"
-    canvas.style.display = 'none'
-    document.body.appendChild(canvas)
+      const canvas = document.createElement('canvas')
+      canvas.style.position = 'absolute'
+      canvas.style.top = '0'
+      canvas.style.left = '0'
+      canvas.style.fontVariationSettings = "'wght' 300"
+      canvas.style.display = 'none'
+      document.body.appendChild(canvas)
 
-    const text = 'Creative Developer'
-    const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
-    const fontSize = 48
+      const text = 'Creative Developer'
+      const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
+      const fontSize = 48
 
-    const blurColor = '#ff0000'
-    const baseBlur = 1
-    const blurRepeatCount = 10
-    const blurIncrement = 1
+      const blurColor = '#ff0000'
+      const baseBlur = 1
+      const blurRepeatCount = 10
+      const blurIncrement = 1
 
-    const ctx = canvas.getContext('2d')
-    ctx.font = `${fontSize}px ${font}`
-    ctx.textBaseline = 'middle'
+      const ctx = canvas.getContext('2d')
+      ctx.font = `${fontSize}px ${font}`
+      ctx.textBaseline = 'middle'
 
-    const textMeasurements = ctx.measureText(text)
-    const textWidth = textMeasurements.width
-    const textHeight = textMeasurements.actualBoundingBoxAscent + textMeasurements.actualBoundingBoxDescent
+      const textMeasurements = ctx.measureText(text)
+      const textWidth = textMeasurements.width
+      const textHeight = textMeasurements.actualBoundingBoxAscent + textMeasurements.actualBoundingBoxDescent
 
-    canvas.width = textWidth + (baseBlur + blurRepeatCount * blurIncrement) * 3
-    canvas.height = textHeight + (baseBlur + blurRepeatCount * blurIncrement) * 3
+      canvas.width = textWidth + (baseBlur + blurRepeatCount * blurIncrement) * 3
+      canvas.height = textHeight + (baseBlur + blurRepeatCount * blurIncrement) * 3
 
-    const topHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxAscent
-    const lowerHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxDescent
-    const textYOffset = topHalfDist - lowerHalfDist
+      const topHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxAscent
+      const lowerHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxDescent
+      const textYOffset = topHalfDist - lowerHalfDist
 
-    const textX = canvas.width / 2 - textWidth / 2
-    const textY = canvas.height / 2 + textYOffset
+      const textX = canvas.width / 2 - textWidth / 2
+      const textY = canvas.height / 2 + textYOffset
 
-    ctx.fillStyle = '#000000'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = '#000000'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    ctx.shadowColor = blurColor
-    ctx.shadowBlur = baseBlur
-    ctx.shadowOffsetX = 0
-    ctx.shadowOffsetY = 0
+      ctx.shadowColor = blurColor
+      ctx.shadowBlur = baseBlur
+      ctx.shadowOffsetX = 0
+      ctx.shadowOffsetY = 0
 
-    ctx.font = `${fontSize}px ${font}`
-    ctx.textBaseline = 'middle'
-    ctx.fillStyle = blurColor
-    ctx.fillText(text, textX, textY)
-
-    for (let i = 0; i < blurRepeatCount; i++) {
-      ctx.shadowBlur += blurIncrement
+      ctx.font = `${fontSize}px ${font}`
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = blurColor
       ctx.fillText(text, textX, textY)
-    }
 
-    const textTexture = new CanvasTexture(canvas)
-    textTexture.generateMipmaps = false
+      for (let i = 0; i < blurRepeatCount; i++) {
+        ctx.shadowBlur += blurIncrement
+        ctx.fillText(text, textX, textY)
+      }
 
-    return {
-      gpgpuCompute,
-      baseGeometryCount,
-      particlesVariable,
-      particlesUvArray,
-      textTexture,
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+      const textTexture = new CanvasTexture(canvas)
+      textTexture.generateMipmaps = false
+
+      const bodyBoundingRect = document.body.getBoundingClientRect()
+      const bodyWidth = bodyBoundingRect.width
+
+      const normalizedWidth = textTexture.image.width / bodyWidth
+      const uvScalar = 1 / normalizedWidth
+
+      const textureAspect = textTexture.image.width / textTexture.image.height
+      const screenAspect = bodyBoundingRect.width / bodyBoundingRect.height
+
+      const textTextureScalar = new Vector2(uvScalar, uvScalar * (textureAspect / screenAspect))
+
+      canvas.remove()
+
+      return {
+        gpgpuCompute,
+        baseGeometryCount,
+        particlesVariable,
+        particlesUvArray,
+        textTexture,
+        textTextureScalar,
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
   let bufferIndex = 0
@@ -221,7 +236,7 @@ export const Particles = ({
             uP2: { value: pointer },
             uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
             uTextTexture: { value: textTexture },
-            uTextTextureSize: { value: [textTexture.image.width, textTexture.image.height] },
+            uTextTextureScalar: { value: textTextureScalar },
           }}
         />
       </mesh>

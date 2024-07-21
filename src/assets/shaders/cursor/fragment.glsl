@@ -2,8 +2,8 @@ uniform vec2 uMouse;
 uniform vec2 uP1;
 uniform vec2 uP2;
 uniform vec2 uUvScalar;
+uniform vec2 uTextTextureScalar;
 uniform sampler2D uTextTexture;
-uniform vec2 uTextTextureSize;
 
 varying vec2 vUv;
 
@@ -108,18 +108,12 @@ void main() {
     float combinedDistSubtract = min(availableSegmentDist, min(nameSegmentDist, min(creditsSegmentDist,min(readcvSegmentDist, min(twitterSegmentDist, linkedinSegmentDist)))));
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
     
-    float textAspect = uTextTextureSize.x / uTextTextureSize.y;
-    float resolutionAspect = uUvScalar.x / uUvScalar.y;
-    
     vec2 textCenterCoords = vec2(-5.362759, -1.4738065);
-    
     uv -= textCenterCoords;
-    uv *= 3.815;
-    uv.y *= textAspect / resolutionAspect;
+    uv *= uTextTextureScalar;
     
     uv /= uUvScalar;
     uv = uv * 0.5 + 0.5;
-    
     float textMask = texture2D(uTextTexture, uv).r;
     
     vec3 cursorColor = vec3(0.918, 0.345, 0.047);
