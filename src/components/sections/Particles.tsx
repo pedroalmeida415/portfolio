@@ -218,19 +218,23 @@ export const Particles = ({
         P1.set(P2.x, P2.y)
       }
 
-      particlesVariable.material.uniforms[gpgpuParticlesShader.uniforms.uMouse.variableName].value = point
+      setUniform(planeAreaRef.current, cursorFragmentShader, 'uMouse', point)
+      setUniform(planeAreaRef.current, cursorFragmentShader, 'uP1', P1)
+      setUniform(planeAreaRef.current, cursorFragmentShader, 'uP2', P2)
 
-      planeAreaRef.current.material.uniforms[cursorFragmentShader.uniforms.uMouse.variableName].value = point
-      planeAreaRef.current.material.uniforms[cursorFragmentShader.uniforms.uP1.variableName].value = P1
-      planeAreaRef.current.material.uniforms[cursorFragmentShader.uniforms.uP2.variableName].value = P2
+      setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
     }
 
     // --- Update GPU Compute ---
-    particlesVariable.material.uniforms[gpgpuParticlesShader.uniforms.uDeltaTime.variableName].value = delta
-    particlesVariable.material.uniforms[gpgpuParticlesShader.uniforms.uIsLMBDown.variableName].value = false
+    setUniform(particlesVariable, gpgpuParticlesShader, 'uDeltaTime', delta)
+    setUniform(particlesVariable, gpgpuParticlesShader, 'uIsLMBDown', false)
     gpgpuCompute.compute()
-    pointsRef.current.material.uniforms[particlesVertexShader.uniforms.uParticlesTexture.variableName].value =
-      gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture
+    setUniform(
+      pointsRef.current,
+      particlesVertexShader,
+      'uParticlesTexture',
+      gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture,
+    )
   })
 
   return (
@@ -271,7 +275,7 @@ export const Particles = ({
           uniforms={mapMangledUniforms(
             {
               uSize: { value: size.width * 0.002 },
-              uParticlesTexture: { value: null },
+              uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
             },
             particlesVertexShader.uniforms,
           )}
@@ -288,6 +292,10 @@ function mapMangledUniforms(uniforms: any, map: GlslVariableMap) {
       return [mangledKey, value as any]
     }),
   )
+}
+
+function setUniform(mesh, shader, uniformName, value) {
+  mesh.material.uniforms[shader.uniforms[uniformName].variableName].value = value
 }
 
 function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0, trimEnds = false) {
