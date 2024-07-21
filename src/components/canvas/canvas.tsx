@@ -1,14 +1,15 @@
 'use client'
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
-import { Canvas as CanvasImpl } from '@react-three/fiber'
-// import { Preload } from '@react-three/drei'
-// import { r3f } from '@/helpers/global'
-// import { Perf } from 'r3f-perf'
 
-import { LZMA } from '@/helpers/lzma'
+import { Canvas as CanvasImpl } from '@react-three/fiber'
 import dynamic from 'next/dynamic'
 
-const Particles = dynamic(() => import('@/components/sections/Particles').then((mod) => mod.Particles))
+import { LZMA } from '~/helpers/lzma'
+// import { Preload } from '@react-three/drei'
+// import { r3f } from '~/helpers/global'
+// import { Perf } from 'r3f-perf'
+
+const Particles = dynamic(() => import('~/components/sections/Particles').then((mod) => mod.Particles))
 
 export default function Canvas({ children }: PropsWithChildren) {
   const [particlesData, setParticlesData] = useState<{ positions: Float32Array; multipliers: Uint8Array }>()

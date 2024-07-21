@@ -1,10 +1,10 @@
 import Image from 'next/image'
 
-import ShowcaseTitle from '@/assets/showcase.svg'
-import collamapImg from '@/assets/collamap.png'
-import rivellaImg from '@/assets/rivella.jpg'
-import freshland from '@/assets/freshland.png'
-import paretoImg from '@/assets/pareto.png'
+import collamapImg from '~/assets/collamap.png'
+import freshland from '~/assets/freshland.png'
+import paretoImg from '~/assets/pareto.png'
+import rivellaImg from '~/assets/rivella.jpg'
+import ShowcaseTitle from '~/assets/showcase.svg'
 
 const Showcase = () => {
   return (

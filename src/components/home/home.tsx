@@ -1,9 +1,10 @@
 'use client'
-import gsap from 'gsap'
 import { useRef } from 'react'
-import { useGSAP } from '@gsap/react'
 
-import HomeIcon from '@/assets/home-icon.svg'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
+
+import HomeIcon from '~/assets/home-icon.svg'
 
 const routes = [
   {

@@ -1,7 +1,7 @@
 import { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 
-import Canvas from '@/components/canvas/canvas'
+import Canvas from '~/components/canvas/canvas'
 
 import './global.css'
 

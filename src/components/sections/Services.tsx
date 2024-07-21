@@ -1,4 +1,4 @@
-import Concept from '@/assets/concept.svg'
+import Concept from '~/assets/concept.svg'
 
 const Services = () => {
   return (

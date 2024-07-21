@@ -15,13 +15,13 @@ import {
 } from 'three'
 import { GlslVariableMap } from 'webpack-glsl-minify'
 
-import { default as cursorFragmentShader } from '@/assets/shaders/cursor/fragment.glsl'
-import { default as cursorVertexShader } from '@/assets/shaders/cursor/vertex.glsl'
-import { default as particlesFragmentShader } from '@/assets/shaders/gpgpu/fragment.glsl'
-import { default as gpgpuParticlesShader } from '@/assets/shaders/gpgpu/particles.glsl'
-import { default as particlesVertexShader } from '@/assets/shaders/gpgpu/vertex.glsl'
+import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
+import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
+import { default as particlesFragmentShader } from '~/assets/shaders/gpgpu/fragment.glsl'
+import { default as gpgpuParticlesShader } from '~/assets/shaders/gpgpu/particles.glsl'
+import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.glsl'
+import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
-import { GPUComputationRenderer } from '@/components/three/GPUComputationRenderer'
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
 
 export const Particles = ({
