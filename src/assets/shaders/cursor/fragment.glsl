@@ -91,7 +91,7 @@ void main() {
     
     float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3160979;
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
-    float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 7, 0.3);
+    float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 10, 0.3);
     
     vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), navSegmentDist, .25);
     
