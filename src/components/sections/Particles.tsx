@@ -8,7 +8,6 @@ import {
   BufferGeometry,
   BufferAttribute,
   PlaneGeometry,
-  RawShaderMaterial,
   Vector2,
   Vector3,
   CanvasTexture,
@@ -22,7 +21,7 @@ import { default as gpgpuParticlesShader } from '~/assets/shaders/gpgpu/particle
 import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.glsl'
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
-extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, RawShaderMaterial })
+extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry })
 
 export const Particles = ({
   positions,

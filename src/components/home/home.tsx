@@ -1,9 +1,6 @@
 'use client'
 import { useRef } from 'react'
 
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-
 import HomeIcon from '~/assets/home-icon.svg'
 
 const routes = [
@@ -44,21 +41,6 @@ const socials = [
 export const Home = () => {
   const subtitleRef = useRef<HTMLHeadingElement | null>()
 
-  useGSAP(() => {
-    gsap.fromTo(
-      subtitleRef.current,
-      { yPercent: 120 },
-      { autoAlpha: 1, yPercent: 0, duration: 1, ease: 'power3.out', delay: 3.5 },
-    )
-
-    gsap.to('#ping', { rotateX: 180, rotateY: 180, duration: 0.75, ease: 'power1.inOut', repeat: -1, yoyo: true })
-    gsap.to('#progress-bar', {
-      autoAlpha: 0,
-      duration: 1.5,
-      ease: 'power3.inOut',
-    })
-  })
-
   return (
     <section className='relative flex h-screen w-full items-end justify-start p-6'>
       <h1 className='absolute left-6 top-6 leading-none'>Pedro Almeida</h1>
@@ -73,7 +55,7 @@ export const Home = () => {
       </ul>
       <span className='absolute right-6 top-6 leading-none'>©2024</span>
       <div className='absolute left-[10%] top-[62.55%]'>
-        <h2 ref={subtitleRef} className='invisible mb-1 text-5xl font-extralight opacity-0'>
+        <h2 ref={subtitleRef} className='mb-1 text-5xl font-extralight'>
           Creative Developer
         </h2>
         <div className='ml-1 flex items-center'>
