@@ -27,6 +27,11 @@ float sdCircle(vec2 p, float r) {
     return length(p) - r;
 }
 
+float sdBox(in vec2 p, in vec2 b) {
+    vec2 d = abs(p)-b;
+    return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+}
+
 float sdSegment(vec2 p, vec2 a, vec2 b) {
     vec2 pa = p-a, ba = b-a;
     float h = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0);
@@ -89,11 +94,17 @@ void main() {
     vec2 uv = vUv * 2.0 - 1.0;
     uv *= uUvScalar;
     
+    float screenBoxDist = sdBox(uv, uUvScalar + 1.0);
+    float screenBoxClipDist = sdBox(uv, uUvScalar + 0.01);
+    float screenBorderDist = max(screenBoxDist, -screenBoxClipDist);
+    
     float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3160979;
+    // float navBoxDist = sdBox(uv - vec2(0.0, -4.0455247), vec2(2.05550575, 0.3160979 / 2.0)) - 0.3160979 / 2.0;
+    
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
     float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 10, 0.3);
     
-    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), navSegmentDist, .25);
+    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), min(navSegmentDist, screenBorderDist), .25);
     
     const float headerYPos = 4.2584713;
     const float normalTextSegmentThickness = 0.1390831;
@@ -116,9 +127,9 @@ void main() {
     uv = uv * 0.5 + 0.5;
     float textMask = texture(uTextTexture, uv).r;
     
-    vec3 cursorColor = vec3(0.918, 0.345, 0.047);
+    vec3 cursorColor = vec3(0.361,0.494,0.6);
     vec3 navColor = vec3(0.851,0.851,0.851);
-    vec3 backgroundColor = vec3(0.945, 0.937, 0.922);
+    vec3 backgroundColor = vec3(0.957,0.953,0.941);
     
     vec3 col = mix(cursorColor, navColor, combinedDistUnion.y);
     col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
