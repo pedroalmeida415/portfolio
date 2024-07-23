@@ -136,9 +136,9 @@ export const Particles = ({
       canvas.width = textWidth + (baseBlur + blurRepeatCount * blurIncrement) * 3
       canvas.height = textHeight + (baseBlur + blurRepeatCount * blurIncrement) * 3
 
-      const topHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxAscent
-      const lowerHalfDist = canvas.height / 2 - textMeasurements.actualBoundingBoxDescent
-      const textYOffset = topHalfDist - lowerHalfDist
+      const topHalfDist = textMeasurements.fontBoundingBoxAscent
+      const lowerHalfDist = textMeasurements.fontBoundingBoxDescent
+      const textYOffset = Math.abs(topHalfDist - lowerHalfDist) / 2
 
       const textX = canvas.width / 2 - textWidth / 2
       const textY = canvas.height / 2 + textYOffset
