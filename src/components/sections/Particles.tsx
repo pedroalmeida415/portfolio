@@ -42,14 +42,11 @@ export const Particles = ({
 
   const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray, textTexture, textTextureScalar } =
     useMemo(() => {
-      const baseGeometry = new BufferGeometry()
-      baseGeometry.setAttribute('position', new BufferAttribute(positions, 2))
-
       // --- GPU Compute ---
-      const baseGeometryCount = baseGeometry.attributes.position.count
+      const baseGeometryCount = positions.length / 2
       const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
-      const particlesUvArray = new Float32Array(baseGeometryCount * 2)
+      const particlesUvArray = new Float32Array(positions.length)
 
       for (let y = 0; y < gpgpuSize; y++) {
         for (let x = 0; x < gpgpuSize; x++) {
@@ -78,12 +75,11 @@ export const Particles = ({
         const normalizedMultiplier = staggerMultipliers[i] / 255
 
         // RGBA values for FBO texture from base geometry position
-        baseParticlesTexture.image.data[i4 + 0] = baseGeometry.attributes.position.array[i2 + 0]
-        baseParticlesTexture.image.data[i4 + 1] = baseGeometry.attributes.position.array[i2 + 1]
+        baseParticlesTexture.image.data[i4 + 0] = positions[i2 + 0]
+        baseParticlesTexture.image.data[i4 + 1] = positions[i2 + 1]
         baseParticlesTexture.image.data[i4 + 2] = 0
         baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
       }
-      baseGeometry.dispose()
 
       // Particles variable
       const particlesVariable = gpgpuCompute.addVariable(
