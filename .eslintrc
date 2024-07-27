@@ -19,7 +19,9 @@
         "groups": [
           "/^react/",
           "module",
-          "/^~/",
+          "/^~\/components/",
+          "/^~\/helpers/",
+          "/^~\/assets/",
           [
             "parent",
             "sibling",
