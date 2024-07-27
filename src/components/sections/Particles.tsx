@@ -14,12 +14,13 @@ import {
 } from 'three'
 import { GlslVariableMap } from 'webpack-glsl-minify'
 
+import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
+
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
 import { default as particlesFragmentShader } from '~/assets/shaders/gpgpu/fragment.glsl'
 import { default as gpgpuParticlesShader } from '~/assets/shaders/gpgpu/particles.glsl'
 import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.glsl'
-import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry })
 
@@ -208,10 +209,6 @@ export const Particles = ({
       const P2 = mousePositions[bufferIndex]
 
       calculateP1(point, P2, PT, P1)
-
-      if (PT.distanceTo(P1) > PT.distanceTo(P2)) {
-        P1.set(P2.x, P2.y)
-      }
 
       setUniform(planeAreaRef.current, cursorFragmentShader, 'uMouse', point)
       setUniform(planeAreaRef.current, cursorFragmentShader, 'uP1', P1)

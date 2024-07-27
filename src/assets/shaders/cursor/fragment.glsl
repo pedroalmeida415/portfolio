@@ -73,16 +73,16 @@ float sdUnevenCapsule(in vec2 p, in vec2 pa, in vec2 pb, in float ra, in float r
 float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples, float startRadius) {
     float dist = 1e30;
     
-    for (int i = samples; i > 0; --i) {
-        float t0 = float(i) / float(samples);
+    for (int i = 0; i < samples; ++i) {
+        float t0 = max(0.05, float(i) / float(samples));
         float t1 = float(i + 1) / float(samples);
         float u0 = 1.0 - t0;
         float u1 = 1.0 - t1;
         vec2 p0 = u0 * u0 * a + 2.0 * u0 * t0 * b + t0 * t0 * c;
         vec2 p1 = u1 * u1 * a + 2.0 * u1 * t1 * b + t1 * t1 * c;
         
-        float radiusA = mix(0.0, startRadius, circularOut(t0));
-        float radiusB = mix(0.0, startRadius, circularOut(t1));
+        float radiusA = startRadius * circularOut(t0);
+        float radiusB = startRadius * circularOut(t1);
         
         dist = min(dist, sdUnevenCapsule(p, p0, p1, radiusA, radiusB));
     }
