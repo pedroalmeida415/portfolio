@@ -38,19 +38,15 @@ export const Particles = ({
     const baseGeometryCount = positions.length / 2
     const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
-    const particlesUvArray = new Float32Array(positions.length)
+    const particlesUvArray = new Int32Array(positions.length)
 
-    for (let y = 0; y < gpgpuSize; y++) {
-      for (let x = 0; x < gpgpuSize; x++) {
+    for (let y = 0; y < gpgpuSize; ++y) {
+      for (let x = 0; x < gpgpuSize; ++x) {
         const i = y * gpgpuSize + x
         const i2 = i * 2
 
-        // UV
-        const uvX = (x + 0.5) / gpgpuSize
-        const uvY = (y + 0.5) / gpgpuSize
-
-        particlesUvArray[i2 + 0] = uvX
-        particlesUvArray[i2 + 1] = uvY
+        particlesUvArray[i2 + 0] = x
+        particlesUvArray[i2 + 1] = y
       }
     }
 

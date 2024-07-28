@@ -14,9 +14,9 @@ float random(vec2 p) {
 void main() {
     Particle particle;
     
-    vec2 uv = gl_FragCoord.xy / resolution.xy;
-    vec4 base = texture(uBase, uv);
-    vec4 current = texture(uParticles, uv);
+    ivec2 uv = ivec2(gl_FragCoord.xy);
+    vec4 base = texelFetch(uBase, uv, 0);
+    vec4 current = texelFetch(uParticles, uv, 0);
     
     if (base == current) {
         vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0 - 1.0;

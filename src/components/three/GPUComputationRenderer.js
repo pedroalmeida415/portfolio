@@ -411,27 +411,19 @@ class GPUComputationRenderer {
     // Shaders
 
     function getPassThroughVertexShader() {
-
       return `void main(void) {
   gl_Position.x = (gl_VertexID == 2) ?  3. : -1.;
   gl_Position.y = (gl_VertexID == 1) ? -3. : 1.;
   gl_Position.zw = vec2(1.);
 }`
-
     }
 
     function getPassThroughFragmentShader() {
-
-      return 'uniform sampler2D passThruTexture;\n' +
-        '\n' +
-        'void main() {\n' +
-        '\n' +
-        '	vec2 uv = gl_FragCoord.xy / resolution.xy;\n' +
-        '\n' +
-        '	gl_FragColor = texture( passThruTexture, uv );\n' +
-        '\n' +
-        '}\n';
-
+        return `uniform sampler2D passThruTexture;
+void main() {
+  ivec2 uv = ivec2(gl_FragCoord.xy);
+  gl_FragColor = texelFetch(passThruTexture, uv, 0);
+}`
     }
 
   }
