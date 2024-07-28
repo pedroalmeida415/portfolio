@@ -57,7 +57,7 @@ export const Particles = ({
 
     const totalStaggerDuration = 2.5
     // Fill texture with particles values
-    for (let i = 0; i < baseGeometryCount; i++) {
+    for (let i = 0; i < baseGeometryCount; ++i) {
       const i2 = i * 2
       const i4 = i * 4
       const normalizedMultiplier = staggerMultipliers[i] / 255

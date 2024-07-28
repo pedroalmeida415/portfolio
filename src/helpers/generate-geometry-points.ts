@@ -50,8 +50,8 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
     const boundingBox = new Box2().setFromPoints(shape.getPoints())
 
     // Fill shape without adding doubles on outline
-    for (let y = boundingBox.min.y; y < boundingBox.max.y; y++) {
-      for (let x = boundingBox.min.x; x < boundingBox.max.x; x++) {
+    for (let y = boundingBox.min.y; y < boundingBox.max.y; ++y) {
+      for (let x = boundingBox.min.x; x < boundingBox.max.x; ++x) {
         const shapePoints = shape.getPoints(60)
 
         const isOriginalInside = isPointInPolygon({ x, y }, shapePoints)
@@ -108,7 +108,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
 // Helper function to check if a point is inside a polygon
 function isPointInPolygon(point, polygon) {
   let inside = false
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = ++i) {
     const xi = polygon[i].x,
       yi = polygon[i].y
     const xj = polygon[j].x,

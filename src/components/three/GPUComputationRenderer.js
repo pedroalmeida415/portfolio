@@ -178,7 +178,7 @@ class GPUComputationRenderer {
 
       }
 
-      for (let i = 0; i < this.variables.length; i++) {
+      for (let i = 0; i < this.variables.length; ++i) {
 
         const variable = this.variables[i];
 
@@ -194,7 +194,7 @@ class GPUComputationRenderer {
 
         if (variable.dependencies !== null) {
 
-          for (let d = 0; d < variable.dependencies.length; d++) {
+          for (let d = 0; d < variable.dependencies.length; ++d) {
 
             const depVar = variable.dependencies[d];
 
@@ -203,7 +203,7 @@ class GPUComputationRenderer {
               // Checks if variable exists
               let found = false;
 
-              for (let j = 0; j < this.variables.length; j++) {
+              for (let j = 0; j < this.variables.length; ++j) {
 
                 if (depVar.name === this.variables[j].name) {
 
@@ -243,7 +243,7 @@ class GPUComputationRenderer {
       const currentTextureIndex = this.currentTextureIndex;
       const nextTextureIndex = this.currentTextureIndex === 0 ? 1 : 0;
 
-      for (let i = 0, il = this.variables.length; i < il; i++) {
+      for (let i = 0, il = this.variables.length; i < il; ++i) {
 
         const variable = this.variables[i];
 
@@ -252,7 +252,7 @@ class GPUComputationRenderer {
 
           const uniforms = variable.material.uniforms;
 
-          for (let d = 0, dl = variable.dependencies.length; d < dl; d++) {
+          for (let d = 0, dl = variable.dependencies.length; d < dl; ++d) {
 
             const depVar = variable.dependencies[d];
 
@@ -290,7 +290,7 @@ class GPUComputationRenderer {
 
       const variables = this.variables;
 
-      for (let i = 0; i < variables.length; i++) {
+      for (let i = 0; i < variables.length; ++i) {
 
         const variable = variables[i];
 
@@ -298,7 +298,7 @@ class GPUComputationRenderer {
 
         const renderTargets = variable.renderTargets;
 
-        for (let j = 0; j < renderTargets.length; j++) {
+        for (let j = 0; j < renderTargets.length; ++j) {
 
           const renderTarget = renderTargets[j];
           renderTarget.dispose();

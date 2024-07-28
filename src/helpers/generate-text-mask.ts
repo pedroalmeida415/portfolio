@@ -49,7 +49,7 @@ export const generateTextMask = () => {
   ctx.fillStyle = blurColor
   ctx.fillText(text, textX, textY)
 
-  for (let i = 0; i < blurRepeatCount; i++) {
+  for (let i = 0; i < blurRepeatCount; ++i) {
     ctx.shadowBlur += blurIncrement
     ctx.fillText(text, textX, textY)
   }
