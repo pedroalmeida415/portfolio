@@ -225,13 +225,12 @@ export const Particles = ({
   )
 }
 
-function mapMangledUniforms(uniforms: any, map: GlslVariableMap) {
-  return Object.fromEntries(
-    Object.entries(uniforms).map(([key, value]) => {
-      const mangledKey = map[key].variableName
-      return [mangledKey, value as any]
-    }),
-  )
+function mapMangledUniforms(uniforms, map: GlslVariableMap) {
+  return Object.entries(uniforms).reduce((acc, [key, value]) => {
+    const mangledKey = map[key].variableName
+    acc[mangledKey] = value
+    return acc
+  }, {})
 }
 
 function setUniform(mesh, shader, uniformName, value) {
