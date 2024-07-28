@@ -21,7 +21,7 @@ const nextConfig = {
         loader: 'webpack-glsl-minify',
         options: {
           esModule: true,
-          nomangle: ['texture', 'projectionMatrix', 'modelViewMatrix'],
+          nomangle: ['texture', 'projectionMatrix', 'modelViewMatrix', 'texelFetch'],
         },
       },
     })

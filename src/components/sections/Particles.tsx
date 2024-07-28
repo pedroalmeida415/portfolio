@@ -16,6 +16,9 @@ import { GlslVariableMap } from 'webpack-glsl-minify'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
+import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
+import { generateTextMask } from '~/helpers/generate-text-mask'
+
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
 import { default as particlesFragmentShader } from '~/assets/shaders/gpgpu/fragment.glsl'
@@ -40,150 +43,81 @@ export const Particles = ({
   const planeAreaRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
   const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
-  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray, textTexture, textTextureScalar } =
-    useMemo(() => {
-      // --- GPU Compute ---
-      const baseGeometryCount = positions.length / 2
-      const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
+  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
+    // --- GPU Compute ---
+    const baseGeometryCount = positions.length / 2
+    const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
-      const particlesUvArray = new Float32Array(positions.length)
+    const particlesUvArray = new Float32Array(positions.length)
 
-      for (let y = 0; y < gpgpuSize; y++) {
-        for (let x = 0; x < gpgpuSize; x++) {
-          const i = y * gpgpuSize + x
-          const i2 = i * 2
-
-          // UV
-          const uvX = (x + 0.5) / gpgpuSize
-          const uvY = (y + 0.5) / gpgpuSize
-
-          particlesUvArray[i2 + 0] = uvX
-          particlesUvArray[i2 + 1] = uvY
-        }
-      }
-
-      const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
-
-      // Texture to store particles position
-      const baseParticlesTexture = gpgpuCompute.createTexture()
-
-      const totalStaggerDuration = 2.5
-      // Fill texture with particles values
-      for (let i = 0; i < baseGeometryCount; i++) {
+    for (let y = 0; y < gpgpuSize; y++) {
+      for (let x = 0; x < gpgpuSize; x++) {
+        const i = y * gpgpuSize + x
         const i2 = i * 2
-        const i4 = i * 4
-        const normalizedMultiplier = staggerMultipliers[i] / 255
 
-        // RGBA values for FBO texture from base geometry position
-        baseParticlesTexture.image.data[i4 + 0] = positions[i2 + 0]
-        baseParticlesTexture.image.data[i4 + 1] = positions[i2 + 1]
-        baseParticlesTexture.image.data[i4 + 2] = 0
-        baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
+        // UV
+        const uvX = (x + 0.5) / gpgpuSize
+        const uvY = (y + 0.5) / gpgpuSize
+
+        particlesUvArray[i2 + 0] = uvX
+        particlesUvArray[i2 + 1] = uvY
       }
+    }
 
-      // Particles variable
-      const particlesVariable = gpgpuCompute.addVariable(
-        'uParticles',
-        gpgpuParticlesShader.sourceCode,
-        baseParticlesTexture,
-      )
-      gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
+    const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
 
-      // Uniforms
-      const mangledUniforms = mapMangledUniforms(
-        {
-          uDeltaTime: { value: 0 },
-          uBase: { value: baseParticlesTexture },
-          uMouse: { value: pointer },
-          uIsLMBDown: { value: false },
-        },
-        gpgpuParticlesShader.uniforms,
-      )
-      particlesVariable.material.uniforms = mangledUniforms
+    // Texture to store particles position
+    const baseParticlesTexture = gpgpuCompute.createTexture()
 
-      // Init
-      gpgpuCompute.init()
+    const totalStaggerDuration = 2.5
+    // Fill texture with particles values
+    for (let i = 0; i < baseGeometryCount; i++) {
+      const i2 = i * 2
+      const i4 = i * 4
+      const normalizedMultiplier = staggerMultipliers[i] / 255
 
-      const canvas = document.createElement('canvas')
-      canvas.style.position = 'absolute'
-      canvas.style.top = '0'
-      canvas.style.left = '0'
-      canvas.style.fontVariationSettings = "'wght' 300"
-      canvas.style.display = 'none'
-      document.body.appendChild(canvas)
+      // RGBA values for FBO texture from base geometry position
+      baseParticlesTexture.image.data[i4 + 0] = positions[i2 + 0]
+      baseParticlesTexture.image.data[i4 + 1] = positions[i2 + 1]
+      baseParticlesTexture.image.data[i4 + 2] = 0
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
+    }
 
-      const text = 'Creative Developer'
-      const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
-      const fontSize = 48
+    // Particles variable
+    const particlesVariable = gpgpuCompute.addVariable(
+      'uParticles',
+      gpgpuParticlesShader.sourceCode,
+      baseParticlesTexture,
+    )
+    gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
-      const blurColor = '#ff0000'
-      const baseBlur = 1
-      const blurRepeatCount = 8
-      const blurIncrement = 2
+    // Uniforms
+    const mangledUniforms = mapMangledUniforms(
+      {
+        uDeltaTime: { value: 0 },
+        uBase: { value: baseParticlesTexture },
+        uMouse: { value: pointer },
+        uIsLMBDown: { value: false },
+      },
+      gpgpuParticlesShader.uniforms,
+    )
+    particlesVariable.material.uniforms = mangledUniforms
 
-      const ctx = canvas.getContext('2d')
-      ctx.font = `${fontSize}px ${font}`
-      ctx.textBaseline = 'middle'
+    // Init
+    gpgpuCompute.init()
 
-      const textMeasurements = ctx.measureText(text)
-      const textWidth = textMeasurements.width
-      const textHeight = textMeasurements.actualBoundingBoxAscent + textMeasurements.actualBoundingBoxDescent
-
-      canvas.width = textWidth + (baseBlur + blurRepeatCount * blurIncrement) * 3
-      canvas.height = textHeight + (baseBlur + blurRepeatCount * blurIncrement) * 3
-
-      const topHalfDist = textMeasurements.fontBoundingBoxAscent
-      const lowerHalfDist = textMeasurements.fontBoundingBoxDescent
-      const textYOffset = Math.abs(topHalfDist - lowerHalfDist) / 2
-
-      const textX = canvas.width / 2 - textWidth / 2
-      const textY = canvas.height / 2 + textYOffset
-
-      ctx.fillStyle = '#000000'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      ctx.shadowColor = blurColor
-      ctx.shadowBlur = baseBlur
-      ctx.shadowOffsetX = 0
-      ctx.shadowOffsetY = 0
-
-      ctx.font = `${fontSize}px ${font}`
-      ctx.textBaseline = 'middle'
-      ctx.fillStyle = blurColor
-      ctx.fillText(text, textX, textY)
-
-      for (let i = 0; i < blurRepeatCount; i++) {
-        ctx.shadowBlur += blurIncrement
-        ctx.fillText(text, textX, textY)
-      }
-
-      const textTexture = new CanvasTexture(canvas)
-      textTexture.generateMipmaps = false
-
-      const bodyBoundingRect = document.body.getBoundingClientRect()
-      const bodyWidth = bodyBoundingRect.width
-
-      const normalizedWidth = textTexture.image.width / bodyWidth
-      const uvScalar = 1 / normalizedWidth
-
-      const textureAspect = textTexture.image.width / textTexture.image.height
-      const screenAspect = bodyBoundingRect.width / bodyBoundingRect.height
-
-      const textTextureScalar = new Vector2(uvScalar, uvScalar * (textureAspect / screenAspect))
-
-      canvas.remove()
-
-      return {
-        gpgpuCompute,
-        baseGeometryCount,
-        particlesVariable,
-        particlesUvArray,
-        textTexture,
-        textTextureScalar,
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    return {
+      gpgpuCompute,
+      baseGeometryCount,
+      particlesVariable,
+      particlesUvArray,
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
+
+  const { textTexture, textTextureScalar } = useMemo(() => generateTextMask(), [])
+  const interactionsTexture = useMemo(() => generateInteractionsTexture(viewport), [viewport])
 
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
@@ -232,7 +166,7 @@ export const Particles = ({
   return (
     <>
       <mesh ref={planeAreaRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
-        <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
+        <planeGeometry args={[viewport.width + 0.01, viewport.height + 0.01]} />
         <shaderMaterial
           depthTest={false}
           vertexShader={cursorVertexShader.sourceCode}
@@ -245,6 +179,7 @@ export const Particles = ({
               uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
               uTextTexture: { value: textTexture },
               uTextTextureScalar: { value: textTextureScalar },
+              uInteractionsTexture: { value: interactionsTexture },
             },
             cursorFragmentShader.uniforms,
           )}
@@ -287,45 +222,6 @@ function mapMangledUniforms(uniforms: any, map: GlslVariableMap) {
 
 function setUniform(mesh, shader, uniformName, value) {
   mesh.material.uniforms[shader.uniforms[uniformName].variableName].value = value
-}
-
-function getWorldSpaceCoords(element, paddingX = 0, paddingY = 0, trimEnds = false) {
-  const box = element.getBoundingClientRect()
-  const bodyBoundingRect = document.body.getBoundingClientRect()
-  const bodyWidth = bodyBoundingRect.width
-  const bodyHeight = bodyBoundingRect.height
-
-  const centerX = (box.left + box.right) / 2
-  const centerY = (box.top + box.bottom) / 2
-
-  const ndcX = (centerX / bodyWidth) * 2 - 1
-  const ndcY = -(centerY / bodyHeight) * 2 + 1
-
-  const heightOffset = trimEnds ? -box.height : 0
-  paddingX += heightOffset
-  const ndcWidth = (box.width + paddingX) / bodyWidth
-  const ndcHeight = (box.height + paddingY) / bodyHeight
-
-  const viewportWidth = 19.42105551423707
-  const viewportHeight = 9.326153163099972
-
-  const ndcX2 = (ndcX * viewportWidth) / 2
-  const ndcY2 = (ndcY * viewportHeight) / 2
-
-  const ndcWidth2 = (ndcWidth * viewportWidth) / 2
-  const ndcHeight2 = (ndcHeight * viewportHeight) / 2
-
-  const pointX1 = ndcX2 - ndcWidth2
-  const pointX2 = ndcX2 + ndcWidth2
-
-  return {
-    pointX1: Number(pointX1.toFixed(7)),
-    pointX2: Number(pointX2.toFixed(7)),
-    centerY: Number(ndcY2.toFixed(7)),
-    centerX: Number(ndcX2.toFixed(7)),
-    width: Number(ndcWidth2.toFixed(7)),
-    height: Number(ndcHeight2.toFixed(7)),
-  }
 }
 
 // P1=2P(0.5)−0.5P0−0.5P2

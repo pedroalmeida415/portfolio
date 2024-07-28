@@ -4,6 +4,7 @@ uniform vec2 uP2;
 uniform vec2 uUvScalar;
 uniform vec2 uTextTextureScalar;
 uniform sampler2D uTextTexture;
+uniform sampler2D uInteractionsTexture;
 
 varying vec2 vUv;
 
@@ -94,11 +95,23 @@ void main() {
     vec2 uv = vUv * 2.0 - 1.0;
     uv *= uUvScalar;
     
+    vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
+    
+    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
+    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(2,0),0);
+    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(3,0),0);
+    
+    vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
+    
+    vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
+    
+    vec4 navSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
+    
     float screenBoxDist = sdBox(uv, uUvScalar + 1.0);
     float screenBoxClipDist = sdBox(uv, uUvScalar + 0.01);
     float screenBorderDist = max(screenBoxDist, -screenBoxClipDist);
     
-    float navSegmentDist = sdSegment(uv, vec2(-2.05550575, -4.0455247), vec2(2.05550575, -4.0455247)) - 0.3160979;
+    float navSegmentDist = sdSegment(uv, vec2(navSegmentData.r, navSegmentData.b), vec2(navSegmentData.g, navSegmentData.b)) - navSegmentData.a;
     // float navBoxDist = sdBox(uv - vec2(0.0, -4.0455247), vec2(2.05550575, 0.3160979 / 2.0)) - 0.3160979 / 2.0;
     
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
@@ -106,20 +119,17 @@ void main() {
     
     vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), min(navSegmentDist, screenBorderDist), .25);
     
-    const float headerYPos = 4.2584713;
-    const float normalTextSegmentThickness = 0.1390831;
-    
-    float nameSegmentDist = sdSegment(uv, vec2(-9.3817859, headerYPos), vec2(-8.1761885, headerYPos)) - normalTextSegmentThickness;
-    float twitterSegmentDist = sdSegment(uv, vec2(3.5858147, headerYPos), vec2(4.0398893, headerYPos)) - normalTextSegmentThickness;
-    float linkedinSegmentDist = sdSegment(uv, vec2(4.6366828, headerYPos), vec2(5.1999693, headerYPos)) - normalTextSegmentThickness;
-    float readcvSegmentDist = sdSegment(uv, vec2(5.7967621, headerYPos), vec2(6.3309676, headerYPos)) - normalTextSegmentThickness;
-    float creditsSegmentDist = sdSegment(uv, vec2(8.7962146, headerYPos), vec2(9.3817859, headerYPos)) - normalTextSegmentThickness;
-    float availableSegmentDist = sdSegment(uv, vec2(-7.6723284, -1.9795631), vec2(-5.4387805, -1.9795631)) - normalTextSegmentThickness;
+    float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
+    float twitterSegmentDist = sdSegment(uv, vec2(twitterSegmentData.r, twitterSegmentData.b), vec2(twitterSegmentData.g, twitterSegmentData.b)) - twitterSegmentData.a;
+    float linkedinSegmentDist = sdSegment(uv, vec2(linkedinSegmentData.r, linkedinSegmentData.b), vec2(linkedinSegmentData.g, linkedinSegmentData.b)) - linkedinSegmentData.a;
+    float readcvSegmentDist = sdSegment(uv, vec2(readcvSegmentData.r, readcvSegmentData.b), vec2(readcvSegmentData.g, readcvSegmentData.b)) - readcvSegmentData.a;
+    float creditsSegmentDist = sdSegment(uv, vec2(creditsSegmentData.r, creditsSegmentData.b), vec2(creditsSegmentData.g, creditsSegmentData.b)) - creditsSegmentData.a;
+    float availableSegmentDist = sdSegment(uv, vec2(availableSegmentData.r, availableSegmentData.b), vec2(availableSegmentData.g, availableSegmentData.b)) - availableSegmentData.a;
     
     float combinedDistSubtract = min(availableSegmentDist, min(nameSegmentDist, min(creditsSegmentDist,min(readcvSegmentDist, min(twitterSegmentDist, linkedinSegmentDist)))));
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
     
-    vec2 textCenterCoords = vec2(-5.362759, -1.4738065);
+    vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(5,0),0).xy;
     uv -= textCenterCoords;
     uv *= uTextTextureScalar;
     

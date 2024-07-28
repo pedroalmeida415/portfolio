@@ -26,15 +26,15 @@ const routes = [
 const socials = [
   {
     link: '',
-    label: 'twitter',
+    label: 'X / Twitter',
   },
   {
     link: '',
-    label: 'linkedIn',
+    label: 'LinkedIn',
   },
   {
     link: '',
-    label: 'read.cv',
+    label: 'Read.cv',
   },
 ]
 
@@ -42,30 +42,34 @@ export const Home = () => {
   const subtitleRef = useRef<HTMLHeadingElement | null>()
 
   return (
-    <section className='relative flex h-screen w-full items-end justify-start p-6'>
-      <h1 className='absolute left-6 top-6 leading-none'>Pedro Almeida</h1>
-      <ul className='absolute right-[16.5rem] top-6 flex items-center justify-start gap-x-10 leading-none'>
+    <section className='relative mx-auto flex  h-screen items-end justify-start p-6'>
+      <h1 className='absolute left-6 top-6 leading-none' data-cursor-interactive='segment'>
+        Pedro Almeida
+      </h1>
+      <ul className='absolute right-[17.2%] top-6 flex items-center justify-start gap-x-10 leading-none'>
         {socials.map(({ link, label }) => (
-          <li key={label}>
+          <li data-cursor-interactive='segment' key={label}>
             <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
               {label}
             </a>
           </li>
         ))}
       </ul>
-      <span className='absolute right-6 top-6 leading-none'>©2024</span>
+      <span data-cursor-interactive='segment' className='absolute right-6 top-6 leading-none'>
+        ©2024
+      </span>
       <div className='absolute left-[10%] top-[62.55%]'>
-        <h2 ref={subtitleRef} className='mb-1 text-5xl font-extralight'>
+        <h2 data-cursor-interactive='center' ref={subtitleRef} className='mb-1 text-5xl font-extralight'>
           Creative Developer
         </h2>
         <div className='ml-1 flex items-center'>
-          <h3>
-            <strong className='mr-2 font-normal tracking-wide'>Available for new projects</strong>
+          <h3 data-cursor-interactive='segment' className='mr-2 font-normal tracking-wide'>
+            Available for new projects
           </h3>
           <span id='ping' className='size-2.5 rounded-full bg-lime-500'></span>
         </div>
       </div>
-      <nav className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2'>
+      <nav data-cursor-interactive='segment' className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2'>
         <ul className='flex items-center gap-x-2 leading-none'>
           {routes.map(({ path, label, icon: Icon }) => (
             <li key={path}>
