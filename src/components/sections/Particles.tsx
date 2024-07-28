@@ -163,26 +163,46 @@ export const Particles = ({
     )
   })
 
+  const cursorInitialUniforms = useMemo(
+    () =>
+      mapMangledUniforms(
+        {
+          uMouse: { value: pointer },
+          uP1: { value: pointer },
+          uP2: { value: pointer },
+          uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
+          uTextTexture: { value: textTexture },
+          uTextTextureScalar: { value: textTextureScalar },
+          uInteractionsTexture: { value: interactionsTexture },
+        },
+        cursorFragmentShader.uniforms,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  const particlesInitialUniforms = useMemo(
+    () =>
+      mapMangledUniforms(
+        {
+          uSize: { value: size.width * 0.002 },
+          uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
+        },
+        particlesVertexShader.uniforms,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
   return (
     <>
       <mesh ref={planeAreaRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
-        <planeGeometry args={[viewport.width + 0.01, viewport.height + 0.01]} />
+        <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
         <shaderMaterial
           depthTest={false}
           vertexShader={cursorVertexShader.sourceCode}
           fragmentShader={cursorFragmentShader.sourceCode}
-          uniforms={mapMangledUniforms(
-            {
-              uMouse: { value: pointer },
-              uP1: { value: pointer },
-              uP2: { value: pointer },
-              uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
-              uTextTexture: { value: textTexture },
-              uTextTextureScalar: { value: textTextureScalar },
-              uInteractionsTexture: { value: interactionsTexture },
-            },
-            cursorFragmentShader.uniforms,
-          )}
+          uniforms={cursorInitialUniforms}
         />
       </mesh>
       <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
@@ -198,13 +218,7 @@ export const Particles = ({
           depthTest={false}
           vertexShader={particlesVertexShader.sourceCode}
           fragmentShader={particlesFragmentShader.sourceCode}
-          uniforms={mapMangledUniforms(
-            {
-              uSize: { value: size.width * 0.002 },
-              uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
-            },
-            particlesVertexShader.uniforms,
-          )}
+          uniforms={particlesInitialUniforms}
         />
       </points>
     </>
