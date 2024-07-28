@@ -1,8 +1,9 @@
 'use client'
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
 
-import { Canvas as CanvasImpl } from '@react-three/fiber'
+import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
 import dynamic from 'next/dynamic'
+import { MathUtils, PerspectiveCamera } from 'three'
 
 import { LZMA } from '~/helpers/lzma'
 // import { Preload } from '@react-three/drei'
@@ -62,8 +63,15 @@ export default function Canvas({ children }: PropsWithChildren) {
             flat
             eventSource={ref}
             eventPrefix='client'
-            camera={{ position: [0, 0, 10], fov: 50, near: 9, far: 11 }}
+            camera={{
+              position: [0, 0, 10],
+              fov: 50,
+              near: 9,
+              far: 11,
+              manual: true,
+            }}
           >
+            <CameraHandler />
             <Particles positions={particlesData.positions} staggerMultipliers={particlesData.multipliers} />
             {/* <Perf /> */}
             {/* @ts-ignore */}
@@ -74,6 +82,39 @@ export default function Canvas({ children }: PropsWithChildren) {
       )}
     </>
   )
+}
+
+const CameraHandler = () => {
+  const camera = useThree((state) => state.camera as PerspectiveCamera)
+
+  const aspectRatio = 2.082429397694086
+  const defaultFov = 50
+
+  useEffect(() => {
+    const resizeHandler = () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+
+      if (camera.aspect > aspectRatio) {
+        // window too narrow
+        camera.fov = defaultFov
+      } else {
+        // window too large
+        const cameraHeight = Math.tan(MathUtils.degToRad(defaultFov / 2))
+        const ratio = camera.aspect / aspectRatio
+        const newCameraHeight = cameraHeight / ratio
+        camera.fov = MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2
+      }
+      camera.updateProjectionMatrix()
+      camera.updateMatrixWorld()
+    }
+    resizeHandler()
+    window.addEventListener('resize', resizeHandler)
+    return () => {
+      window.removeEventListener('resize', resizeHandler)
+    }
+  }, [camera])
+
+  return null
 }
 
 async function getPositions() {
