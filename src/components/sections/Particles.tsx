@@ -1,17 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
-import {
-  Mesh,
-  Points,
-  ShaderMaterial,
-  BufferGeometry,
-  BufferAttribute,
-  PlaneGeometry,
-  Vector2,
-  Vector3,
-  CanvasTexture,
-} from 'three'
+import { Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, Vector2, Vector3 } from 'three'
 import { GlslVariableMap } from 'webpack-glsl-minify'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
@@ -40,8 +30,8 @@ export const Particles = ({
   const pointer = useThree((state) => state.pointer)
   pointer.set(0, -4.0435247)
 
-  const planeAreaRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
-  const pointsRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
+  const cursorObjectRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
+  const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
   const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
     // --- GPU Compute ---
@@ -116,8 +106,19 @@ export const Particles = ({
   }, [])
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
+  useEffect(() => {
+    if (cursorObjectRef.current) {
+      setUniform(cursorObjectRef.current, cursorFragmentShader, 'uUvScalar', [viewport.width / 2, viewport.height / 2])
+      setUniform(
+        cursorObjectRef.current,
+        cursorFragmentShader,
+        'uInteractionsTexture',
+        generateInteractionsTexture(viewport),
+      )
+    }
+  }, [viewport])
+
   const { textTexture, textTextureScalar } = useMemo(() => generateTextMask(), [])
-  const interactionsTexture = useMemo(() => generateInteractionsTexture(viewport), [viewport])
 
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
@@ -132,7 +133,7 @@ export const Particles = ({
 
   useFrame((state, delta) => {
     state.raycaster.setFromCamera(state.pointer, state.camera)
-    const intersects = state.raycaster.intersectObject(planeAreaRef.current)
+    const intersects = state.raycaster.intersectObject(cursorObjectRef.current)
 
     if (intersects.length) {
       const { point } = intersects[0]
@@ -144,9 +145,9 @@ export const Particles = ({
 
       calculateP1(point, P2, PT, P1)
 
-      setUniform(planeAreaRef.current, cursorFragmentShader, 'uMouse', point)
-      setUniform(planeAreaRef.current, cursorFragmentShader, 'uP1', P1)
-      setUniform(planeAreaRef.current, cursorFragmentShader, 'uP2', P2)
+      setUniform(cursorObjectRef.current, cursorFragmentShader, 'uMouse', point)
+      setUniform(cursorObjectRef.current, cursorFragmentShader, 'uP1', P1)
+      setUniform(cursorObjectRef.current, cursorFragmentShader, 'uP2', P2)
 
       setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
     }
@@ -156,7 +157,7 @@ export const Particles = ({
     setUniform(particlesVariable, gpgpuParticlesShader, 'uIsLMBDown', false)
     gpgpuCompute.compute()
     setUniform(
-      pointsRef.current,
+      particlesObjectRef.current,
       particlesVertexShader,
       'uParticlesTexture',
       gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture,
@@ -170,10 +171,10 @@ export const Particles = ({
           uMouse: { value: pointer },
           uP1: { value: pointer },
           uP2: { value: pointer },
-          uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
+          uUvScalar: { value: null },
           uTextTexture: { value: textTexture },
           uTextTextureScalar: { value: textTextureScalar },
-          uInteractionsTexture: { value: interactionsTexture },
+          uInteractionsTexture: { value: null },
         },
         cursorFragmentShader.uniforms,
       ),
@@ -196,7 +197,7 @@ export const Particles = ({
 
   return (
     <>
-      <mesh ref={planeAreaRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
+      <mesh ref={cursorObjectRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
         <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
         <shaderMaterial
           depthTest={false}
@@ -205,7 +206,7 @@ export const Particles = ({
           uniforms={cursorInitialUniforms}
         />
       </mesh>
-      <points ref={pointsRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
+      <points ref={particlesObjectRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
         <bufferGeometry
           ref={(ref) => {
             ref?.setDrawRange(0, baseGeometryCount)
