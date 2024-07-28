@@ -36,10 +36,13 @@ export const generateInteractionsTexture = (viewport: Viewport) => {
 }
 
 function getWorldSpaceCoords(element: Element, viewport: Viewport) {
-  const box = element.getBoundingClientRect()
+  const padding = element.getAttribute('data-padding')?.split(';').map(Number)
+
   const bodyBoundingRect = document.body.getBoundingClientRect()
   const bodyWidth = bodyBoundingRect.width
   const bodyHeight = bodyBoundingRect.height
+
+  const box = element.getBoundingClientRect()
 
   const centerX = (box.left + box.right) / 2
   const centerY = (box.top + box.bottom) / 2
@@ -47,7 +50,13 @@ function getWorldSpaceCoords(element: Element, viewport: Viewport) {
   const ndcX = (centerX / bodyWidth) * 2 - 1
   const ndcY = -(centerY / bodyHeight) * 2 + 1
 
-  const ndcWidth = (box.width - box.height) / bodyWidth
+  box.width -= box.height
+  if (padding) {
+    box.width += box.height * padding[0]
+    box.height += box.height * padding[1]
+  }
+
+  const ndcWidth = box.width / bodyWidth
   const ndcHeight = box.height / bodyHeight
 
   const viewportWidth = viewport.width

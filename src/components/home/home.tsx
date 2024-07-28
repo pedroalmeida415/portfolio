@@ -43,19 +43,19 @@ export const Home = () => {
 
   return (
     <section className='relative mx-auto flex  h-screen items-end justify-start p-6'>
-      <h1 className='absolute left-6 top-6 leading-none' data-cursor-interactive='segment'>
+      <h1 className='absolute left-6 top-6 leading-none' data-cursor-interactive='segment' data-padding='0.4;0.6'>
         Pedro Almeida
       </h1>
       <ul className='absolute right-[17.2%] top-6 flex items-center justify-start gap-x-10 leading-none'>
         {socials.map(({ link, label }) => (
-          <li data-cursor-interactive='segment' key={label}>
+          <li data-cursor-interactive='segment' key={label} data-padding='0.4;0.6'>
             <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
               {label}
             </a>
           </li>
         ))}
       </ul>
-      <span data-cursor-interactive='segment' className='absolute right-6 top-6 leading-none'>
+      <span data-cursor-interactive='segment' data-padding='0.4;0.6' className='absolute right-6 top-6 leading-none'>
         ©2024
       </span>
       <div className='absolute left-[10%] top-[62.55%]'>
@@ -63,7 +63,7 @@ export const Home = () => {
           Creative Developer
         </h2>
         <div className='ml-1 flex items-center'>
-          <h3 data-cursor-interactive='segment' className='mr-2 font-normal tracking-wide'>
+          <h3 data-cursor-interactive='segment' data-padding='0.4;0.0' className='mr-2 font-normal tracking-wide'>
             Available for new projects
           </h3>
           <span id='ping' className='size-2.5 rounded-full bg-lime-500'></span>
