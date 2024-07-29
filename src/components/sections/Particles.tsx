@@ -28,7 +28,8 @@ export const Particles = ({
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
   const pointer = useThree((state) => state.pointer)
-  pointer.set(0, -4.0435247)
+
+  const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
   const cursorObjectRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
@@ -167,10 +168,10 @@ export const Particles = ({
           uMouse: { value: pointer },
           uP1: { value: pointer },
           uP2: { value: pointer },
-          uUvScalar: { value: null },
+          uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
           uTextTexture: { value: textTexture },
           uTextTextureScalar: { value: textTextureScalar },
-          uInteractionsTexture: { value: null },
+          uInteractionsTexture: { value: generateInteractionsTexture(viewport) },
         },
         cursorFragmentShader.uniforms,
       ),
@@ -182,7 +183,7 @@ export const Particles = ({
     () =>
       mapMangledUniforms(
         {
-          uSize: { value: size.width * 0.002 },
+          uSize: { value: resolution.x * 0.0016 },
           uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
         },
         particlesVertexShader.uniforms,
