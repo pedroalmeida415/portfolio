@@ -58,7 +58,7 @@ export const Home = () => {
       <span data-cursor-interactive='segment' data-padding='0.4;0.6' className='absolute right-6 top-6 leading-none'>
         ©2024
       </span>
-      <div className='absolute left-[10%] top-[62.55%]'>
+      <div className='absolute left-[10%] top-[66%]'>
         <h2 data-cursor-interactive='center' ref={subtitleRef} className='mb-1 text-5xl font-extralight'>
           Creative Developer
         </h2>

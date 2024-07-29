@@ -1,14 +1,14 @@
 'use client'
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
 
+// import { Preload } from '@react-three/drei'
 import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
 import dynamic from 'next/dynamic'
+// import { Perf } from 'r3f-perf'
 import { MathUtils, PerspectiveCamera } from 'three'
 
-import { LZMA } from '~/helpers/lzma'
-// import { Preload } from '@react-three/drei'
 // import { r3f } from '~/helpers/global'
-// import { Perf } from 'r3f-perf'
+import { LZMA } from '~/helpers/lzma'
 
 const Particles = dynamic(() => import('~/components/sections/Particles').then((mod) => mod.Particles))
 
@@ -35,17 +35,10 @@ export default function Canvas({ children }: PropsWithChildren) {
         </div>
       )}
       {particlesData && (
-        <main
-          ref={ref}
-          style={{
-            position: 'relative',
-            width: ' 100%',
-            minHeight: '100vh',
-            overflow: 'auto',
-            touchAction: 'auto',
-          }}
-        >
-          {children}
+        <>
+          <main ref={ref} className='h-screen w-full touch-auto overflow-auto'>
+            {children}
+          </main>
           <CanvasImpl
             style={{
               position: 'fixed',
@@ -74,11 +67,10 @@ export default function Canvas({ children }: PropsWithChildren) {
             <CameraHandler />
             <Particles positions={particlesData.positions} staggerMultipliers={particlesData.multipliers} />
             {/* <Perf /> */}
-            {/* @ts-ignore */}
-            {/* <r3f.Out />
-            <Preload all /> */}
+            {/* <r3f.Out /> */}
+            {/* <Preload all /> */}
           </CanvasImpl>
-        </main>
+        </>
       )}
     </>
   )
@@ -87,11 +79,11 @@ export default function Canvas({ children }: PropsWithChildren) {
 const CameraHandler = () => {
   const camera = useThree((state) => state.camera as PerspectiveCamera)
 
-  const aspectRatio = 2.082429397694086
+  const aspectRatio = 2.1843003033790924
   const defaultFov = 50
 
   useEffect(() => {
-    const resizeHandler = () => {
+    const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight
 
       if (camera.aspect > aspectRatio) {
@@ -107,11 +99,10 @@ const CameraHandler = () => {
       camera.updateProjectionMatrix()
       camera.updateMatrixWorld()
     }
-    resizeHandler()
-    window.addEventListener('resize', resizeHandler)
-    return () => {
-      window.removeEventListener('resize', resizeHandler)
-    }
+    handleResize()
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [camera])
 
   return null

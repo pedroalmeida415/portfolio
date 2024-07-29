@@ -24,10 +24,13 @@ export const Particles = ({
   positions: Float32Array
   staggerMultipliers: Uint8Array
 }) => {
+  // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
+  // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
+
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
-  const size = useThree((state) => state.size)
   const pointer = useThree((state) => state.pointer)
+  pointer.set(0, -4.0435247)
 
   const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
@@ -35,6 +38,25 @@ export const Particles = ({
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
 
   const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
+    // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
+    // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
+    // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
+
+    // const [positions] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
+
+    // const baseGeometry = new BufferGeometry()
+    // baseGeometry.setAttribute('position', new Float32BufferAttribute(positions, 2))
+
+    // // --- Translate base geometry instead of points geometry for accurate raycast ---
+    // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
+
+    // fetch(
+    //   new Request('/api/encode?output=position', {
+    //     method: 'POST',
+    //     body: baseGeometry.attributes.position.array,
+    //   }),
+    // )
+
     // --- GPU Compute ---
     const baseGeometryCount = positions.length / 2
     const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
