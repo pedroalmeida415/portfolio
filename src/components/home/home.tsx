@@ -42,11 +42,11 @@ export const Home = () => {
   const subtitleRef = useRef<HTMLHeadingElement | null>()
 
   return (
-    <section className='relative mx-auto flex  h-screen items-end justify-start p-6'>
+    <section className='relative mx-auto size-full max-w-screen-2xl'>
       <h1 className='absolute left-6 top-6 leading-none' data-cursor-interactive='segment' data-padding='0.4;0.6'>
         Pedro Almeida
       </h1>
-      <ul className='absolute right-[17.2%] top-6 flex items-center justify-start gap-x-10 leading-none'>
+      <ul className='absolute right-[14.5rem] top-6 flex items-center justify-start gap-x-10 leading-none'>
         {socials.map(({ link, label }) => (
           <li data-cursor-interactive='segment' key={label} data-padding='0.4;0.6'>
             <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>

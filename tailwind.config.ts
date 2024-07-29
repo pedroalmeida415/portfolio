@@ -7,6 +7,9 @@ module.exports = {
   darkMode: 'media', // or 'media' or 'class'
   theme: {
     extend: {
+      screens: {
+        '2xl': '1920px',
+      },
       fontFamily: {
         'neue-montreal': ['var(--font-neue-montreal-variable)', ...defaultTheme.fontFamily.sans],
       },
