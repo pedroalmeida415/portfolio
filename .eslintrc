@@ -19,6 +19,7 @@
         "groups": [
           "/^react/",
           "module",
+          "/^~\/store/",
           "/^~\/components/",
           "/^~\/helpers/",
           "/^~\/assets/",

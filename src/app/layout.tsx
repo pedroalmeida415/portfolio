@@ -1,3 +1,4 @@
+import { Provider } from 'jotai'
 import { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 
@@ -102,7 +103,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en'>
       <body className={`${neue_montreal.variable}`}>
-        <Canvas>{children}</Canvas>
+        <Provider>
+          <Canvas>{children}</Canvas>
+        </Provider>
       </body>
     </html>
   )
