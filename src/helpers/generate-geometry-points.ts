@@ -108,7 +108,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
 // Helper function to check if a point is inside a polygon
 function isPointInPolygon(point, polygon) {
   let inside = false
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = ++i) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const xi = polygon[i].x,
       yi = polygon[i].y
     const xj = polygon[j].x,
