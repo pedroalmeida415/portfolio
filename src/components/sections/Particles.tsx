@@ -217,7 +217,7 @@ export const Particles = ({
   return (
     <>
       <mesh ref={cursorObjectRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
-        <planeGeometry args={[viewport.width + 0.001, viewport.height + 0.001]} />
+        <planeGeometry args={[viewport.width + 0.01, viewport.height + 0.01]} />
         <shaderMaterial
           depthTest={false}
           vertexShader={cursorVertexShader.sourceCode}

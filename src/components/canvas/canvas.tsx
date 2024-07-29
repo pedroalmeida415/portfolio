@@ -1,20 +1,24 @@
 'use client'
-import { PropsWithChildren, useEffect, useRef, useState } from 'react'
+import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react'
 
 // import { Preload } from '@react-three/drei'
-import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
+import { PerspectiveCamera } from '@react-three/drei'
+import { Canvas as CanvasImpl } from '@react-three/fiber'
 import dynamic from 'next/dynamic'
 // import { Perf } from 'r3f-perf'
-import { MathUtils, PerspectiveCamera } from 'three'
+import { MathUtils, type PerspectiveCamera as PerspectiveCameraType } from 'three'
 
 // import { r3f } from '~/helpers/global'
 import { LZMA } from '~/helpers/lzma'
 
 const Particles = dynamic(() => import('~/components/sections/Particles').then((mod) => mod.Particles))
 
+const aspectRatio = 2.1843003033790924
+const defaultFov = 50
+
 export default function Canvas({ children }: PropsWithChildren) {
   const [particlesData, setParticlesData] = useState<{ positions: Float32Array; multipliers: Uint8Array }>()
-  const ref = useRef<HTMLDivElement | null>()
+  const eventSourceRef = useRef<HTMLDivElement | null>()
 
   useEffect(() => {
     async function getParticlesData() {
@@ -27,6 +31,23 @@ export default function Canvas({ children }: PropsWithChildren) {
     getParticlesData()
   }, [])
 
+  const handleResize = useCallback((camera: PerspectiveCameraType) => {
+    camera.aspect = window.innerWidth / window.innerHeight
+
+    if (camera.aspect > aspectRatio) {
+      // window too narrow
+      camera.fov = defaultFov
+    } else {
+      // window too large
+      const cameraHeight = Math.tan(MathUtils.degToRad(defaultFov / 2))
+      const ratio = camera.aspect / aspectRatio
+      const newCameraHeight = cameraHeight / ratio
+      camera.fov = MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2
+    }
+    camera.updateProjectionMatrix()
+    camera.updateMatrixWorld()
+  }, [])
+
   return (
     <>
       {!particlesData && (
@@ -36,7 +57,7 @@ export default function Canvas({ children }: PropsWithChildren) {
       )}
       {particlesData && (
         <>
-          <main ref={ref} className='h-screen w-full touch-auto overflow-auto'>
+          <main ref={eventSourceRef} className='h-screen w-full touch-auto overflow-auto'>
             {children}
           </main>
           <CanvasImpl
@@ -54,18 +75,27 @@ export default function Canvas({ children }: PropsWithChildren) {
               depth: false,
             }}
             flat
-            eventSource={ref}
+            eventSource={eventSourceRef}
             eventPrefix='client'
             camera={{
-              position: [0, 0, 10],
-              fov: 50,
-              near: 9,
-              far: 11,
               manual: true,
             }}
           >
-            <CameraHandler />
             <Particles positions={particlesData.positions} staggerMultipliers={particlesData.multipliers} />
+            <PerspectiveCamera
+              makeDefault
+              position={[0, 0, 10]}
+              fov={50}
+              near={9}
+              far={11}
+              manual
+              ref={(cameraRef) => {
+                if (cameraRef) {
+                  window.addEventListener('resize', handleResize.bind(null, cameraRef))
+                }
+              }}
+              onUpdate={handleResize}
+            />
             {/* <Perf /> */}
             {/* <r3f.Out /> */}
             {/* <Preload all /> */}
@@ -74,38 +104,6 @@ export default function Canvas({ children }: PropsWithChildren) {
       )}
     </>
   )
-}
-
-const CameraHandler = () => {
-  const camera = useThree((state) => state.camera as PerspectiveCamera)
-
-  const aspectRatio = 2.1843003033790924
-  const defaultFov = 50
-
-  useEffect(() => {
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight
-
-      if (camera.aspect > aspectRatio) {
-        // window too narrow
-        camera.fov = defaultFov
-      } else {
-        // window too large
-        const cameraHeight = Math.tan(MathUtils.degToRad(defaultFov / 2))
-        const ratio = camera.aspect / aspectRatio
-        const newCameraHeight = cameraHeight / ratio
-        camera.fov = MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2
-      }
-      camera.updateProjectionMatrix()
-      camera.updateMatrixWorld()
-    }
-    handleResize()
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [camera])
-
-  return null
 }
 
 async function getPositions() {
