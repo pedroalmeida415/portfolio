@@ -94,6 +94,7 @@ export const Cursor = () => {
     <mesh ref={cursorMeshRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
       <planeGeometry args={[viewport.width + 0.01, viewport.height + 0.01]} />
       <shaderMaterial
+        transparent
         depthTest={false}
         vertexShader={cursorVertexShader.sourceCode}
         fragmentShader={cursorFragmentShader.sourceCode}

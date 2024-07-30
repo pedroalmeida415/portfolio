@@ -137,12 +137,12 @@ void main() {
     uv = uv * 0.5 + 0.5;
     float textMask = texture(uTextTexture, uv).r;
     
-    vec3 cursorColor = vec3(0.361,0.494,0.6);
-    vec3 navColor = vec3(0.851,0.851,0.851);
-    vec3 backgroundColor = vec3(0.957,0.953,0.941);
+    vec4 cursorColor = vec4(0.361,0.494,0.6,1.0);
+    vec4 navColor = vec4(0.851,0.851,0.851,1.0);
+    vec4 backgroundColor = vec4(0.957,0.953,0.941,0.0);
     
-    vec3 col = mix(cursorColor, navColor, combinedDistUnion.y);
+    vec4 col = mix(cursorColor, navColor, combinedDistUnion.y);
     col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
     
-    gl_FragColor = vec4(col, 1.);
+    gl_FragColor = col;
 }

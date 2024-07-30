@@ -159,7 +159,7 @@ export const Particles = ({
   )
 
   return (
-    <points ref={particlesObjectRef} position={[0, 0, 0.001]} frustumCulled={false} matrixAutoUpdate={false}>
+    <points ref={particlesObjectRef} position={[0, 0, 0]} frustumCulled={false} matrixAutoUpdate={false}>
       <bufferGeometry
         ref={(ref) => {
           ref?.setDrawRange(0, baseGeometryCount)

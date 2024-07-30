@@ -39,13 +39,7 @@ export const Background = () => {
   )
 
   return (
-    <mesh
-      visible={true}
-      ref={backgroundObjectRef}
-      position={[0, 0, -0.001]}
-      frustumCulled={false}
-      matrixAutoUpdate={false}
-    >
+    <mesh ref={backgroundObjectRef} position={[0, 0, 0]} frustumCulled={false} matrixAutoUpdate={false}>
       <bufferGeometry ref={(ref) => ref?.setDrawRange(0, 3)} />
       <rawShaderMaterial
         glslVersion='300 es'
