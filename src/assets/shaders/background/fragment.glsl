@@ -32,18 +32,21 @@ float gaussian(float z, float u, float o) {
 }
 // Output
 void main(void) {
+    vec2 fragmentCoordinates = gl_FragCoord.xy / uResolution.xy * 2.0 - 1.0;
+    
     // Initial color (left to right gradient)
     float mixFactor = gl_FragCoord.x / uResolution.x;
     vec3 leftSide = vec3(.063, .035, .192);
     vec3 rightSide = vec3(.03, .015, .1);
     vec3 gradientColor = mix(leftSide, rightSide, mixFactor);
     gl_FragColor = vec4(gradientColor, 1.0);
-    vec2 p = -3. + 1.6 * (gl_FragCoord.xy / uResolution.xy) + (uZoomOffset * 0.2);
+    
+    vec2 p = -3. + 1.6 * fragmentCoordinates + (uZoomOffset * 0.2);
     vec3 o = vec3(p.x + 14. - (uZoomOffset * 3.0) - (uInitialXOffset * 3.0) - ((1.0 - uMouse.x) * 0.5) + ((uPortfolioScrollPercentage * 5.0) * uZoomOffset), p.y + 2.7 - (uZoomOffset * 0.3) - (uMouse.y * 0.15), -0.35 + (uZoomOffset * 0.4));
     vec3 d = vec3(p.x * 8. + ((1.0 - uMouse.x) * 0.5) - (uZoomOffset * 2.0), p.y + 0.5 + ((1.0 - uMouse.y) * 0.25) - (uZoomOffset * 0.5), 0.8 + (uZoomOffset * 2.0))/140.;
     vec4 c = vec4(0.);
     float t = 0.;
-    for (int i = 0;i < 140; i++) {
+    for (int i = 0;i < 140; ++i) {
         if (blob(o + d * t) < 20.) {
             vec3 e = vec3(.1, 0.0, 2.1 - (uZoomOffset * 0.8));
             vec3 n = vec3(0.0);
@@ -70,7 +73,7 @@ void main(void) {
     // Apply Noise
     
     vec2 ps = vec2(1.0) / uResolution.xy;
-    vec2 uv = (gl_FragCoord.xy / uResolution.xy) * ps;
+    vec2 uv = fragmentCoordinates * ps;
     float seed = dot(uv * vec2(1000.), vec2(12, 52));
     float noise = fract(sin(seed) * 43758.5453 + t);
     noise = gaussian(noise, float(0.0), float(0.5) * float(0.5));
