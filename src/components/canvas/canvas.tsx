@@ -10,6 +10,7 @@ import { MathUtils, type PerspectiveCamera as PerspectiveCameraType } from 'thre
 
 // import { r3f } from '~/helpers/global'
 import { Background } from '~/components/background/background'
+import { Cursor } from '~/components/cursor/cursor'
 
 import { LZMA } from '~/helpers/lzma'
 
@@ -84,6 +85,7 @@ export default function Canvas({ children }: PropsWithChildren) {
             }}
           >
             <Background />
+            <Cursor />
             <Particles positions={particlesData.positions} staggerMultipliers={particlesData.multipliers} />
             <PerspectiveCamera
               makeDefault
