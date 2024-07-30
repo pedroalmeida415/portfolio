@@ -11,10 +11,9 @@ import { MathUtils, type PerspectiveCamera as PerspectiveCameraType } from 'thre
 // import { r3f } from '~/helpers/global'
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
+import { Particles } from '~/components/particles/particles'
 
 import { LZMA } from '~/helpers/lzma'
-
-const Particles = dynamic(() => import('~/components/sections/Particles').then((mod) => mod.Particles))
 
 const aspectRatio = 2.1843003033790924
 const defaultFov = 50

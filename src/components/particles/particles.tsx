@@ -123,12 +123,14 @@ export const Particles = ({
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
   useFrame((state, delta) => {
-    state.raycaster.setFromCamera(state.pointer, state.camera)
-    const intersects = state.raycaster.intersectObject(cursorMeshRef)
+    if (cursorMeshRef) {
+      state.raycaster.setFromCamera(state.pointer, state.camera)
+      const intersects = state.raycaster.intersectObject(cursorMeshRef)
 
-    if (intersects.length) {
-      const { point } = intersects[0]
-      setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
+      if (intersects.length) {
+        const { point } = intersects[0]
+        setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
+      }
     }
 
     // --- Update GPU Compute ---
