@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, Vector2, Vector3 } from 'three'
-import { GlslVariableMap } from 'webpack-glsl-minify'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
+import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
@@ -243,18 +243,6 @@ export const Particles = ({
       </points>
     </>
   )
-}
-
-function mapMangledUniforms(uniforms, map: GlslVariableMap) {
-  return Object.entries(uniforms).reduce((acc, [key, value]) => {
-    const mangledKey = map[key].variableName
-    acc[mangledKey] = value
-    return acc
-  }, {})
-}
-
-function setUniform(mesh, shader, uniformName, value) {
-  mesh.material.uniforms[shader.uniforms[uniformName].variableName].value = value
 }
 
 // P1=2P(0.5)−0.5P0−0.5P2

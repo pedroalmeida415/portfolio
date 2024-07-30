@@ -9,6 +9,8 @@ import dynamic from 'next/dynamic'
 import { MathUtils, type PerspectiveCamera as PerspectiveCameraType } from 'three'
 
 // import { r3f } from '~/helpers/global'
+import { Background } from '~/components/background/background'
+
 import { LZMA } from '~/helpers/lzma'
 
 const Particles = dynamic(() => import('~/components/sections/Particles').then((mod) => mod.Particles))
@@ -81,6 +83,7 @@ export default function Canvas({ children }: PropsWithChildren) {
               manual: true,
             }}
           >
+            <Background />
             <Particles positions={particlesData.positions} staggerMultipliers={particlesData.multipliers} />
             <PerspectiveCamera
               makeDefault
