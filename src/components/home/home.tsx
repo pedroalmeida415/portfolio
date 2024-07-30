@@ -43,21 +43,23 @@ export const Home = () => {
 
   return (
     <section className='relative mx-auto size-full max-w-screen-2xl'>
-      <h1 className='absolute left-6 top-6 leading-none' data-cursor-interactive='segment' data-padding='0.4;0.6'>
-        Pedro Almeida
-      </h1>
-      <ul className='absolute right-[14.5rem] top-6 flex items-center justify-start gap-x-10 leading-none'>
-        {socials.map(({ link, label }) => (
-          <li data-cursor-interactive='segment' key={label} data-padding='0.4;0.6'>
-            <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
-              {label}
-            </a>
-          </li>
-        ))}
-      </ul>
-      <span data-cursor-interactive='segment' data-padding='0.4;0.6' className='absolute right-6 top-6 leading-none'>
-        ©2024
-      </span>
+      <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
+        <h1 data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          Pedro Almeida
+        </h1>
+        <ul className='ml-auto mr-[9.4rem] flex items-center justify-start gap-x-10'>
+          {socials.map(({ link, label }) => (
+            <li data-cursor-interactive='segment' key={label} data-padding='0.4;0.6'>
+              <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <span data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          ©2024
+        </span>
+      </header>
       <div className='absolute left-[10%] top-[66%]'>
         <h2 data-cursor-interactive='center' ref={subtitleRef} className='mb-1 text-5xl font-extralight'>
           Creative Developer

@@ -117,7 +117,7 @@ void main() {
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
     float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 10, 0.3);
     
-    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), min(navSegmentDist, screenBorderDist), .25);
+    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), min(navSegmentDist, screenBorderDist), .2);
     
     float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
     float twitterSegmentDist = sdSegment(uv, vec2(twitterSegmentData.r, twitterSegmentData.b), vec2(twitterSegmentData.g, twitterSegmentData.b)) - twitterSegmentData.a;
