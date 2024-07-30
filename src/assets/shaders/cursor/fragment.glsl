@@ -138,7 +138,7 @@ void main() {
     float textMask = texture(uTextTexture, uv).r;
     
     vec4 cursorColor = vec4(0.361,0.494,0.6,1.0);
-    vec4 navColor = vec4(0.851,0.851,0.851,1.0);
+    vec4 navColor = vec4(0.831,0.831,0.831,1.0);
     vec4 backgroundColor = vec4(0.957,0.953,0.941,0.0);
     
     vec4 col = mix(cursorColor, navColor, combinedDistUnion.y);

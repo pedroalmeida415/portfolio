@@ -12,8 +12,9 @@ module.exports = {
         'neue-montreal': ['var(--font-neue-montreal-variable)', ...defaultTheme.fontFamily.sans],
       },
       colors: {
-        black: '#1d1d1d',
+        offBlack: '#1d1d1d',
         offWhite: '#f4f3f0',
+        gray: '#d4d4d4',
       },
     },
   },
