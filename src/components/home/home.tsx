@@ -47,7 +47,7 @@ export const Home = () => {
         <h1 data-cursor-interactive='segment' data-padding='0.4;0.6'>
           Pedro Almeida
         </h1>
-        <ul className='ml-auto mr-[9.4rem] flex items-center justify-start gap-x-10'>
+        <ul role='list' className='ml-auto mr-[9.4rem] flex items-center justify-start gap-x-10'>
           {socials.map(({ link, label }) => (
             <li data-cursor-interactive='segment' key={label} data-padding='0.4;0.6'>
               <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
@@ -72,7 +72,7 @@ export const Home = () => {
         </div>
       </div>
       <nav data-cursor-interactive='segment' className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2'>
-        <ul className='flex items-center gap-x-2 leading-none'>
+        <ul role='list' className='flex items-center gap-x-2 leading-none'>
           {routes.map(({ path, label, icon: Icon }) => (
             <li key={path}>
               <a href={path} className='block rounded-full px-6 py-2 underline-offset-4 hover:underline'>

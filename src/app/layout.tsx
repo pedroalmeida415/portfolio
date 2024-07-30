@@ -102,7 +102,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
-      <body className={`${neue_montreal.variable}`}>
+      <body className={`${neue_montreal.variable} bg-offWhite font-neue-montreal font-normal text-black antialiased`}>
         <Provider>
           <Canvas>{children}</Canvas>
         </Provider>

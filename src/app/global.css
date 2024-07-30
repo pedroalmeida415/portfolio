@@ -3,31 +3,15 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
-
   html,
-  body,
   :root {
-    @apply font-neue-montreal antialiased;
-    font-variation-settings: 'wght' 450;
-
     font-synthesis: none;
     font-synthesis-weight: none;
     font-optical-sizing: auto;
     text-rendering: optimizelegibility;
     text-size-adjust: 100%;
 
-    width: 100%;
-    margin: 0;
-    padding: 0;
-
     font-size: clamp(8px, 1.041667vw, 20px);
-  }
-
-  body {
-    background-color: #f4f3f0;
   }
 }
 
