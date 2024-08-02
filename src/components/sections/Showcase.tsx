@@ -8,7 +8,7 @@ import ShowcaseTitle from '~/assets/showcase.svg'
 
 const Showcase = () => {
   return (
-    <section className='overflow-hidden bg-[#1d1d1d] px-6 py-20'>
+    <section className='overflow-hidden bg-offBlack px-6 py-20'>
       <h1 className='sr-only'>Showcase</h1>
       <ShowcaseTitle
         style={{
