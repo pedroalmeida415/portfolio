@@ -2,7 +2,7 @@ import { Provider } from 'jotai'
 import { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 
-import Canvas from '~/components/canvas/canvas'
+import { Layout } from '~/components/layout/layout'
 
 import './global.css'
 
@@ -104,7 +104,7 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body className={`${neue_montreal.variable} bg-offWhite font-neue-montreal font-normal text-black antialiased`}>
         <Provider>
-          <Canvas>{children}</Canvas>
+          <Layout>{children}</Layout>
         </Provider>
       </body>
     </html>
