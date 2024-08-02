@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { type PropsWithChildren, useRef } from 'react'
 
 import { useAtomValue } from 'jotai'
 
@@ -8,7 +8,7 @@ import { getParticlesDataAtom } from '~/store'
 
 import Canvas from '~/components/canvas/canvas'
 
-export const Layout = ({ children }) => {
+export const Layout = ({ children }: PropsWithChildren) => {
   const particlesData = useAtomValue(getParticlesDataAtom)
 
   const eventSourceRef = useRef<HTMLElement | null>(null)

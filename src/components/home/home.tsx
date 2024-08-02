@@ -1,6 +1,3 @@
-'use client'
-import { useRef } from 'react'
-
 import HomeIcon from '~/assets/home-icon.svg'
 
 const routes = [
@@ -39,8 +36,6 @@ const socials = [
 ]
 
 export const Home = () => {
-  const subtitleRef = useRef<HTMLHeadingElement | null>()
-
   return (
     <section className='relative mx-auto size-full max-w-screen-2xl'>
       <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
@@ -61,7 +56,7 @@ export const Home = () => {
         </span>
       </header>
       <div className='absolute left-[10%] top-[66%]'>
-        <h2 data-cursor-interactive='center' ref={subtitleRef} className='mb-1 text-5xl font-extralight'>
+        <h2 data-cursor-interactive='center' className='mb-1 text-5xl font-extralight'>
           Creative Developer
         </h2>
         <div className='ml-1 flex items-center'>

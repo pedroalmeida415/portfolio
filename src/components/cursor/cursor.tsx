@@ -20,9 +20,8 @@ export const Cursor = () => {
 
   const viewport = useThree((state) => state.viewport)
   const pointer = useThree((state) => state.pointer)
-  pointer.set(0, -4.0435247)
 
-  const cursorMeshRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>()
+  const cursorMeshRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>(null)
 
   useEffect(() => {
     if (cursorMeshRef.current) setCursorMeshAtom(cursorMeshRef.current)
@@ -54,6 +53,7 @@ export const Cursor = () => {
   )
 
   useFrame((state, delta) => {
+    if (!cursorMeshRef.current) return
     state.raycaster.setFromCamera(state.pointer, state.camera)
     const intersects = state.raycaster.intersectObject(cursorMeshRef.current)
 

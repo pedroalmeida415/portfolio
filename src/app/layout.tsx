@@ -1,3 +1,5 @@
+import { type PropsWithChildren } from 'react'
+
 import { Provider } from 'jotai'
 import { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
@@ -99,7 +101,7 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang='en'>
       <body className={`${neue_montreal.variable} bg-offWhite font-neue-montreal font-normal text-black antialiased`}>
