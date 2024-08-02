@@ -71,7 +71,11 @@ export const Home = () => {
           <span id='ping' className='size-2.5 rounded-full bg-lime-500'></span>
         </div>
       </div>
-      <nav data-cursor-interactive='segment' className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2'>
+      <nav
+        data-cursor-interactive='segment'
+        id='navbar'
+        className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2'
+      >
         <ul role='list' className='flex items-center gap-x-2 leading-none'>
           {routes.map(({ path, label, icon: Icon }) => (
             <li key={path}>

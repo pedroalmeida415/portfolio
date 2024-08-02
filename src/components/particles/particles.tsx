@@ -2,13 +2,13 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
-import { Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, Vector2 } from 'three'
+import { Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, Vector2, Vector3 } from 'three'
 
 import { cursorMeshAtom } from '~/store'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
-import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
+import { getWorldSpaceCoords, mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as particlesFragmentShader } from '~/assets/shaders/gpgpu/fragment.glsl'
 import { default as gpgpuParticlesShader } from '~/assets/shaders/gpgpu/particles.glsl'
@@ -29,10 +29,11 @@ export const Particles = ({
 
   const renderer = useThree((state) => state.gl)
   const pointer = useThree((state) => state.pointer)
+  const viewport = useThree((state) => state.viewport)
 
   const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
-  const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>()
+  const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
 
   const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
     // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
@@ -97,17 +98,20 @@ export const Particles = ({
     )
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
-    // Uniforms
-    const mangledUniforms = mapMangledUniforms(
+    const navbar = document.getElementById('navbar')!
+    const navbarCoords = getWorldSpaceCoords(navbar, viewport)
+
+    const mappedUniforms = mapMangledUniforms(
       {
         uDeltaTime: { value: 0 },
         uBase: { value: baseParticlesTexture },
         uMouse: { value: pointer },
         uIsLMBDown: { value: false },
+        initialCoords: { value: new Vector3(navbarCoords.width, navbarCoords.centerY, navbarCoords.height) },
       },
       gpgpuParticlesShader.uniforms,
     )
-    particlesVariable.material.uniforms = mangledUniforms
+    particlesVariable.material.uniforms = mappedUniforms
 
     // Init
     gpgpuCompute.init()

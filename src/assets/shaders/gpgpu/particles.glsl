@@ -3,6 +3,7 @@
 uniform float uDeltaTime;
 uniform sampler2D uBase;
 uniform vec2 uMouse;
+uniform vec3 initialCoords;
 uniform bool uIsLMBDown;
 
 @include "../includes/encode_decode.glsl"
@@ -21,9 +22,9 @@ void main() {
     if (base == current) {
         vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0 - 1.0;
         
-        basePos.x *= 2.2625;
-        basePos.y *= .185;
-        basePos.y -= 4.045;
+        basePos.x *= initialCoords.x;
+        basePos.y *= initialCoords.z;
+        basePos.y += initialCoords.y;
         
         particle.pos = basePos;
         particle.delay = base.a - fract(uDeltaTime);
