@@ -1,13 +1,16 @@
 'use client'
 
-import { memo, useEffect, useLayoutEffect, useMemo, type MutableRefObject } from 'react'
+import { memo, useCallback, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
-import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
-// import { Perf } from 'r3f-perf'
-import { useAtomValue } from 'jotai'
 
+import { PerspectiveCamera } from '@react-three/drei'
+import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
+import { useAtomValue } from 'jotai'
+// import { Perf } from 'r3f-perf'
 // import { r3f } from '~/helpers/global'
+import { MathUtils } from 'three'
+
 import { isHomeLoadedAtom } from '~/store'
 
 import { Background } from '~/components/background/background'
@@ -18,6 +21,16 @@ import { getWorldSpaceCoords } from '~/helpers/shader.utils'
 
 type Props = {
   eventSource: MutableRefObject<HTMLElement | null>
+}
+
+const calculateFov = (viewportAspect: number) => {
+  const defaultFov = 50
+  const particlesAspectRatio = 2.1843003033790924
+  if (viewportAspect > particlesAspectRatio) return defaultFov
+  const cameraHeight = Math.tan(MathUtils.degToRad(defaultFov / 2))
+  const ratio = viewportAspect / particlesAspectRatio
+  const newCameraHeight = cameraHeight / ratio
+  return MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2
 }
 
 export const Canvas = memo(({ eventSource }: Props) => {
@@ -43,13 +56,20 @@ export const Canvas = memo(({ eventSource }: Props) => {
       eventSource={eventSource.current!}
       eventPrefix='client'
       camera={{
-        fov: 50,
+        fov: calculateFov(window.innerWidth / window.innerHeight),
+        aspect: window.innerWidth / window.innerHeight,
         position: [0, 0, 10],
         near: 9,
         far: 11,
       }}
+      onCreated={(state) => {
+        const navbar = document.getElementById('navbar') as HTMLElement
+        const navbarCoords = getWorldSpaceCoords(navbar, state.viewport)
+
+        state.pointer.set(0, navbarCoords.centerY)
+      }}
     >
-      {/* <Setup /> */}
+      <Camera />
       {/* <Background /> */}
       <Cursor />
       <Particles />
@@ -61,3 +81,22 @@ export const Canvas = memo(({ eventSource }: Props) => {
   )
 })
 Canvas.displayName = 'Canvas'
+
+const Camera = memo(() => {
+  const viewport = useThree((state) => state.viewport)
+
+  const getFov = useCallback(() => calculateFov(viewport.aspect), [viewport.aspect])
+
+  return (
+    <PerspectiveCamera
+      makeDefault
+      manual
+      position={[0, 0, 10]}
+      fov={getFov()}
+      aspect={viewport.aspect}
+      near={9}
+      far={11}
+    />
+  )
+})
+Camera.displayName = 'Camera'
