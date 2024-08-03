@@ -15,7 +15,7 @@ export const Background = () => {
 
   const resolution = useMemo(() => renderer.getDrawingBufferSize(new Vector2()), [renderer])
 
-  const backgroundObjectRef = useRef<Mesh<BufferGeometry, RawShaderMaterial> | null>()
+  const backgroundObjectRef = useRef<Mesh<BufferGeometry, RawShaderMaterial> | null>(null)
 
   const backgroundInitialUniforms = useMemo(
     () =>

@@ -1,15 +1,16 @@
 import { type Viewport } from '@react-three/fiber'
-import { type GlslVariableMap } from 'webpack-glsl-minify'
+import { type Uniforms } from 'three-stdlib'
+import type { GlslShader, GlslVariableMap } from 'webpack-glsl-minify'
 
-export function mapMangledUniforms(uniforms, map: GlslVariableMap) {
+export function mapMangledUniforms(uniforms: Uniforms, map: GlslVariableMap) {
   return Object.entries(uniforms).reduce((acc, [key, value]) => {
     const mangledKey = map[key]?.variableName || key
     acc[mangledKey] = value
     return acc
-  }, {})
+  }, {} as Uniforms)
 }
 
-export function setUniform(mesh, shader, uniformName, value) {
+export function setUniform(mesh: any, shader: GlslShader, uniformName: string, value: any) {
   if (shader.uniforms[uniformName]) {
     mesh.material.uniforms[shader.uniforms[uniformName].variableName].value = value
   } else {

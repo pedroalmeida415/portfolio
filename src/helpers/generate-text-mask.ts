@@ -18,7 +18,7 @@ export const generateTextMask = () => {
   const blurRepeatCount = 8
   const blurIncrement = 2
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   ctx.font = `${fontSize}px ${font}`
   ctx.textBaseline = 'middle'
 

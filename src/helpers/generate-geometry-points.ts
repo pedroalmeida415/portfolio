@@ -1,6 +1,8 @@
-import { Box2 } from 'three'
+import { type Viewport } from '@react-three/fiber'
+import { Box2, type Vector2 } from 'three'
+import { type SVGResult } from 'three-stdlib'
 
-export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap) => {
+export const generateGeometryPoints = (textSvg: SVGResult, viewport: Viewport, gradientTextureBitmap: ImageBitmap) => {
   // Create a canvas element
   const canvas = document.createElement('canvas')
   canvas.width = gradientTextureBitmap.width
@@ -9,7 +11,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
   // Get the 2D drawing context
   const ctx = canvas.getContext('2d', {
     willReadFrequently: true,
-  })
+  }) as CanvasRenderingContext2D
 
   // Draw the ImageBitmap onto the canvas
   ctx.drawImage(gradientTextureBitmap, 0, 0)
@@ -18,10 +20,10 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
   const svgHeight = Number((textSvg.xml as any).attributes.height.value)
   const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-  const positions = []
-  const delays = []
+  const positions: number[] = []
+  const delays: number[] = []
 
-  let inner_o_shape_points
+  let inner_o_shape_points: Vector2[]
 
   textSvg.paths.forEach((path, index) => {
     const shape = path.toShapes(false)[0]
@@ -106,7 +108,7 @@ export const generateGeometryPoints = (textSvg, viewport, gradientTextureBitmap)
 }
 
 // Helper function to check if a point is inside a polygon
-function isPointInPolygon(point, polygon) {
+function isPointInPolygon(point: { x: number; y: number }, polygon: Vector2[]) {
   let inside = false
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const xi = polygon[i].x,

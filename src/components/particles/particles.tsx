@@ -92,7 +92,7 @@ export const Particles = memo(() => {
     )
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
-    const navbar = document.getElementById('navbar')!
+    const navbar = document.getElementById('navbar') as HTMLElement
     const navbarCoords = getWorldSpaceCoords(navbar, viewport)
 
     const mappedUniforms = mapMangledUniforms(
