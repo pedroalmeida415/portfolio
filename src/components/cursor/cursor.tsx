@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
 import { useSetAtom } from 'jotai'
@@ -15,7 +15,7 @@ import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.gl
 
 extend({ Mesh, PlaneGeometry, ShaderMaterial })
 
-export const Cursor = () => {
+export const Cursor = memo(() => {
   const setCursorMeshAtom = useSetAtom(cursorMeshAtom)
 
   const viewport = useThree((state) => state.viewport)
@@ -102,7 +102,8 @@ export const Cursor = () => {
       />
     </mesh>
   )
-}
+})
+Cursor.displayName = 'Cursor'
 
 // P1=2P(0.5)−0.5P0−0.5P2
 function calculateP1(P0: Vector3, P2: Vector2, Pt: Vector2, P1: Vector2) {

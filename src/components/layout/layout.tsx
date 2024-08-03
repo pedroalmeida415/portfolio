@@ -6,7 +6,7 @@ import { useAtomValue } from 'jotai'
 
 import { getParticlesDataAtom } from '~/store'
 
-import Canvas from '~/components/canvas/canvas'
+import { Canvas } from '~/components/canvas/canvas'
 
 export const Layout = ({ children }: PropsWithChildren) => {
   const particlesData = useAtomValue(getParticlesDataAtom)

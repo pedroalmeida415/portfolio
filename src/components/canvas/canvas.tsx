@@ -1,9 +1,9 @@
 'use client'
 
-import { type MutableRefObject } from 'react'
+import { memo, useEffect, useLayoutEffect, useMemo, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
-import { Canvas as CanvasImpl } from '@react-three/fiber'
+import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
 // import { Perf } from 'r3f-perf'
 import { useAtomValue } from 'jotai'
 
@@ -14,13 +14,16 @@ import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
 import { Particles } from '~/components/particles/particles'
 
+import { getWorldSpaceCoords } from '~/helpers/shader.utils'
+
 type Props = {
   eventSource: MutableRefObject<HTMLElement | null>
 }
 
-export default function Canvas({ eventSource }: Props) {
+export const Canvas = memo(({ eventSource }: Props) => {
   const particlesRequest = useAtomValue(getParticlesDataAtom)
 
+  if (!eventSource.current || particlesRequest.state !== 'hasData') return null
   return (
     <CanvasImpl
       style={{
@@ -37,7 +40,7 @@ export default function Canvas({ eventSource }: Props) {
         depth: false,
       }}
       flat
-      eventSource={eventSource.current ?? undefined}
+      eventSource={eventSource.current}
       eventPrefix='client'
       camera={{
         fov: 50,
@@ -48,13 +51,12 @@ export default function Canvas({ eventSource }: Props) {
     >
       {/* <Background /> */}
       <Cursor />
-      {particlesRequest.state === 'hasData' && (
         <Particles positions={particlesRequest.data.positions} staggerMultipliers={particlesRequest.data.multipliers} />
-      )}
 
       {/* <Perf /> */}
       {/* <r3f.Out /> */}
       {/* <Preload all /> */}
     </CanvasImpl>
   )
-}
+})
+Canvas.displayName = 'Canvas'
