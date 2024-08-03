@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
-import { Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, Vector3 } from 'three'
+import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector3 } from 'three'
 
 import { cursorMeshAtom, particlesDataAtom } from '~/store'
 
@@ -14,7 +14,7 @@ import { default as particlesFragmentShader } from '~/assets/shaders/gpgpu/fragm
 import { default as gpgpuParticlesShader } from '~/assets/shaders/gpgpu/particles.glsl'
 import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.glsl'
 
-extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry })
+extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
 export const Particles = memo(() => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
