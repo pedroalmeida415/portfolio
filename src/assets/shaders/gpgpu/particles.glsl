@@ -23,8 +23,8 @@ void main() {
         vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0 - 1.0;
         
         basePos.x *= initialCoords.x;
-        basePos.y *= initialCoords.z;
-        basePos.y += initialCoords.y;
+        basePos.y *= initialCoords.y * 0.6;
+        basePos.y += initialCoords.z;
         
         particle.pos = basePos;
         particle.delay = base.a - fract(uDeltaTime);

@@ -8,7 +8,7 @@ import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
 
 // import { r3f } from '~/helpers/global'
-import { getParticlesDataAtom } from '~/store'
+import { isHomeLoadedAtom } from '~/store'
 
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
@@ -21,9 +21,9 @@ type Props = {
 }
 
 export const Canvas = memo(({ eventSource }: Props) => {
-  const particlesRequest = useAtomValue(getParticlesDataAtom)
+  const isHomeLoaded = useAtomValue(isHomeLoadedAtom)
 
-  if (!eventSource.current || particlesRequest.state !== 'hasData') return null
+  if (!isHomeLoaded) return null
   return (
     <CanvasImpl
       style={{
@@ -40,7 +40,7 @@ export const Canvas = memo(({ eventSource }: Props) => {
         depth: false,
       }}
       flat
-      eventSource={eventSource.current}
+      eventSource={eventSource.current!}
       eventPrefix='client'
       camera={{
         fov: 50,
@@ -49,9 +49,10 @@ export const Canvas = memo(({ eventSource }: Props) => {
         far: 11,
       }}
     >
+      {/* <Setup /> */}
       {/* <Background /> */}
       <Cursor />
-        <Particles positions={particlesRequest.data.positions} staggerMultipliers={particlesRequest.data.multipliers} />
+      <Particles />
 
       {/* <Perf /> */}
       {/* <r3f.Out /> */}

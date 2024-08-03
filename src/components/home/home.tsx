@@ -1,3 +1,10 @@
+'use client'
+import { useEffect } from 'react'
+
+import { useSetAtom } from 'jotai'
+
+import { isHomeLoadedAtom } from '~/store'
+
 import HomeIcon from '~/assets/home-icon.svg'
 
 const routes = [
@@ -36,6 +43,12 @@ const socials = [
 ]
 
 export const Home = () => {
+  const setHomeLoaded = useSetAtom(isHomeLoadedAtom)
+
+  useEffect(() => {
+    setHomeLoaded(true)
+  }, [setHomeLoaded])
+
   return (
     <section className='relative mx-auto size-full max-w-screen-2xl'>
       <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
@@ -81,6 +94,9 @@ export const Home = () => {
           ))}
         </ul>
       </nav>
+      <div className='progress completed bg-transparent'>
+        <div className='progress-value completed'></div>
+      </div>
     </section>
   )
 }

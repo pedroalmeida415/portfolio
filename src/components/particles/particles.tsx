@@ -4,7 +4,7 @@ import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
 import { Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry, Vector3 } from 'three'
 
-import { cursorMeshAtom } from '~/store'
+import { cursorMeshAtom, particlesDataAtom } from '~/store'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
@@ -16,163 +16,163 @@ import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.
 
 extend({ Mesh, Points, ShaderMaterial, BufferGeometry, BufferAttribute, PlaneGeometry })
 
-export const Particles = memo(
-  ({ positions, staggerMultipliers }: { positions: Float32Array; staggerMultipliers: Uint8Array }) => {
-    const cursorMeshRef = useAtomValue(cursorMeshAtom)
-    // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
-    // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
+export const Particles = memo(() => {
+  const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
+  const cursorMeshRef = useAtomValue(cursorMeshAtom)
+  // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
+  // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
 
-    const renderer = useThree((state) => state.gl)
-    const pointer = useThree((state) => state.pointer)
-    const size = useThree((state) => state.size)
+  const renderer = useThree((state) => state.gl)
+  const pointer = useThree((state) => state.pointer)
+  const viewport = useThree((state) => state.viewport)
+  const size = useThree((state) => state.size)
 
-    const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
+  const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
 
-    const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
-      // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
-      // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
-      // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
+  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
+    // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
+    // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
+    // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
 
-      // const [positions] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
+    // const [positions] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
 
-      // const baseGeometry = new BufferGeometry()
-      // baseGeometry.setAttribute('position', new Float32BufferAttribute(positions, 2))
+    // const baseGeometry = new BufferGeometry()
+    // baseGeometry.setAttribute('position', new Float32BufferAttribute(positions, 2))
 
-      // // --- Translate base geometry instead of points geometry for accurate raycast ---
-      // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
+    // // --- Translate base geometry instead of points geometry for accurate raycast ---
+    // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
 
-      // fetch(
-      //   new Request('/api/encode?output=position', {
-      //     method: 'POST',
-      //     body: baseGeometry.attributes.position.array,
-      //   }),
-      // )
+    // fetch(
+    //   new Request('/api/encode?output=position', {
+    //     method: 'POST',
+    //     body: baseGeometry.attributes.position.array,
+    //   }),
+    // )
 
-      // --- GPU Compute ---
-      const baseGeometryCount = positions.length / 2
-      const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
+    // --- GPU Compute ---
+    const baseGeometryCount = positions.length / 2
+    const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
 
-      const particlesUvArray = new Int32Array(positions.length)
+    const particlesUvArray = new Int32Array(positions.length)
 
-      for (let y = 0; y < gpgpuSize; ++y) {
-        for (let x = 0; x < gpgpuSize; ++x) {
-          const i = y * gpgpuSize + x
-          const i2 = i * 2
-
-          particlesUvArray[i2 + 0] = x
-          particlesUvArray[i2 + 1] = y
-        }
-      }
-
-      const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
-
-      // Texture to store particles position
-      const baseParticlesTexture = gpgpuCompute.createTexture()
-
-      const totalStaggerDuration = 2.5
-      // Fill texture with particles values
-      for (let i = 0; i < baseGeometryCount; ++i) {
+    for (let y = 0; y < gpgpuSize; ++y) {
+      for (let x = 0; x < gpgpuSize; ++x) {
+        const i = y * gpgpuSize + x
         const i2 = i * 2
-        const i4 = i * 4
-        const normalizedMultiplier = staggerMultipliers[i] / 255
 
-        // RGBA values for FBO texture from base geometry position
-        baseParticlesTexture.image.data[i4 + 0] = positions[i2 + 0]
-        baseParticlesTexture.image.data[i4 + 1] = positions[i2 + 1]
-        baseParticlesTexture.image.data[i4 + 2] = 0
-        baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
+        particlesUvArray[i2 + 0] = x
+        particlesUvArray[i2 + 1] = y
       }
+    }
 
-      // Particles variable
-      const particlesVariable = gpgpuCompute.addVariable(
-        'uParticles',
-        gpgpuParticlesShader.sourceCode,
-        baseParticlesTexture,
-      )
-      gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
+    const gpgpuCompute = new GPUComputationRenderer(gpgpuSize, gpgpuSize, renderer)
 
-      const navbar = document.getElementById('navbar')!
+    // Texture to store particles position
+    const baseParticlesTexture = gpgpuCompute.createTexture()
+
+    const totalStaggerDuration = 2.5
+    // Fill texture with particles values
+    for (let i = 0; i < baseGeometryCount; ++i) {
+      const i2 = i * 2
+      const i4 = i * 4
+      const normalizedMultiplier = staggerMultipliers[i] / 255
+
+      // RGBA values for FBO texture from base geometry position
+      baseParticlesTexture.image.data[i4 + 0] = positions[i2 + 0]
+      baseParticlesTexture.image.data[i4 + 1] = positions[i2 + 1]
+      baseParticlesTexture.image.data[i4 + 2] = 0
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
+    }
+
+    // Particles variable
+    const particlesVariable = gpgpuCompute.addVariable(
+      'uParticles',
+      gpgpuParticlesShader.sourceCode,
+      baseParticlesTexture,
+    )
+    gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
+
+    const navbar = document.getElementById('navbar')!
     const navbarCoords = getWorldSpaceCoords(navbar, viewport)
 
-      const mappedUniforms = mapMangledUniforms(
+    const mappedUniforms = mapMangledUniforms(
+      {
+        uDeltaTime: { value: 0 },
+        uBase: { value: baseParticlesTexture },
+        uMouse: { value: pointer },
+        uIsLMBDown: { value: false },
+        initialCoords: { value: new Vector3(navbarCoords.width, navbarCoords.height, navbarCoords.centerY) },
+      },
+      gpgpuParticlesShader.uniforms,
+    )
+    particlesVariable.material.uniforms = mappedUniforms
+
+    // Init
+    gpgpuCompute.init()
+
+    return {
+      gpgpuCompute,
+      baseGeometryCount,
+      particlesVariable,
+      particlesUvArray,
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
+
+  useFrame((state, delta) => {
+    if (cursorMeshRef) {
+      state.raycaster.setFromCamera(state.pointer, state.camera)
+      const intersects = state.raycaster.intersectObject(cursorMeshRef)
+
+      if (intersects.length) {
+        const { point } = intersects[0]
+        setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
+      }
+    }
+
+    // --- Update GPU Compute ---
+    setUniform(particlesVariable, gpgpuParticlesShader, 'uDeltaTime', delta)
+    setUniform(particlesVariable, gpgpuParticlesShader, 'uIsLMBDown', false)
+    gpgpuCompute.compute()
+    setUniform(
+      particlesObjectRef.current,
+      particlesVertexShader,
+      'uParticlesTexture',
+      gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture,
+    )
+  })
+
+  const particlesInitialUniforms = useMemo(
+    () =>
+      mapMangledUniforms(
         {
-          uDeltaTime: { value: 0 },
-          uBase: { value: baseParticlesTexture },
-          uMouse: { value: pointer },
-          uIsLMBDown: { value: false },
-        initialCoords: { value: new Vector3(navbarCoords.width, navbarCoords.centerY, navbarCoords.height) },
+          uSize: { value: size.width * 0.002 },
+          uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
         },
-        gpgpuParticlesShader.uniforms,
-      )
-      particlesVariable.material.uniforms = mappedUniforms
+        particlesVertexShader.uniforms,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
-      // Init
-      gpgpuCompute.init()
-
-      return {
-        gpgpuCompute,
-        baseGeometryCount,
-        particlesVariable,
-        particlesUvArray,
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-    useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
-
-    useFrame((state, delta) => {
-      if (cursorMeshRef) {
-        state.raycaster.setFromCamera(state.pointer, state.camera)
-        const intersects = state.raycaster.intersectObject(cursorMeshRef)
-
-        if (intersects.length) {
-          const { point } = intersects[0]
-          setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
-        }
-      }
-
-      // --- Update GPU Compute ---
-      setUniform(particlesVariable, gpgpuParticlesShader, 'uDeltaTime', delta)
-      setUniform(particlesVariable, gpgpuParticlesShader, 'uIsLMBDown', false)
-      gpgpuCompute.compute()
-      setUniform(
-        particlesObjectRef.current,
-        particlesVertexShader,
-        'uParticlesTexture',
-        gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture,
-      )
-    })
-
-    const particlesInitialUniforms = useMemo(
-      () =>
-        mapMangledUniforms(
-          {
-            uSize: { value: size.width * 0.002 },
-            uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
-          },
-          particlesVertexShader.uniforms,
-        ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [],
-    )
-
-    return (
-      <points ref={particlesObjectRef} position={[0, 0, 0]} frustumCulled={false} matrixAutoUpdate={false}>
-        <bufferGeometry
-          ref={(ref) => {
-            ref?.setDrawRange(0, baseGeometryCount)
-          }}
-        >
-          <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
-        </bufferGeometry>
-        <shaderMaterial
-          transparent
-          depthTest={false}
-          vertexShader={particlesVertexShader.sourceCode}
-          fragmentShader={particlesFragmentShader.sourceCode}
-          uniforms={particlesInitialUniforms}
-        />
-      </points>
-    )
-  },
-)
+  return (
+    <points ref={particlesObjectRef} position={[0, 0, 0]} frustumCulled={false} matrixAutoUpdate={false}>
+      <bufferGeometry
+        ref={(ref) => {
+          ref?.setDrawRange(0, baseGeometryCount)
+        }}
+      >
+        <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />
+      </bufferGeometry>
+      <shaderMaterial
+        transparent
+        depthTest={false}
+        vertexShader={particlesVertexShader.sourceCode}
+        fragmentShader={particlesFragmentShader.sourceCode}
+        uniforms={particlesInitialUniforms}
+      />
+    </points>
+  )
+})
 Particles.displayName = 'Particles'
