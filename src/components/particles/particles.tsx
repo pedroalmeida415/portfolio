@@ -29,7 +29,7 @@ export const Particles = memo(() => {
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
 
-  const { gpgpuCompute, baseGeometryCount, particlesVariable, particlesUvArray } = useMemo(() => {
+  const { gpgpuCompute, particlesVariable, particlesUvArray } = useMemo(() => {
     // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
     // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
     // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
@@ -112,7 +112,6 @@ export const Particles = memo(() => {
 
     return {
       gpgpuCompute,
-      baseGeometryCount,
       particlesVariable,
       particlesUvArray,
     }
@@ -122,7 +121,6 @@ export const Particles = memo(() => {
 
   useFrame((state, delta) => {
     if (cursorMeshRef) {
-      state.raycaster.setFromCamera(state.pointer, state.camera)
       const intersects = state.raycaster.intersectObject(cursorMeshRef)
 
       if (intersects.length) {
@@ -160,7 +158,7 @@ export const Particles = memo(() => {
     <points ref={particlesObjectRef} position={[0, 0, 0]} frustumCulled={false} matrixAutoUpdate={false}>
       <bufferGeometry
         ref={(ref) => {
-          ref?.setDrawRange(0, baseGeometryCount)
+          ref?.setDrawRange(0, positions.length / 2)
         }}
       >
         <bufferAttribute attach='attributes-aParticlesUv' array={particlesUvArray} itemSize={2} />

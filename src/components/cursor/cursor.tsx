@@ -35,13 +35,13 @@ export const Cursor = memo(() => {
     if (!previousViewportAspect) previousViewportAspect = viewport.aspect
     if (previousViewportAspect === viewport.aspect) return
 
-      setUniform(cursorMeshRef.current, cursorFragmentShader, 'uUvScalar', [viewport.width / 2, viewport.height / 2])
-      setUniform(
-        cursorMeshRef.current,
-        cursorFragmentShader,
-        'uInteractionsTexture',
-        generateInteractionsTexture(viewport),
-      )
+    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uUvScalar', [viewport.width / 2, viewport.height / 2])
+    setUniform(
+      cursorMeshRef.current,
+      cursorFragmentShader,
+      'uInteractionsTexture',
+      generateInteractionsTexture(viewport),
+    )
 
     const subtitle = document.getElementById('subtitle') as HTMLElement
     const { textTexture, textTextureScalar } = generateTextMask(subtitle, size)
@@ -64,7 +64,6 @@ export const Cursor = memo(() => {
 
   useFrame((state, delta) => {
     if (!cursorMeshRef.current) return
-    state.raycaster.setFromCamera(state.pointer, state.camera)
     const intersects = state.raycaster.intersectObject(cursorMeshRef.current)
 
     if (intersects.length) {
