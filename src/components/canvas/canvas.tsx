@@ -67,6 +67,7 @@ export const Canvas = memo(({ eventSource }: Props) => {
         const navbarCoords = getWorldSpaceCoords(navbar, state.viewport)
 
         state.pointer.set(0, navbarCoords.centerY)
+        state.raycaster.setFromCamera(state.pointer, state.camera)
       }}
     >
       <Camera />
