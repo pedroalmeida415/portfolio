@@ -53,6 +53,7 @@ export const Canvas = memo(({ eventSource }: Props) => {
         depth: false,
       }}
       flat
+      resize={{ scroll: false, debounce: 50 }}
       eventSource={eventSource.current!}
       eventPrefix='client'
       camera={{
@@ -61,13 +62,6 @@ export const Canvas = memo(({ eventSource }: Props) => {
         position: [0, 0, 10],
         near: 9,
         far: 11,
-      }}
-      onCreated={(state) => {
-        const navbar = document.getElementById('navbar') as HTMLElement
-        const navbarCoords = getWorldSpaceCoords(navbar, state.viewport)
-
-        state.pointer.set(0, navbarCoords.centerY)
-        state.raycaster.setFromCamera(state.pointer, state.camera)
       }}
     >
       <Camera />
