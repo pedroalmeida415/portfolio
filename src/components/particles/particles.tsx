@@ -2,9 +2,9 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
-import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector3 } from 'three'
+import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector2 } from 'three'
 
-import { cursorMeshAtom, particlesDataAtom } from '~/store'
+import { particlesDataAtom } from '~/store'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
@@ -18,18 +18,16 @@ extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
 export const Particles = memo(() => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
-  const cursorMeshRef = useAtomValue(cursorMeshAtom)
   // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
   // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
 
   const renderer = useThree((state) => state.gl)
-  const pointer = useThree((state) => state.pointer)
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
 
-  const { gpgpuCompute, particlesVariable, particlesUvArray } = useMemo(() => {
+  const { gpgpuCompute, particlesVariable, particlesUvArray, pointer } = useMemo(() => {
     // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
     // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
     // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
@@ -95,13 +93,15 @@ export const Particles = memo(() => {
     const navbar = document.getElementById('navbar') as HTMLElement
     const navbarCoords = getWorldSpaceCoords(navbar, viewport)
 
+    const pointer = new Vector2(0, navbarCoords.centerY)
+
     const mappedUniforms = mapMangledUniforms(
       {
         uDeltaTime: { value: 0 },
         uBase: { value: baseParticlesTexture },
         uMouse: { value: pointer },
         uIsLMBDown: { value: false },
-        initialCoords: { value: new Vector3(navbarCoords.width, navbarCoords.height, navbarCoords.centerY) },
+        initialCoords: { value: [navbarCoords.width, navbarCoords.height, navbarCoords.centerY] },
       },
       gpgpuParticlesShader.uniforms,
     )
@@ -114,20 +114,16 @@ export const Particles = memo(() => {
       gpgpuCompute,
       particlesVariable,
       particlesUvArray,
+      pointer,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
 
   useFrame((state, delta) => {
-    if (cursorMeshRef) {
-      const intersects = state.raycaster.intersectObject(cursorMeshRef)
+    if (!particlesObjectRef.current) return
 
-      if (intersects.length) {
-        const { point } = intersects[0]
-        setUniform(particlesVariable, gpgpuParticlesShader, 'uMouse', point)
-      }
-    }
+    pointer.copy(state.raycaster.ray.direction)
 
     // --- Update GPU Compute ---
     setUniform(particlesVariable, gpgpuParticlesShader, 'uDeltaTime', delta)

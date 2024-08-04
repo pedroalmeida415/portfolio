@@ -1,10 +1,7 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
-import { useSetAtom } from 'jotai'
-import { Mesh, PlaneGeometry, ShaderMaterial, Vector2, Vector3 } from 'three'
-
-import { cursorMeshAtom } from '~/store'
+import { Mesh, PlaneGeometry, ShaderMaterial, Vector2 } from 'three'
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
@@ -18,17 +15,11 @@ extend({ Mesh, PlaneGeometry, ShaderMaterial })
 let previousViewportAspect: number | undefined
 
 export const Cursor = memo(() => {
-  const setCursorMeshAtom = useSetAtom(cursorMeshAtom)
-
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
   const renderer = useThree((state) => state.gl)
 
   const cursorMeshRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>(null)
-
-  useEffect(() => {
-    if (cursorMeshRef.current) setCursorMeshAtom(cursorMeshRef.current)
-  }, [setCursorMeshAtom])
 
   useEffect(() => {
     if (!cursorMeshRef.current) return
@@ -57,28 +48,20 @@ export const Cursor = memo(() => {
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
   const middleBufferIndex = Math.floor(bufferSize / 2)
-
-  const { P0, P1, P2, PT, mouse3D, pointerBuffer } = useMemo(
+  const { P0, P1, P2, PT, pointerBuffer } = useMemo(
     () => ({
       P0: new Vector2(0, 0),
       P1: new Vector2(0, 0),
       P2: new Vector2(0, 0),
       PT: new Vector2(0, 0),
-      mouse3D: new Vector3(0, 0, 0.5),
       pointerBuffer: Array.from({ length: bufferSize }, () => new Vector2(0, 0)),
     }),
     [],
   )
 
-  let distance: number
   useFrame((state) => {
     if (!cursorMeshRef.current) return
-
-    mouse3D.set(state.pointer.x, state.pointer.y, 0.5)
-    mouse3D.unproject(state.camera)
-    mouse3D.sub(state.camera.position).normalize()
-    distance = -state.camera.position.z / mouse3D.z
-    P0.copy(state.camera.position).add(mouse3D.multiplyScalar(distance))
+    P0.copy(state.raycaster.ray.direction)
 
     pointerBuffer[bufferIndex].copy(P0)
     bufferIndex = (bufferIndex + 1) % bufferSize

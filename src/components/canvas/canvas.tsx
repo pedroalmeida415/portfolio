@@ -5,7 +5,7 @@ import { memo, useCallback, type MutableRefObject } from 'react'
 // import { Preload } from '@react-three/drei'
 
 import { PerspectiveCamera } from '@react-three/drei'
-import { Canvas as CanvasImpl, useThree } from '@react-three/fiber'
+import { Canvas as CanvasImpl, useFrame, useThree } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
 // import { Perf } from 'r3f-perf'
 // import { r3f } from '~/helpers/global'
@@ -16,8 +16,6 @@ import { isHomeLoadedAtom } from '~/store'
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
 import { Particles } from '~/components/particles/particles'
-
-import { getWorldSpaceCoords } from '~/helpers/shader.utils'
 
 type Props = {
   eventSource: MutableRefObject<HTMLElement | null>
@@ -81,6 +79,12 @@ const Camera = memo(() => {
   const viewport = useThree((state) => state.viewport)
 
   const getFov = useCallback(() => calculateFov(viewport.aspect), [viewport.aspect])
+
+  let distance: number
+  useFrame((state) => {
+    distance = -state.camera.position.z / state.raycaster.ray.direction.z
+    state.raycaster.ray.direction.multiplyScalar(distance)
+  }, -1)
 
   return (
     <PerspectiveCamera
