@@ -2,11 +2,10 @@ uniform vec2 uMouse;
 uniform vec2 uP1;
 uniform vec2 uP2;
 uniform vec2 uUvScalar;
+uniform vec2 uResolution;
 uniform vec2 uTextTextureScalar;
 uniform sampler2D uTextTexture;
 uniform sampler2D uInteractionsTexture;
-
-varying vec2 vUv;
 
 float smoothMax(float a, float b, float k) {
     return log(exp(k * a) + exp(k * b)) / k;
@@ -92,7 +91,7 @@ float sdTaperedQuadraticBezier(vec2 p, vec2 a, vec2 b, vec2 c, int samples, floa
 }
 
 void main() {
-    vec2 uv = vUv * 2.0 - 1.0;
+    vec2 uv = gl_FragCoord.xy / uResolution * 2.0 - 1.0;
     uv *= uUvScalar;
     
     vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
@@ -112,7 +111,6 @@ void main() {
     float screenBorderDist = max(screenBoxDist, -screenBoxClipDist);
     
     float navSegmentDist = sdSegment(uv, vec2(navSegmentData.r, navSegmentData.b), vec2(navSegmentData.g, navSegmentData.b)) - navSegmentData.a;
-    // float navBoxDist = sdBox(uv - vec2(0.0, -4.0455247), vec2(2.05550575, 0.3160979 / 2.0)) - 0.3160979 / 2.0;
     
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
     float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 10, 0.3);

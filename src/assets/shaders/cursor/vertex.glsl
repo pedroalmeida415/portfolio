@@ -1,9 +1,5 @@
-@nomangle position uv
-
-varying vec2 vUv;
-
-void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    
-    vUv = uv;
+void main(void) {
+    gl_Position.x = (gl_VertexID == 2) ?  3. : -1.;
+    gl_Position.y = (gl_VertexID == 1) ? -3. : 1.;
+    gl_Position.zw = vec2(1.);
 }

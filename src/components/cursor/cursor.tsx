@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
 import { useSetAtom } from 'jotai'
-import { Mesh, PlaneGeometry, ShaderMaterial, Vector2, type Vector3 } from 'three'
+import { Mesh, PlaneGeometry, ShaderMaterial, Vector2, Vector3 } from 'three'
 
 import { cursorMeshAtom } from '~/store'
 
@@ -22,7 +22,7 @@ export const Cursor = memo(() => {
 
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
-  const pointer = useThree((state) => state.pointer)
+  const renderer = useThree((state) => state.gl)
 
   const cursorMeshRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>(null)
 
@@ -48,38 +48,44 @@ export const Cursor = memo(() => {
     setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTexture', textTexture)
     setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTextureScalar', textTextureScalar)
 
+    const resolution = renderer.getDrawingBufferSize(new Vector2())
+    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uResolution', resolution)
+
     previousViewportAspect = viewport.aspect
-  }, [viewport, size])
+  }, [viewport, size, renderer])
 
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
   const middleBufferIndex = Math.floor(bufferSize / 2)
 
-  const P1 = useMemo(() => new Vector2(), [])
-  const mousePositions = useMemo(
-    () => Array.from({ length: bufferSize }, () => new Vector2(pointer.x, pointer.y)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { P0, P1, P2, PT, mouse3D, pointerBuffer } = useMemo(
+    () => ({
+      P0: new Vector2(0, 0),
+      P1: new Vector2(0, 0),
+      P2: new Vector2(0, 0),
+      PT: new Vector2(0, 0),
+      mouse3D: new Vector3(0, 0, 0.5),
+      pointerBuffer: Array.from({ length: bufferSize }, () => new Vector2(0, 0)),
+    }),
     [],
   )
 
-  useFrame((state, delta) => {
+  let distance: number
+  useFrame((state) => {
     if (!cursorMeshRef.current) return
-    const intersects = state.raycaster.intersectObject(cursorMeshRef.current)
 
-    if (intersects.length) {
-      const { point } = intersects[0]
+    mouse3D.set(state.pointer.x, state.pointer.y, 0.5)
+    mouse3D.unproject(state.camera)
+    mouse3D.sub(state.camera.position).normalize()
+    distance = -state.camera.position.z / mouse3D.z
+    P0.copy(state.camera.position).add(mouse3D.multiplyScalar(distance))
 
-      mousePositions[bufferIndex].set(point.x, point.y)
-      bufferIndex = (bufferIndex + 1) % bufferSize
-      const PT = mousePositions[(bufferIndex + middleBufferIndex) % bufferSize]
-      const P2 = mousePositions[bufferIndex]
+    pointerBuffer[bufferIndex].copy(P0)
+    bufferIndex = (bufferIndex + 1) % bufferSize
+    PT.copy(pointerBuffer[(bufferIndex + middleBufferIndex) % bufferSize])
+    P2.copy(pointerBuffer[bufferIndex])
 
-      calculateP1(point, P2, PT, P1)
-
-      setUniform(cursorMeshRef.current, cursorFragmentShader, 'uMouse', point)
-      setUniform(cursorMeshRef.current, cursorFragmentShader, 'uP1', P1)
-      setUniform(cursorMeshRef.current, cursorFragmentShader, 'uP2', P2)
-    }
+    calculateP1(P0, P2, PT, P1)
   })
 
   const cursorInitialUniforms = useMemo(
@@ -90,15 +96,18 @@ export const Cursor = memo(() => {
       const interactionsTexture = generateInteractionsTexture(viewport)
       const uvScalar = new Vector2(viewport.width / 2, viewport.height / 2)
 
+      const resolution = renderer.getDrawingBufferSize(new Vector2())
+
       return mapMangledUniforms(
         {
-          uMouse: { value: pointer },
-          uP1: { value: pointer },
-          uP2: { value: pointer },
+          uMouse: { value: P0 },
+          uP1: { value: P1 },
+          uP2: { value: P2 },
           uUvScalar: { value: uvScalar },
           uTextTexture: { value: textTexture },
           uTextTextureScalar: { value: textTextureScalar },
           uInteractionsTexture: { value: interactionsTexture },
+          uResolution: { value: resolution },
         },
         cursorFragmentShader.uniforms,
       )
@@ -108,7 +117,7 @@ export const Cursor = memo(() => {
   )
   return (
     <mesh ref={cursorMeshRef} frustumCulled={false} matrixAutoUpdate={false} position={[0, 0, 0]}>
-      <planeGeometry args={[viewport.width + 0.01, viewport.height + 0.01]} />
+      <bufferGeometry ref={(ref) => ref?.setDrawRange(0, 3)} />
       <shaderMaterial
         transparent
         depthTest={false}
@@ -122,9 +131,6 @@ export const Cursor = memo(() => {
 Cursor.displayName = 'Cursor'
 
 // P1=2P(0.5)−0.5P0−0.5P2
-function calculateP1(P0: Vector3, P2: Vector2, Pt: Vector2, P1: Vector2) {
-  const x = Pt.x * 2 - P0.x * 0.5 - P2.x * 0.5,
-    y = Pt.y * 2 - P0.y * 0.5 - P2.y * 0.5
-
-  P1.set(x, y)
+function calculateP1(P0: Vector2, P2: Vector2, Pt: Vector2, P1: Vector2) {
+  P1.set(Pt.x * 2 - P0.x * 0.5 - P2.x * 0.5, Pt.y * 2 - P0.y * 0.5 - P2.y * 0.5)
 }
