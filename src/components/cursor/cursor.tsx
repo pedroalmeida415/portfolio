@@ -15,10 +15,13 @@ import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.gl
 
 extend({ Mesh, PlaneGeometry, ShaderMaterial })
 
+let previousViewportAspect: number | undefined
+
 export const Cursor = memo(() => {
   const setCursorMeshAtom = useSetAtom(cursorMeshAtom)
 
   const viewport = useThree((state) => state.viewport)
+  const size = useThree((state) => state.size)
   const pointer = useThree((state) => state.pointer)
 
   const cursorMeshRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>(null)
@@ -28,7 +31,10 @@ export const Cursor = memo(() => {
   }, [setCursorMeshAtom])
 
   useEffect(() => {
-    if (cursorMeshRef.current) {
+    if (!cursorMeshRef.current) return
+    if (!previousViewportAspect) previousViewportAspect = viewport.aspect
+    if (previousViewportAspect === viewport.aspect) return
+
       setUniform(cursorMeshRef.current, cursorFragmentShader, 'uUvScalar', [viewport.width / 2, viewport.height / 2])
       setUniform(
         cursorMeshRef.current,
@@ -36,10 +42,14 @@ export const Cursor = memo(() => {
         'uInteractionsTexture',
         generateInteractionsTexture(viewport),
       )
-    }
-  }, [viewport])
 
-  const { textTexture, textTextureScalar } = useMemo(() => generateTextMask(), [])
+    const subtitle = document.getElementById('subtitle') as HTMLElement
+    const { textTexture, textTextureScalar } = generateTextMask(subtitle, size)
+    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTexture', textTexture)
+    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTextureScalar', textTextureScalar)
+
+    previousViewportAspect = viewport.aspect
+  }, [viewport, size])
 
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
@@ -74,19 +84,26 @@ export const Cursor = memo(() => {
   })
 
   const cursorInitialUniforms = useMemo(
-    () =>
-      mapMangledUniforms(
+    () => {
+      const subtitle = document.getElementById('subtitle') as HTMLElement
+      const { textTexture, textTextureScalar } = generateTextMask(subtitle, size)
+
+      const interactionsTexture = generateInteractionsTexture(viewport)
+      const uvScalar = new Vector2(viewport.width / 2, viewport.height / 2)
+
+      return mapMangledUniforms(
         {
           uMouse: { value: pointer },
           uP1: { value: pointer },
           uP2: { value: pointer },
-          uUvScalar: { value: [viewport.width / 2, viewport.height / 2] },
+          uUvScalar: { value: uvScalar },
           uTextTexture: { value: textTexture },
           uTextTextureScalar: { value: textTextureScalar },
-          uInteractionsTexture: { value: generateInteractionsTexture(viewport) },
+          uInteractionsTexture: { value: interactionsTexture },
         },
         cursorFragmentShader.uniforms,
-      ),
+      )
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )

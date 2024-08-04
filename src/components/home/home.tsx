@@ -69,7 +69,7 @@ export const Home = () => {
         </span>
       </header>
       <div className='absolute left-[10%] top-[66%]'>
-        <h2 data-cursor-interactive='center' className='mb-1 text-5xl font-extralight'>
+        <h2 data-cursor-interactive='center' id='subtitle' className='mb-1 text-5xl font-extralight'>
           Creative Developer
         </h2>
         <div className='ml-1 flex items-center'>

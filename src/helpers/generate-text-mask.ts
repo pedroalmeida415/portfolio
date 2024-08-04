@@ -1,6 +1,7 @@
+import { type Size } from '@react-three/fiber'
 import { CanvasTexture, Vector2 } from 'three'
 
-export const generateTextMask = () => {
+export const generateTextMask = (textElement: HTMLElement, canvasSize: Size) => {
   const canvas = document.createElement('canvas')
   canvas.style.position = 'absolute'
   canvas.style.top = '0'
@@ -9,9 +10,9 @@ export const generateTextMask = () => {
   canvas.style.display = 'none'
   document.body.appendChild(canvas)
 
-  const text = 'Creative Developer'
   const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
-  const fontSize = 48
+  const fontSize = getComputedStyle(textElement).fontSize
+  const text = textElement.innerText
 
   const blurColor = '#ff0000'
   const baseBlur = 1
@@ -19,7 +20,7 @@ export const generateTextMask = () => {
   const blurIncrement = 2
 
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-  ctx.font = `${fontSize}px ${font}`
+  ctx.font = `${fontSize} ${font}`
   ctx.textBaseline = 'middle'
 
   const textMeasurements = ctx.measureText(text)
@@ -44,7 +45,7 @@ export const generateTextMask = () => {
   ctx.shadowOffsetX = 0
   ctx.shadowOffsetY = 0
 
-  ctx.font = `${fontSize}px ${font}`
+  ctx.font = `${fontSize} ${font}`
   ctx.textBaseline = 'middle'
   ctx.fillStyle = blurColor
   ctx.fillText(text, textX, textY)
@@ -57,14 +58,11 @@ export const generateTextMask = () => {
   const textTexture = new CanvasTexture(canvas)
   textTexture.generateMipmaps = false
 
-  const bodyBoundingRect = document.body.getBoundingClientRect()
-  const bodyWidth = bodyBoundingRect.width
-
-  const normalizedWidth = textTexture.image.width / bodyWidth
+  const normalizedWidth = textTexture.image.width / canvasSize.width
   const uvScalar = 1 / normalizedWidth
 
   const textureAspect = textTexture.image.width / textTexture.image.height
-  const screenAspect = bodyBoundingRect.width / bodyBoundingRect.height
+  const screenAspect = canvasSize.width / canvasSize.height
 
   const textTextureScalar = new Vector2(uvScalar, uvScalar * (textureAspect / screenAspect))
 
