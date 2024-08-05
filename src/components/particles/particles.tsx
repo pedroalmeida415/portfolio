@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
-import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector2 } from 'three'
+import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector2, type Object3D } from 'three'
 
 import { particlesDataAtom } from '~/store'
 
@@ -27,7 +27,7 @@ export const Particles = memo(() => {
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
 
-  const { gpgpuCompute, particlesVariable, particlesUvArray, pointer } = useMemo(() => {
+  const { gpgpuCompute, particlesVariable, particlesUvArray, particlesPointer } = useMemo(() => {
     // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
     // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
     // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
@@ -93,13 +93,13 @@ export const Particles = memo(() => {
     const navbar = document.getElementById('navbar') as HTMLElement
     const navbarCoords = getWorldSpaceCoords(navbar, viewport)
 
-    const pointer = new Vector2(0, navbarCoords.centerY)
+    const particlesPointer = new Vector2(0, navbarCoords.centerY)
 
     const mappedUniforms = mapMangledUniforms(
       {
         uDeltaTime: { value: 0 },
         uBase: { value: baseParticlesTexture },
-        uMouse: { value: pointer },
+        uMouse: { value: particlesPointer },
         uIsLMBDown: { value: false },
         initialCoords: { value: [navbarCoords.width, navbarCoords.height, navbarCoords.centerY] },
       },
@@ -114,7 +114,7 @@ export const Particles = memo(() => {
       gpgpuCompute,
       particlesVariable,
       particlesUvArray,
-      pointer,
+      particlesPointer,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -123,7 +123,8 @@ export const Particles = memo(() => {
   useFrame((state, delta) => {
     if (!particlesObjectRef.current) return
 
-    pointer.copy(state.raycaster.ray.direction)
+    const pointer3D = state.scene.getObjectByName('Pointer3D') as Object3D
+    particlesPointer.copy(pointer3D.position)
 
     // --- Update GPU Compute ---
     setUniform(particlesVariable, gpgpuParticlesShader, 'uDeltaTime', delta)

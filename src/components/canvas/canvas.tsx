@@ -1,21 +1,23 @@
 'use client'
 
-import { memo, useCallback, type MutableRefObject } from 'react'
+import { memo, useCallback, useMemo, useRef, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
 
 import { PerspectiveCamera } from '@react-three/drei'
-import { Canvas as CanvasImpl, useFrame, useThree } from '@react-three/fiber'
+import { Canvas as CanvasImpl, extend, useFrame, useThree } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
 // import { Perf } from 'r3f-perf'
 // import { r3f } from '~/helpers/global'
-import { MathUtils } from 'three'
+import { Group, MathUtils, Object3D, Plane, Vector3 } from 'three'
 
 import { isHomeLoadedAtom } from '~/store'
 
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
 import { Particles } from '~/components/particles/particles'
+
+extend({ Object3D, PerspectiveCamera, Group })
 
 type Props = {
   eventSource: MutableRefObject<HTMLElement | null>
@@ -62,6 +64,7 @@ export const Canvas = memo(({ eventSource }: Props) => {
         far: 11,
       }}
     >
+      <Pointer3D />
       <Camera />
       {/* <Background /> */}
       <Cursor />
@@ -80,12 +83,6 @@ const Camera = memo(() => {
 
   const getFov = useCallback(() => calculateFov(viewport.aspect), [viewport.aspect])
 
-  let distance: number
-  useFrame((state) => {
-    distance = -state.camera.position.z / state.raycaster.ray.direction.z
-    state.raycaster.ray.direction.multiplyScalar(distance)
-  }, -1)
-
   return (
     <PerspectiveCamera
       makeDefault
@@ -99,3 +96,26 @@ const Camera = memo(() => {
   )
 })
 Camera.displayName = 'Camera'
+
+const Pointer3D = memo(() => {
+  const Pointer3DRef = useRef<Object3D | null>(null)
+
+  const normalPlane = useMemo(() => new Plane(new Vector3(0, 0, 1), 0), [])
+
+  useFrame((state) => {
+    if (!Pointer3DRef.current) return
+    state.raycaster.ray.intersectPlane(normalPlane, Pointer3DRef.current.position)
+  }, -1)
+
+  return (
+    <object3D
+      name='Pointer3D'
+      ref={Pointer3DRef}
+      visible={false}
+      renderOrder={-1}
+      frustumCulled={false}
+      matrixAutoUpdate={false}
+    />
+  )
+})
+Pointer3D.displayName = 'Pointer3D'

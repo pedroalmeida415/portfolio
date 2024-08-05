@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
-import { Mesh, PlaneGeometry, ShaderMaterial, Vector2 } from 'three'
+import { BufferGeometry, Mesh, type Object3D, ShaderMaterial, Vector2 } from 'three'
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
@@ -10,7 +10,7 @@ import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
 
-extend({ Mesh, PlaneGeometry, ShaderMaterial })
+extend({ Mesh, BufferGeometry, ShaderMaterial })
 
 let previousViewportAspect: number | undefined
 
@@ -19,7 +19,7 @@ export const Cursor = memo(() => {
   const size = useThree((state) => state.size)
   const renderer = useThree((state) => state.gl)
 
-  const cursorMeshRef = useRef<Mesh<PlaneGeometry, ShaderMaterial> | null>(null)
+  const cursorMeshRef = useRef<Mesh<BufferGeometry, ShaderMaterial> | null>(null)
 
   useEffect(() => {
     if (!cursorMeshRef.current) return
@@ -48,12 +48,11 @@ export const Cursor = memo(() => {
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
   const middleBufferIndex = Math.floor(bufferSize / 2)
-  const { P0, P1, P2, PT, pointerBuffer } = useMemo(
+  const { P0, P1, P2, pointerBuffer } = useMemo(
     () => ({
       P0: new Vector2(0, 0),
       P1: new Vector2(0, 0),
       P2: new Vector2(0, 0),
-      PT: new Vector2(0, 0),
       pointerBuffer: Array.from({ length: bufferSize }, () => new Vector2(0, 0)),
     }),
     [],
@@ -61,11 +60,12 @@ export const Cursor = memo(() => {
 
   useFrame((state) => {
     if (!cursorMeshRef.current) return
-    P0.copy(state.raycaster.ray.direction)
+    const pointer3D = state.scene.getObjectByName('Pointer3D') as Object3D
+    P0.copy(pointer3D.position)
 
     pointerBuffer[bufferIndex].copy(P0)
     bufferIndex = (bufferIndex + 1) % bufferSize
-    PT.copy(pointerBuffer[(bufferIndex + middleBufferIndex) % bufferSize])
+    const PT = pointerBuffer[(bufferIndex + middleBufferIndex) % bufferSize]
     P2.copy(pointerBuffer[bufferIndex])
 
     calculateP1(P0, P2, PT, P1)
