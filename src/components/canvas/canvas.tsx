@@ -98,19 +98,19 @@ const Camera = memo(() => {
 Camera.displayName = 'Camera'
 
 const Pointer3D = memo(() => {
-  const Pointer3DRef = useRef<Object3D | null>(null)
+  const pointer3DRef = useRef<Object3D | null>(null)
 
   const normalPlane = useMemo(() => new Plane(new Vector3(0, 0, 1), 0), [])
 
   useFrame((state) => {
-    if (!Pointer3DRef.current) return
-    state.raycaster.ray.intersectPlane(normalPlane, Pointer3DRef.current.position)
+    if (!pointer3DRef.current) return
+    state.raycaster.ray.intersectPlane(normalPlane, pointer3DRef.current.position)
   }, -1)
 
   return (
     <object3D
       name='Pointer3D'
-      ref={Pointer3DRef}
+      ref={pointer3DRef}
       visible={false}
       renderOrder={-1}
       frustumCulled={false}
