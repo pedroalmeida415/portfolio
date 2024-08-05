@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useMemo, useRef, type MutableRefObject } from 'react'
+import { useCallback, useMemo, useRef, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
 
@@ -33,7 +33,7 @@ const calculateFov = (viewportAspect: number) => {
   return MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2
 }
 
-export const Canvas = memo(({ eventSource }: Props) => {
+export const Canvas = ({ eventSource }: Props) => {
   const isHomeLoaded = useAtomValue(isHomeLoadedAtom)
 
   if (!isHomeLoaded) return null
@@ -63,6 +63,10 @@ export const Canvas = memo(({ eventSource }: Props) => {
         near: 9,
         far: 11,
       }}
+      onCreated={(state) => {
+        state.pointer.set(0, -1)
+        state.raycaster.setFromCamera(state.pointer, state.camera)
+      }}
     >
       <Pointer3D />
       <Camera />
@@ -75,10 +79,9 @@ export const Canvas = memo(({ eventSource }: Props) => {
       {/* <Preload all /> */}
     </CanvasImpl>
   )
-})
-Canvas.displayName = 'Canvas'
+}
 
-const Camera = memo(() => {
+const Camera = () => {
   const viewport = useThree((state) => state.viewport)
 
   const getFov = useCallback(() => calculateFov(viewport.aspect), [viewport.aspect])
@@ -94,12 +97,10 @@ const Camera = memo(() => {
       far={11}
     />
   )
-})
-Camera.displayName = 'Camera'
+}
 
-const Pointer3D = memo(() => {
+const Pointer3D = () => {
   const pointer3DRef = useRef<Object3D | null>(null)
-
   const normalPlane = useMemo(() => new Plane(new Vector3(0, 0, 1), 0), [])
 
   useFrame((state) => {
@@ -117,5 +118,4 @@ const Pointer3D = memo(() => {
       matrixAutoUpdate={false}
     />
   )
-})
-Pointer3D.displayName = 'Pointer3D'
+}

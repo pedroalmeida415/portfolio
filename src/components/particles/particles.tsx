@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
@@ -16,7 +16,7 @@ import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.
 
 extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
-export const Particles = memo(() => {
+export const Particles = () => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
   // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
   // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
@@ -169,5 +169,4 @@ export const Particles = memo(() => {
       />
     </points>
   )
-})
-Particles.displayName = 'Particles'
+}

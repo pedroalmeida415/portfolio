@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
 import { BufferGeometry, Mesh, type Object3D, ShaderMaterial, Vector2 } from 'three'
@@ -14,7 +14,7 @@ extend({ Mesh, BufferGeometry, ShaderMaterial })
 
 let previousViewportAspect: number | undefined
 
-export const Cursor = memo(() => {
+export const Cursor = () => {
   const viewport = useThree((state) => state.viewport)
   const size = useThree((state) => state.size)
   const renderer = useThree((state) => state.gl)
@@ -110,8 +110,7 @@ export const Cursor = memo(() => {
       />
     </mesh>
   )
-})
-Cursor.displayName = 'Cursor'
+}
 
 // P1=2P(0.5)−0.5P0−0.5P2
 function calculateP1(P0: Vector2, P2: Vector2, Pt: Vector2, P1: Vector2) {
