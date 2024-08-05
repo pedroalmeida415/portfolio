@@ -5,7 +5,7 @@ import { BufferGeometry, Mesh, type Object3D, ShaderMaterial, Vector2 } from 'th
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
-import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
+import { getWorldSpaceCoords, mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
@@ -49,12 +49,20 @@ export const Cursor = () => {
   const bufferSize = 5 // Number of frames to delay
   const middleBufferIndex = Math.floor(bufferSize / 2)
   const { P0, P1, P2, pointerBuffer } = useMemo(
-    () => ({
-      P0: new Vector2(0, 0),
-      P1: new Vector2(0, 0),
-      P2: new Vector2(0, 0),
-      pointerBuffer: Array.from({ length: bufferSize }, () => new Vector2(0, 0)),
-    }),
+    () => {
+      const navbar = document.getElementById('navbar') as HTMLElement
+      const navbarCoords = getWorldSpaceCoords(navbar, viewport)
+
+      const cursorPointer = new Vector2(0, navbarCoords.centerY)
+
+      return {
+        P0: cursorPointer,
+        P1: cursorPointer.clone(),
+        P2: cursorPointer.clone(),
+        pointerBuffer: Array.from({ length: bufferSize }, () => cursorPointer.clone()),
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
 
