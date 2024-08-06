@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 
-export const homeAnimationsControlAtom = atom<() => void>()
+export const isCanvasCreatedAtom = atom(false)
 
 export const particlesDataAtom = atom<{
   positions: Float32Array

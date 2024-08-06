@@ -1,10 +1,12 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import clsx from 'clsx'
 import { type AnimationSequence, stagger, useAnimate } from 'framer-motion'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue } from 'jotai'
 
-import { homeAnimationsControlAtom, particlesDataAtom } from '~/store'
+import { isCanvasCreatedAtom, particlesDataAtom } from '~/store'
 
 import HomeIcon from '~/assets/home-icon.svg'
 
@@ -44,15 +46,28 @@ const socials = [
 ]
 
 const sequence = [
-  ['[data-animate]', { opacity: [0, 1] }, { delay: stagger(0.25), duration: 1 }],
-  ['#progress', { opacity: 0 }, { delay: 0.25, duration: 0.25, at: 0 }],
+  ['#progress-bar', { opacity: 0 }, { duration: 0.25 }],
+  [
+    '#progress-bar-wrapper',
+    { opacity: 0, backgroundColor: 'transparent', visibility: 'hidden' },
+    { duration: 2.5, at: 0, backgroundColor: { duration: 0 } },
+  ],
+  ['[data-animate]', { opacity: 1 }, { delay: stagger(0.25), duration: 1, at: 2.5 }],
+  ['#navbar', { color: '#000' }, { duration: 0.25, at: '<' }],
 ] as AnimationSequence
 
 export const Home = () => {
   const particlesData = useAtomValue(particlesDataAtom)
-  const setHomeAnimationsControl = useSetAtom(homeAnimationsControlAtom)
+  const isCanvasCreated = useAtomValue(isCanvasCreatedAtom)
 
   const [scope, animate] = useAnimate()
+
+  useEffect(() => {
+    if (!isCanvasCreated) return
+
+    animate(sequence)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCanvasCreated])
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
@@ -104,18 +119,15 @@ export const Home = () => {
           ))}
         </ul>
         <div
+          id='progress-bar-wrapper'
           className={clsx(
-            'progress-wrapper absolute left-0 top-0 size-full rounded-full p-2',
-            particlesData && 'completed bg-transparent',
-            !particlesData && 'bg-gray',
+            'progress-wrapper absolute left-0 top-0 size-full rounded-full bg-gray p-2',
+            particlesData && 'completed',
           )}
         >
           <div
             id='progress-bar'
-            className={clsx(
-              'progress-bar size-full rounded-full bg-offBlack',
-              particlesData && 'completed bg-transparent',
-            )}
+            className={clsx('progress-bar size-full rounded-full bg-offBlack', particlesData && 'completed')}
           ></div>
         </div>
       </nav>

@@ -6,12 +6,12 @@ import { useMemo, useRef, type MutableRefObject } from 'react'
 
 import { PerspectiveCamera } from '@react-three/drei'
 import { Canvas as CanvasImpl, extend, useFrame, useThree } from '@react-three/fiber'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 // import { Perf } from 'r3f-perf'
 // import { r3f } from '~/helpers/global'
 import { Group, MathUtils, Object3D, Plane, Vector3 } from 'three'
 
-import { particlesDataAtom } from '~/store'
+import { isCanvasCreatedAtom, particlesDataAtom } from '~/store'
 
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
@@ -37,6 +37,7 @@ const calculateFov = (viewportAspect: number) => {
 
 export const Canvas = ({ eventSource }: Props) => {
   const particlesData = useAtomValue(particlesDataAtom)
+  const setIsCanvasCreated = useSetAtom(isCanvasCreatedAtom)
 
   if (!particlesData) return null
   return (
@@ -67,6 +68,7 @@ export const Canvas = ({ eventSource }: Props) => {
       }}
       onCreated={({ gl, scene, camera }) => {
         gl.render(scene, camera)
+        setIsCanvasCreated(true)
       }}
     >
       <Pointer3D />

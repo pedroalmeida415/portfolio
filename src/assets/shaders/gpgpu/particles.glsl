@@ -33,7 +33,7 @@ void main() {
         
         float progressBarDist = sdSegment(basePos, vec2(initialCoords.x, initialCoords.z), vec2(initialCoords.y, initialCoords.z)) - initialCoords.w;
         
-        if (progressBarDist > -0.005) {
+        if (progressBarDist > -0.01) {
             vec2 progressBarCenter = vec2(0.0, initialCoords.z);
             vec2 direction = normalize(progressBarCenter - basePos);
             float dist = distance(progressBarCenter, basePos);
