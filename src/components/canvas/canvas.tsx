@@ -11,7 +11,7 @@ import { useAtomValue } from 'jotai'
 // import { r3f } from '~/helpers/global'
 import { Group, MathUtils, Object3D, Plane, Vector3 } from 'three'
 
-import { isHomeLoadedAtom } from '~/store'
+import { particlesDataAtom } from '~/store'
 
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
@@ -36,9 +36,9 @@ const calculateFov = (viewportAspect: number) => {
 }
 
 export const Canvas = ({ eventSource }: Props) => {
-  const isHomeLoaded = useAtomValue(isHomeLoadedAtom)
+  const particlesData = useAtomValue(particlesDataAtom)
 
-  if (!isHomeLoaded) return null
+  if (!particlesData) return null
   return (
     <CanvasImpl
       style={{
@@ -64,6 +64,9 @@ export const Canvas = ({ eventSource }: Props) => {
         position: [0, 0, 10],
         near: 9,
         far: 11,
+      }}
+      onCreated={({ gl, scene, camera }) => {
+        gl.render(scene, camera)
       }}
     >
       <Pointer3D />

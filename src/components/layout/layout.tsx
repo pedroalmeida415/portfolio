@@ -2,7 +2,7 @@
 
 import { type PropsWithChildren, useRef, useEffect } from 'react'
 
-import { useAtom, useSetAtom } from 'jotai'
+import { useSetAtom } from 'jotai'
 
 import { particlesDataAtom } from '~/store'
 
@@ -10,15 +10,15 @@ import { Canvas } from '~/components/canvas/canvas'
 
 import { LZMA } from '~/helpers/lzma'
 
-let didInit = false
+let didLayoutInit = false
 
 export const Layout = ({ children }: PropsWithChildren) => {
-  const [particlesData, setParticlesData] = useAtom(particlesDataAtom)
+  const setParticlesData = useSetAtom(particlesDataAtom)
 
   const eventSourceRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    if (didInit) return
+    if (didLayoutInit) return
 
     async function fetchParticlesData() {
       try {
@@ -32,19 +32,14 @@ export const Layout = ({ children }: PropsWithChildren) => {
       }
     }
     fetchParticlesData()
-    didInit = true
+    didLayoutInit = true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <>
       <main ref={eventSourceRef} className='h-screen w-full touch-auto overflow-auto'>
-        {!particlesData && (
-          <div className='progress'>
-            <div className='progress-value'></div>
-          </div>
-        )}
-        {particlesData && children}
+        {children}
       </main>
       <Canvas eventSource={eventSourceRef} />
     </>

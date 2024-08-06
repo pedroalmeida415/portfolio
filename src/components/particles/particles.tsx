@@ -90,10 +90,10 @@ export const Particles = () => {
     )
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
-    const navbar = document.getElementById('navbar') as HTMLElement
-    const navbarCoords = getWorldSpaceCoords(navbar, viewport)
+    const progressBar = document.getElementById('progress-bar') as HTMLElement
+    const progressBarCoords = getWorldSpaceCoords(progressBar, viewport)
 
-    const particlesPointer = new Vector2(0, navbarCoords.centerY)
+    const particlesPointer = new Vector2(0, progressBarCoords.centerY)
 
     const mappedUniforms = mapMangledUniforms(
       {
@@ -101,7 +101,14 @@ export const Particles = () => {
         uBase: { value: baseParticlesTexture },
         uMouse: { value: particlesPointer },
         uIsLMBDown: { value: false },
-        initialCoords: { value: [navbarCoords.width, navbarCoords.height, navbarCoords.centerY] },
+        initialCoords: {
+          value: [
+            progressBarCoords.pointX1,
+            progressBarCoords.pointX2,
+            progressBarCoords.centerY,
+            progressBarCoords.height,
+          ],
+        },
       },
       gpgpuParticlesShader.uniforms,
     )
