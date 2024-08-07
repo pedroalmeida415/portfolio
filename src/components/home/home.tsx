@@ -74,14 +74,14 @@ export const Home = () => {
       <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
         <div className='mr-10 overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
           <h1 data-animate className='translate-y-full'>
-            Pedro Almeida
+            Pedro H. Almeida
           </h1>
         </div>
 
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
           <div data-animate className='flex translate-y-full items-center'>
             <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
-            <span className='size-2.5 rounded-full bg-lime-500'></span>
+            <span className='size-2.5 animate-wiggle rounded-full bg-lime-500'></span>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export const Home = () => {
           {socials.map(({ link, label }) => (
             <div key={label} className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
               <li className='translate-y-full' data-animate>
-                <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
+                <a href={link} target='_blank' rel='noopener noreferrer'>
                   {label}
                 </a>
               </li>
@@ -102,7 +102,7 @@ export const Home = () => {
           </span>
         </div>
       </header>
-      <div className='absolute left-[10.2rem] top-[66%] overflow-hidden' data-cursor-interactive='center'>
+      <div className='absolute bottom-6 left-6 h-[3.125rem] overflow-hidden' data-cursor-interactive='center'>
         <h2 id='subtitle' data-animate className='translate-y-full text-5xl font-extralight'>
           Creative Developer
         </h2>
