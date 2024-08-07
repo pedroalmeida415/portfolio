@@ -96,13 +96,13 @@ void main() {
     
     vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
     
-    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
-    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(2,0),0);
-    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(3,0),0);
+    vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
     
-    vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
+    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(2,0),0);
+    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(3,0),0);
+    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
     
-    vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
+    vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
     
     vec4 navSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
     
@@ -127,7 +127,7 @@ void main() {
     float combinedDistSubtract = min(availableSegmentDist, min(nameSegmentDist, min(creditsSegmentDist,min(readcvSegmentDist, min(twitterSegmentDist, linkedinSegmentDist)))));
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
     
-    vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(5,0),0).xy;
+    vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(6,0),0).xy;
     uv -= textCenterCoords;
     uv *= uTextTextureScalar;
     

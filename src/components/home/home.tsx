@@ -72,9 +72,20 @@ export const Home = () => {
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
       <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
-        <h1 data-animate data-cursor-interactive='segment' data-padding='0.4;0.6' className='opacity-0'>
+        <h1 data-animate data-cursor-interactive='segment' data-padding='0.4;0.6' className='mr-12 opacity-0'>
           Pedro Almeida
         </h1>
+
+        <div
+          data-animate
+          className='flex items-center opacity-0'
+          data-cursor-interactive='segment'
+          data-padding='0.4;0.6'
+        >
+          <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
+          <span className='size-2.5 rounded-full bg-lime-500'></span>
+        </div>
+
         <ul role='list' className='ml-auto mr-[9.4rem] flex items-center justify-start gap-x-10'>
           {socials.map(({ link, label }) => (
             <li data-animate data-cursor-interactive='segment' key={label} data-padding='0.4;0.6' className='opacity-0'>
@@ -88,22 +99,14 @@ export const Home = () => {
           ©2024
         </span>
       </header>
-      <div className='absolute left-[10%] top-[66%]'>
-        <h2
-          data-animate
-          data-cursor-interactive='center'
-          id='subtitle'
-          className='mb-1 text-5xl font-extralight opacity-0'
-        >
-          Creative Developer
-        </h2>
-        <div data-animate className='ml-1 flex items-center opacity-0'>
-          <h3 data-cursor-interactive='segment' data-padding='0.4;0.0' className='mr-2 font-normal tracking-wide'>
-            Available for new projects
-          </h3>
-          <span id='ping' className='size-2.5 rounded-full bg-lime-500'></span>
-        </div>
-      </div>
+      <h2
+        data-animate
+        data-cursor-interactive='center'
+        id='subtitle'
+        className='absolute left-[10.8rem] top-[66%] mb-1 text-5xl font-extralight opacity-0'
+      >
+        Creative Developer
+      </h2>
       <nav
         id='navbar'
         data-cursor-interactive='segment'
