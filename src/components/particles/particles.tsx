@@ -10,9 +10,9 @@ import { GPUComputationRenderer } from '~/components/three/GPUComputationRendere
 
 import { getWorldSpaceCoords, mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
-import { default as particlesFragmentShader } from '~/assets/shaders/gpgpu/fragment.glsl'
-import { default as gpgpuParticlesShader } from '~/assets/shaders/gpgpu/particles.glsl'
-import { default as particlesVertexShader } from '~/assets/shaders/gpgpu/vertex.glsl'
+import { default as computePositionShader } from '~/assets/shaders/particles/compute-position.glsl'
+import { default as particlesFragmentShader } from '~/assets/shaders/particles/fragment.glsl'
+import { default as particlesVertexShader } from '~/assets/shaders/particles/vertex.glsl'
 
 extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
@@ -85,7 +85,7 @@ export const Particles = () => {
     // Particles variable
     const particlesVariable = gpgpuCompute.addVariable(
       'uParticles',
-      gpgpuParticlesShader.sourceCode,
+      computePositionShader.sourceCode,
       baseParticlesTexture,
     )
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
@@ -110,7 +110,7 @@ export const Particles = () => {
           ],
         },
       },
-      gpgpuParticlesShader.uniforms,
+      computePositionShader.uniforms,
     )
     particlesVariable.material.uniforms = mappedUniforms
 
@@ -134,8 +134,8 @@ export const Particles = () => {
     particlesPointer.copy(pointer3D.position)
 
     // --- Update GPU Compute ---
-    setUniform(particlesVariable, gpgpuParticlesShader, 'uDeltaTime', delta)
-    setUniform(particlesVariable, gpgpuParticlesShader, 'uIsLMBDown', false)
+    setUniform(particlesVariable, computePositionShader, 'uDeltaTime', delta)
+    setUniform(particlesVariable, computePositionShader, 'uIsLMBDown', false)
     gpgpuCompute.compute()
     setUniform(
       particlesObjectRef.current,
