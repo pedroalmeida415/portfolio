@@ -52,7 +52,7 @@ const sequence = [
     { opacity: 0, backgroundColor: 'transparent', visibility: 'hidden' },
     { duration: 2.5, at: 0, backgroundColor: { duration: 0 } },
   ],
-  ['[data-animate]', { opacity: 1 }, { delay: stagger(0.25), duration: 1, at: 2.5 }],
+  ['[data-animate]', { y: [100, 0] }, { delay: stagger(0.25), duration: 0.75, ease: [0.33, 1, 0.68, 1], at: 2.5 }],
   ['#navbar', { color: '#000' }, { duration: 0.25, at: '<' }],
 ] as AnimationSequence
 
@@ -72,41 +72,41 @@ export const Home = () => {
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
       <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
-        <h1 data-animate data-cursor-interactive='segment' data-padding='0.4;0.6' className='mr-12 opacity-0'>
-          Pedro Almeida
-        </h1>
+        <div className='mr-10 overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          <h1 data-animate className='translate-y-full'>
+            Pedro Almeida
+          </h1>
+        </div>
 
-        <div
-          data-animate
-          className='flex items-center opacity-0'
-          data-cursor-interactive='segment'
-          data-padding='0.4;0.6'
-        >
-          <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
-          <span className='size-2.5 rounded-full bg-lime-500'></span>
+        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          <div data-animate className='flex translate-y-full items-center'>
+            <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
+            <span className='size-2.5 rounded-full bg-lime-500'></span>
+          </div>
         </div>
 
         <ul role='list' className='ml-auto mr-[9.4rem] flex items-center justify-start gap-x-10'>
           {socials.map(({ link, label }) => (
-            <li data-animate data-cursor-interactive='segment' key={label} data-padding='0.4;0.6' className='opacity-0'>
-              <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
-                {label}
-              </a>
-            </li>
+            <div key={label} className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
+              <li className='translate-y-full' data-animate>
+                <a className='underline-offset-4 hover:underline' href={link} target='_blank' rel='noopener noreferrer'>
+                  {label}
+                </a>
+              </li>
+            </div>
           ))}
         </ul>
-        <span data-animate data-cursor-interactive='segment' data-padding='0.4;0.6' className='opacity-0'>
-          ©2024
-        </span>
+        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          <span data-animate className='block translate-y-full'>
+            ©2024
+          </span>
+        </div>
       </header>
-      <h2
-        data-animate
-        data-cursor-interactive='center'
-        id='subtitle'
-        className='absolute left-[10.8rem] top-[66%] mb-1 text-5xl font-extralight opacity-0'
-      >
-        Creative Developer
-      </h2>
+      <div className='absolute left-[10.2rem] top-[66%] overflow-hidden' data-cursor-interactive='center'>
+        <h2 id='subtitle' data-animate className='translate-y-full text-5xl font-extralight'>
+          Creative Developer
+        </h2>
+      </div>
       <nav
         id='navbar'
         data-cursor-interactive='segment'
