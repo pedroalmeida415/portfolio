@@ -81,7 +81,7 @@ export const Home = () => {
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
           <div data-animate className='flex translate-y-full items-center'>
             <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
-            <span className='size-2.5 animate-wiggle rounded-full bg-lime-500'></span>
+            <span className='size-2.5 rounded-full bg-lime-500'></span>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ export const Home = () => {
         <div
           id='progress-bar-wrapper'
           className={clsx(
-            'progress-wrapper absolute left-0 top-0 size-full rounded-full bg-gray p-2',
+            'progress-wrapper absolute left-0 top-0 size-full rounded-full bg-neutral-300 p-2',
             particlesData && 'completed',
           )}
         >
