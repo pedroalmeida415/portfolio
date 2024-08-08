@@ -95,9 +95,6 @@ void main() {
     vec2 uv = gl_FragCoord.xy / uResolution * 2.0 - 1.0;
     uv *= uUvScalar;
     
-    // Fetch union elements data
-    vec4 homeButtonCircleData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
-    
     // Construct union distances
     float mouseCircleDist = sdCircle(uv - uMouse, 0.3);
     float curveDist = sdTaperedQuadraticBezier(uv, uP2, uP1, uMouse, 10, 0.3);
@@ -106,11 +103,10 @@ void main() {
     float screenBoxClipDist = sdBox(uv, uUvScalar + 0.01);
     float screenBorderDist = max(screenBoxDist, -screenBoxClipDist);
     
-    float homeButtonCircleDist = sdCircle(uv - vec2(homeButtonCircleData.x, homeButtonCircleData.y), homeButtonCircleData.z);
-    
-    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), min(homeButtonCircleDist, screenBorderDist), .2);
+    vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), screenBorderDist, .2);
     
     // Fetch subtraction elements data
+    vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
     vec4 workButtonSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
     vec4 aboutButtonSegmentData = texelFetch(uInteractionsTexture, ivec2(2,0),0);
     
@@ -124,6 +120,7 @@ void main() {
     vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(9,0),0);
     
     // Construct subtraction distances
+    float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
     float workButtonSegmentDist = sdSegment(uv, vec2(workButtonSegmentData.r, workButtonSegmentData.b), vec2(workButtonSegmentData.g, workButtonSegmentData.b)) - workButtonSegmentData.a;
     float aboutButtonSegmentDist = sdSegment(uv, vec2(aboutButtonSegmentData.r, aboutButtonSegmentData.b), vec2(aboutButtonSegmentData.g, aboutButtonSegmentData.b)) - aboutButtonSegmentData.a;
     
@@ -136,7 +133,7 @@ void main() {
     
     float creditsSegmentDist = sdSegment(uv, vec2(creditsSegmentData.r, creditsSegmentData.b), vec2(creditsSegmentData.g, creditsSegmentData.b)) - creditsSegmentData.a;
     
-    float combinedDistSubtract = min(workButtonSegmentDist, min(aboutButtonSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, min(readcvSegmentDist, creditsSegmentDist)))))));
+    float combinedDistSubtract = min(nameSegmentDist, min(workButtonSegmentDist, min(aboutButtonSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, min(readcvSegmentDist, creditsSegmentDist))))))));
     
     // Merge distances
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
@@ -150,10 +147,10 @@ void main() {
     float textMask = texture(uTextTexture, uv).r;
     
     vec4 cursorColor = vec4(0.122,0.337,0.451,1.0);
-    vec4 homeButtonColor = vec4(0.647,0.753,0.694,1.0);
+    vec4 screenBorderColor = vec4(0.647,0.753,0.694,1.0);
     vec4 backgroundColor = vec4(0.957,0.953,0.941,0.0);
     
-    vec4 col = mix(cursorColor, homeButtonColor, combinedDistUnion.y);
+    vec4 col = mix(cursorColor, screenBorderColor, combinedDistUnion.y);
     col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
     
     gl_FragColor = col;

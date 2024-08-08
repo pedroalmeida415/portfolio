@@ -12,12 +12,12 @@ import HomeIcon from '~/assets/home-icon.svg'
 
 const routes = [
   {
-    path: '#work',
-    label: 'work',
+    path: '/projects',
+    label: 'Projects',
   },
   {
-    path: '#about',
-    label: 'about',
+    path: '/about',
+    label: 'About',
   },
 ]
 
@@ -70,18 +70,15 @@ export const Home = () => {
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
-      <header className='absolute left-0 top-0 w-full p-6'>
+      <header className='absolute left-0 top-0 flex w-full items-center justify-between px-6 py-8 leading-none'>
+        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          <h1 data-animate className='translate-y-full'>
+            <a href='/'>Pedro Almeida</a>
+          </h1>
+        </div>
+
         <nav>
           <ul role='list' className='flex items-center gap-x-10 leading-none'>
-            <li data-cursor-interactive='circle' data-padding='1.0;1.0' className='overflow-hidden'>
-              <a
-                href='#'
-                className='flex size-12 translate-y-full items-center justify-center rounded-full'
-                data-animate
-              >
-                <HomeIcon className='size-[1.125rem]' />
-              </a>
-            </li>
             {routes.map(({ path, label }) => (
               <li key={path} data-cursor-interactive='segment' data-padding='0.4;0.6' className='overflow-hidden'>
                 <a href={path} className='block translate-y-full' data-animate>
@@ -93,8 +90,8 @@ export const Home = () => {
         </nav>
       </header>
 
-      <div className='absolute bottom-20 left-1/2 -translate-x-1/2 overflow-hidden' data-cursor-interactive='center'>
-        <h2 id='subtitle' data-animate className='translate-y-full text-8xl font-thin'>
+      <div className='absolute bottom-16 left-1/2 -translate-x-1/2 overflow-hidden' data-cursor-interactive='center'>
+        <h2 id='subtitle' data-animate className='translate-y-full text-7xl font-thin'>
           Creative Developer
         </h2>
       </div>
