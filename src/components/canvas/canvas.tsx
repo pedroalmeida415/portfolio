@@ -17,8 +17,6 @@ import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
 import { Particles } from '~/components/particles/particles'
 
-import { getWorldSpaceCoords } from '~/helpers/shader.utils'
-
 extend({ Object3D, PerspectiveCamera, Group })
 
 type Props = {
@@ -102,8 +100,6 @@ const Camera = () => {
 }
 
 const Pointer3D = () => {
-  const viewport = useThree((state) => state.viewport)
-
   const pointer3DRef = useRef<Object3D | null>(null)
   const normalPlane = useMemo(() => new Plane(new Vector3(0, 0, 1), 0), [])
 
@@ -111,14 +107,6 @@ const Pointer3D = () => {
     if (!pointer3DRef.current || state.raycaster.ray.direction.z === -1) return
     state.raycaster.ray.intersectPlane(normalPlane, pointer3DRef.current.position)
   }, -1)
-
-  const initialYPosition = useMemo(() => {
-    const navbar = document.getElementById('navbar') as HTMLElement
-    const navbarCoords = getWorldSpaceCoords(navbar, viewport)
-
-    return navbarCoords.centerY
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <object3D
@@ -128,7 +116,7 @@ const Pointer3D = () => {
       renderOrder={-1}
       frustumCulled={false}
       matrixAutoUpdate={false}
-      position={[0, initialYPosition, 0]}
+      position={[0, 0, 0]}
     />
   )
 }

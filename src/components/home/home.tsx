@@ -12,25 +12,20 @@ import HomeIcon from '~/assets/home-icon.svg'
 
 const routes = [
   {
-    path: '/',
-    label: 'home',
-    icon: HomeIcon,
-  },
-  {
-    path: '/work',
+    path: '#work',
     label: 'work',
   },
   {
-    path: '/about',
+    path: '#about',
     label: 'about',
-  },
-  {
-    path: '/contact',
-    label: 'contact',
   },
 ]
 
 const socials = [
+  {
+    link: '',
+    label: 'hello@pedroalmeida.dev',
+  },
   {
     link: '',
     label: 'X / Twitter',
@@ -53,7 +48,6 @@ const sequence = [
     { duration: 2.5, at: 0, backgroundColor: { duration: 0 } },
   ],
   ['[data-animate]', { y: [100, 0] }, { delay: stagger(0.25), duration: 0.75, ease: [0.33, 1, 0.68, 1], at: 2.5 }],
-  ['#navbar', { color: '#000' }, { duration: 0.25, at: '<' }],
 ] as AnimationSequence
 
 export const Home = () => {
@@ -76,21 +70,50 @@ export const Home = () => {
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
-      <header className='absolute left-0 top-0 flex w-full items-center justify-start p-6 leading-none'>
-        <div className='mr-10 overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
-          <h1 data-animate className='translate-y-full'>
-            Pedro H. Almeida
-          </h1>
-        </div>
+      <header className='absolute left-0 top-0 w-full p-6'>
+        <nav>
+          <ul role='list' className='flex items-center gap-x-10 leading-none'>
+            <li data-cursor-interactive='circle' data-padding='1.0;1.0' className='overflow-hidden'>
+              <a
+                href='#'
+                className='flex size-12 translate-y-full items-center justify-center rounded-full'
+                data-animate
+              >
+                <HomeIcon className='size-[1.125rem]' />
+              </a>
+            </li>
+            {routes.map(({ path, label }) => (
+              <li key={path} data-cursor-interactive='segment' data-padding='0.4;0.6' className='overflow-hidden'>
+                <a href={path} className='block translate-y-full' data-animate>
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </header>
 
-        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+      <div className='absolute bottom-20 left-1/2 -translate-x-1/2 overflow-hidden' data-cursor-interactive='center'>
+        <h2 id='subtitle' data-animate className='translate-y-full text-8xl font-thin'>
+          Creative Developer
+        </h2>
+      </div>
+
+      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 p-6 leading-none'>
+        {/* <div className='mr-10 overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+          <h1 data-animate className='translate-y-full font-semibold'>
+            Pedro Almeida
+          </h1>
+        </div> */}
+
+        <div className='justify-self-start overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
           <div data-animate className='flex translate-y-full items-center'>
             <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
-            <span className='size-2.5 rounded-full bg-lime-500'></span>
+            <span className='size-2.5 rounded-full bg-[#2c731f]'></span>
           </div>
         </div>
 
-        <ul role='list' className='ml-auto mr-[9.4rem] flex items-center justify-start gap-x-10'>
+        <ul role='list' className='flex items-center justify-start gap-x-10'>
           {socials.map(({ link, label }) => (
             <div key={label} className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
               <li className='translate-y-full' data-animate>
@@ -101,44 +124,12 @@ export const Home = () => {
             </div>
           ))}
         </ul>
-        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+        <div className='justify-self-end overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
           <span data-animate className='block translate-y-full'>
             ©2024
           </span>
         </div>
-      </header>
-      <div className='absolute bottom-6 left-6 h-[3.125rem] overflow-hidden' data-cursor-interactive='center'>
-        <h2 id='subtitle' data-animate className='translate-y-full text-5xl font-extralight'>
-          Creative Developer
-        </h2>
-      </div>
-      <nav
-        id='navbar'
-        data-cursor-interactive='segment'
-        className='absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full p-2 text-offBlack'
-      >
-        <ul role='list' className='flex items-center gap-x-2 leading-none'>
-          {routes.map(({ path, label, icon: Icon }) => (
-            <li key={path}>
-              <a href={path} className='block rounded-full px-6 py-2 underline-offset-4 hover:underline'>
-                {Icon ? <Icon className='size-[1.125rem]' /> : label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div
-          id='progress-bar-wrapper'
-          className={clsx(
-            'progress-wrapper absolute left-0 top-0 size-full rounded-full bg-neutral-300 p-2',
-            particlesData && 'completed',
-          )}
-        >
-          <div
-            id='progress-bar'
-            className={clsx('progress-bar size-full rounded-full bg-offBlack', particlesData && 'completed')}
-          ></div>
-        </div>
-      </nav>
+      </footer>
     </section>
   )
 }

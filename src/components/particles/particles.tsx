@@ -8,7 +8,7 @@ import { particlesDataAtom } from '~/store'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
-import { getWorldSpaceCoords, mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
+import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as computePositionShader } from '~/assets/shaders/particles/compute-position.glsl'
 import { default as particlesFragmentShader } from '~/assets/shaders/particles/fragment.glsl'
@@ -90,10 +90,7 @@ export const Particles = () => {
     )
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
 
-    const progressBar = document.getElementById('progress-bar') as HTMLElement
-    const progressBarCoords = getWorldSpaceCoords(progressBar, viewport)
-
-    const particlesPointer = new Vector2(0, progressBarCoords.centerY)
+    const particlesPointer = new Vector2(0, 0)
 
     const mappedUniforms = mapMangledUniforms(
       {
@@ -101,14 +98,6 @@ export const Particles = () => {
         uBase: { value: baseParticlesTexture },
         uMouse: { value: particlesPointer },
         uIsLMBDown: { value: false },
-        initialCoords: {
-          value: [
-            progressBarCoords.pointX1,
-            progressBarCoords.pointX2,
-            progressBarCoords.centerY,
-            progressBarCoords.height,
-          ],
-        },
       },
       computePositionShader.uniforms,
     )

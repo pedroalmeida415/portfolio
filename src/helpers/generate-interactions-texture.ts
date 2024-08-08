@@ -3,7 +3,7 @@ import { DataTexture, FloatType, RGBAFormat } from 'three'
 
 import { getWorldSpaceCoords } from './shader.utils'
 
-type InteractionType = 'segment' | 'center'
+type InteractionType = 'segment' | 'center' | 'circle'
 
 export const generateInteractionsTexture = (viewport: Viewport) => {
   const interactiveElements = document.querySelectorAll('[data-cursor-interactive]')
@@ -28,6 +28,13 @@ export const generateInteractionsTexture = (viewport: Viewport) => {
       data[i4 + 0] = elementData.centerX
       data[i4 + 1] = elementData.centerY
       data[i4 + 2] = 0
+      data[i4 + 3] = 0
+    }
+
+    if (type === 'circle') {
+      data[i4 + 0] = elementData.centerX
+      data[i4 + 1] = elementData.centerY
+      data[i4 + 2] = elementData.width
       data[i4 + 3] = 0
     }
   })

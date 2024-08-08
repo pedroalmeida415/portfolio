@@ -3,7 +3,6 @@
 uniform float uDeltaTime;
 uniform sampler2D uBase;
 uniform vec2 uMouse;
-uniform vec4 initialCoords;
 uniform bool uIsLMBDown;
 
 @include "../includes/encode_decode.glsl"
@@ -26,19 +25,10 @@ void main() {
     vec4 current = texelFetch(uParticles, uv, 0);
     
     if (base == current) {
-        vec2 basePos = vec2(random(base.xy), random(base.yx)) * 2.0 - 1.0;
-        basePos.x *= initialCoords.y + initialCoords.w;
-        basePos.y *= initialCoords.w;
-        basePos.y += initialCoords.z;
-        
-        float progressBarDist = sdSegment(basePos, vec2(initialCoords.x, initialCoords.z), vec2(initialCoords.y, initialCoords.z)) - initialCoords.w;
-        
-        if (progressBarDist > -0.01) {
-            vec2 progressBarCenter = vec2(0.0, initialCoords.z);
-            vec2 direction = normalize(progressBarCenter - basePos);
-            float dist = distance(progressBarCenter, basePos);
-            basePos += direction * dist * abs(progressBarDist);
-        }
+        // Generate a random angle
+        float angle = random(base.xy) * 2.0 * 3.14159265359;
+        // Set the base position to be on the circumference of a circle with radius x
+        vec2 basePos = vec2(cos(angle), sin(angle)) * 2.5;
         
         particle.pos = basePos;
         particle.delay = base.a - fract(uDeltaTime);

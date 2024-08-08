@@ -6,7 +6,7 @@ export const generateTextMask = (textElement: HTMLElement, canvasSize: Size) => 
   canvas.style.position = 'absolute'
   canvas.style.top = '0'
   canvas.style.left = '0'
-  canvas.style.fontVariationSettings = "'wght' 300"
+  canvas.style.fontVariationSettings = "'wght' 200"
   canvas.style.display = 'none'
   document.body.appendChild(canvas)
 

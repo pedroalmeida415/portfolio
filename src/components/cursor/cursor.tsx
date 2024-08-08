@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
-import { BufferGeometry, Mesh, type Object3D, ShaderMaterial, Vector2 } from 'three'
+import { BufferGeometry, Mesh, ShaderMaterial, Vector2 } from 'three'
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
-import { getWorldSpaceCoords, mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
+import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
@@ -51,10 +51,7 @@ export const Cursor = () => {
   const middleBufferIndex = Math.floor(bufferSize / 2)
   const { P0, P1, P2, pointerBuffer } = useMemo(
     () => {
-      const navbar = document.getElementById('navbar') as HTMLElement
-      const navbarCoords = getWorldSpaceCoords(navbar, viewport)
-
-      const cursorPointer = new Vector2(0, navbarCoords.centerY)
+      const cursorPointer = new Vector2(0, 0)
 
       return {
         P0: cursorPointer,
