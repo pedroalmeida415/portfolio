@@ -4,6 +4,9 @@ import defaultTheme from 'tailwindcss/defaultTheme'
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'], // remove unused styles in production
   theme: {
+    animation: {
+      ping: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+    },
     extend: {
       screens: {
         '2xl': '1920px',

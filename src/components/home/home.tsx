@@ -41,12 +41,6 @@ const socials = [
 ]
 
 const sequence = [
-  ['#progress-bar', { opacity: 0 }, { duration: 0.25 }],
-  [
-    '#progress-bar-wrapper',
-    { opacity: 0, backgroundColor: 'transparent', visibility: 'hidden' },
-    { duration: 2.5, at: 0, backgroundColor: { duration: 0 } },
-  ],
   ['[data-animate]', { y: [100, 0] }, { delay: stagger(0.25), duration: 0.75, ease: [0.33, 1, 0.68, 1], at: 2.5 }],
 ] as AnimationSequence
 
@@ -62,6 +56,7 @@ export const Home = () => {
     const triggerAnimations = async () => {
       await animate(sequence)
       document.querySelector('main')?.classList.remove('pointer-events-none')
+      document.querySelector('#ping-wrapper')?.classList.remove('overflow-hidden')
     }
 
     triggerAnimations()
@@ -97,16 +92,18 @@ export const Home = () => {
       </div>
 
       <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 p-6 leading-none'>
-        {/* <div className='mr-10 overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
-          <h1 data-animate className='translate-y-full font-semibold'>
-            Pedro Almeida
-          </h1>
-        </div> */}
-
-        <div className='justify-self-start overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+        <div
+          id='ping-wrapper'
+          className='justify-self-start overflow-hidden'
+          data-cursor-interactive='segment'
+          data-padding='0.4;0.6'
+        >
           <div data-animate className='flex translate-y-full items-center'>
             <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
-            <span className='size-2.5 rounded-full bg-[#2c731f]'></span>
+            <span className='relative flex size-3 items-center justify-center'>
+              <span className='absolute inline-flex size-full animate-ping self-center rounded-full bg-[#2c731f]'></span>
+              <span className='relative inline-flex size-2.5 rounded-full bg-[#2c731f]'></span>
+            </span>
           </div>
         </div>
 
