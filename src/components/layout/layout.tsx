@@ -38,7 +38,7 @@ export const Layout = ({ children }: PropsWithChildren) => {
 
   return (
     <>
-      <main ref={eventSourceRef} className='h-screen w-full touch-auto overflow-auto'>
+      <main ref={eventSourceRef} className='pointer-events-none h-screen w-full touch-auto overflow-auto'>
         {children}
       </main>
       <Canvas eventSource={eventSourceRef} />

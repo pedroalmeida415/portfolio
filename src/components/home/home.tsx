@@ -65,7 +65,12 @@ export const Home = () => {
   useEffect(() => {
     if (!isCanvasCreated) return
 
-    animate(sequence)
+    const triggerAnimations = async () => {
+      await animate(sequence)
+      document.querySelector('main')?.classList.remove('pointer-events-none')
+    }
+
+    triggerAnimations()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCanvasCreated])
 
