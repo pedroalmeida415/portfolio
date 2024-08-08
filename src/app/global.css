@@ -91,4 +91,24 @@
       transform: scaleX(0.99);
     }
   }
+
+  .underline-animated {
+    position: relative;
+    &::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      display: block;
+      right: 0;
+      bottom: 1px;
+      background: black;
+      transition: width 0.4s ease;
+    }
+
+    &:hover::after {
+      width: 100%;
+      left: 0;
+    }
+  }
 }

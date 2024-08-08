@@ -24,10 +24,6 @@ const routes = [
 const socials = [
   {
     link: '',
-    label: 'hello@pedroalmeida.dev',
-  },
-  {
-    link: '',
     label: 'X / Twitter',
   },
   {
@@ -75,7 +71,12 @@ export const Home = () => {
         <nav>
           <ul role='list' className='flex items-center gap-x-10 leading-none'>
             {routes.map(({ path, label }) => (
-              <li key={path} data-cursor-interactive='segment' data-padding='0.4;0.6' className='overflow-hidden'>
+              <li
+                key={path}
+                data-cursor-interactive='segment'
+                data-padding='0.4;0.6'
+                className='underline-animated overflow-hidden'
+              >
                 <a href={path} className='block translate-y-full' data-animate>
                   {label}
                 </a>
@@ -108,9 +109,14 @@ export const Home = () => {
         </div>
 
         <ul role='list' className='flex items-center justify-start gap-x-10'>
+          <div className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
+            <li className='underline-animated translate-y-full' data-animate>
+              <a href='mailto:pedroalmeida.415@gmail.com'>hello@pedroalmeida.dev</a>
+            </li>
+          </div>
           {socials.map(({ link, label }) => (
             <div key={label} className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
-              <li className='translate-y-full' data-animate>
+              <li className='underline-animated translate-y-full' data-animate>
                 <a href={link} target='_blank' rel='noopener noreferrer'>
                   {label}
                 </a>
