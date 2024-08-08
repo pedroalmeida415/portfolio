@@ -13,6 +13,7 @@ import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.gl
 extend({ Mesh, BufferGeometry, ShaderMaterial })
 
 let previousViewportAspect: number | undefined
+let pointerBufferInitilized = false
 
 export const Cursor = () => {
   const viewport = useThree((state) => state.viewport)
@@ -67,15 +68,25 @@ export const Cursor = () => {
   )
 
   useFrame((state) => {
-    if (!cursorMeshRef.current) return
-    const pointer3D = state.scene.getObjectByName('Pointer3D') as Object3D
-    P0.copy(pointer3D.position)
+    if (!cursorMeshRef.current || state.raycaster.ray.direction.z === -1) return
+
+    const pointer3D = state.scene.getObjectByName('Pointer3D')!.position
+
+    if (!pointerBufferInitilized) {
+      for (let i = 0; i < bufferSize; ++i) {
+        pointerBuffer[i].copy(pointer3D)
+      }
+      pointerBufferInitilized = true
+    }
+
+    P0.copy(pointer3D)
 
     pointerBuffer[bufferIndex].copy(P0)
     bufferIndex = (bufferIndex + 1) % bufferSize
-    const PT = pointerBuffer[(bufferIndex + middleBufferIndex) % bufferSize]
+
     P2.copy(pointerBuffer[bufferIndex])
 
+    const PT = pointerBuffer[(bufferIndex + middleBufferIndex) % bufferSize]
     calculateP1(P0, P2, PT, P1)
   })
 

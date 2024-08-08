@@ -130,8 +130,8 @@ export const Particles = () => {
   useFrame((state, delta) => {
     if (!particlesObjectRef.current) return
 
-    const pointer3D = state.scene.getObjectByName('Pointer3D') as Object3D
-    particlesPointer.copy(pointer3D.position)
+    const pointer3D = state.scene.getObjectByName('Pointer3D')!.position
+    particlesPointer.copy(pointer3D)
 
     // --- Update GPU Compute ---
     setUniform(particlesVariable, computePositionShader, 'uDeltaTime', delta)
