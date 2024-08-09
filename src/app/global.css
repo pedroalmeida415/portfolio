@@ -40,55 +40,70 @@
 }
 
 @layer components {
-  @property --s {
+  @property --counter {
     syntax: '<integer>';
     initial-value: 0;
     inherits: true;
   }
 
-  @keyframes t {
+  @keyframes increment {
     to {
-      --s: 99;
+      --counter: 99;
     }
   }
 
-  .progress-wrapper {
-    --load-duration: 1.5s;
-    animation: t var(--load-duration) normal forwards;
+  .countdown {
+    --k: calc(var(--counter) / 100);
 
-    &.completed {
-      animation: none;
-      --s: 100;
-    }
-  }
-
-  .progress-wrapper::after {
+    @apply font-thin;
+    display: grid;
+    width: 26.25rem;
+    height: auto;
+    aspect-ratio: 1;
     position: absolute;
-    bottom: 100%;
     left: 50%;
-    font-size: 3rem;
-    transform: translateX(-50%);
-    counter-reset: s var(--s);
-    content: counter(s, decimal-leading-zero);
-    will-change: contents;
-  }
-
-  .progress-bar {
-    animation: load var(--load-duration) normal forwards;
-    will-change: transform;
-
-    &.completed {
-      animation: none;
-      transform: scaleX(1);
+    top: 50%;
+    z-index: -1;
+    font-size: 4.5rem;
+    transform: translate(-50%, -50%);
+    &:not(.stopped) {
+      animation: increment 1.5s linear forwards;
     }
-  }
 
-  @keyframes load {
-    0% {
-      transform: scaleX(0);
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 2.875rem;
+      height: 2.875rem;
+      border-radius: 9999px;
+      background-color: color-mix(in hsl shorter hue, #1f5673 calc(var(--k) * 100%), #d4d4d4);
     }
-    100% {
-      transform: scaleX(0.99);
+    &::after {
+      bottom: 110%;
+      left: 50%;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      counter-reset: s var(--counter);
+      content: counter(s, decimal-leading-zero);
+      line-height: 0;
+    }
+
+    svg {
+      grid-row: 1;
+      grid-column: 1;
+      [r] {
+        fill: none;
+        stroke: #c0c0c0;
+      }
+      [r] + [r] {
+        stroke: #1d1d1d;
+        stroke-linecap: square;
+        transform: rotate(-90deg);
+        stroke-dasharray: var(--k) 1;
+      }
     }
   }
 

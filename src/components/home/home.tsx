@@ -23,20 +23,22 @@ const routes = [
 
 const socials = [
   {
-    link: '',
+    link: 'https://twitter.com/',
     label: 'X / Twitter',
   },
   {
-    link: '',
+    link: 'https://www.linkedin.com/',
     label: 'LinkedIn',
   },
   {
-    link: '',
+    link: 'https://read.cv/',
     label: 'Read.cv',
   },
 ]
 
 const sequence = [
+  ['#countdown', { opacity: 0, visibility: 'hidden' }, { duration: 2.5, ease: 'linear' }],
+  ['#countdown-circle', { visibility: 'hidden' }, { duration: 0, at: '<' }],
   ['[data-animate]', { y: [100, 0] }, { delay: stagger(0.25), duration: 0.75, ease: [0.33, 1, 0.68, 1], at: 2.5 }],
 ] as AnimationSequence
 
@@ -125,6 +127,12 @@ export const Home = () => {
           </div>
         </div>
       </footer>
+      <div id='countdown' className={clsx('countdown', particlesData && 'stopped [--counter:100]')}>
+        <svg id='countdown-circle' viewBox='-50 -50 100 100' strokeWidth='1'>
+          <circle r='45'></circle>
+          <circle r='45' pathLength='1'></circle>
+        </svg>
+      </div>
     </section>
   )
 }
