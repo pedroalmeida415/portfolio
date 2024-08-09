@@ -36,10 +36,16 @@ const socials = [
   },
 ]
 
-const sequence = [
-  ['#countdown', { opacity: 0, visibility: 'hidden' }, { duration: 2.5, ease: 'linear' }],
+const mainSequence = [
+  ['#countdown', { opacity: 0, visibility: 'hidden' }, { duration: 2.0, ease: 'linear' }],
   ['#countdown-circle', { visibility: 'hidden' }, { duration: 0, at: '<' }],
-  ['[data-animate]', { y: [100, 0] }, { delay: stagger(0.25), duration: 0.75, ease: [0.33, 1, 0.68, 1], at: 2.5 }],
+  ['#subtitle', { y: [100, 0] }, { duration: 0.75, ease: 'circOut', at: 3.0 }],
+  [
+    '[data-animate="footer"]',
+    { y: [100, 0] },
+    { delay: stagger(0.25, { startDelay: 0, from: 'center' }), duration: 0.75, ease: 'circOut', at: '<' },
+  ],
+  ['[data-animate="header"]', { y: [100, 0] }, { duration: 0.75, ease: 'circOut', at: '-0.5' }],
 ] as AnimationSequence
 
 export const Home = () => {
@@ -52,8 +58,11 @@ export const Home = () => {
     if (!isCanvasCreated) return
 
     const triggerAnimations = async () => {
-      await animate(sequence)
-      document.querySelector('main')?.classList.remove('pointer-events-none')
+      setTimeout(() => {
+        document.querySelector('main')?.classList.remove('pointer-events-none')
+      }, 3000)
+      await animate(mainSequence)
+      document.querySelector('[data-ping]')?.classList.add('animate-ping')
       document.querySelector('#ping-wrapper')?.classList.remove('overflow-hidden')
     }
 
@@ -65,7 +74,7 @@ export const Home = () => {
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
       <header className='absolute left-0 top-0 flex w-full items-start justify-between px-6 py-5'>
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
-          <h1 data-animate className='translate-y-full'>
+          <h1 data-animate='header' className='translate-y-full'>
             <a href='/'>Pedro Almeida</a>
           </h1>
         </div>
@@ -74,7 +83,7 @@ export const Home = () => {
           <ul role='list' className='flex items-center gap-x-10'>
             {routes.map(({ path, label }) => (
               <li key={path} data-cursor-interactive='segment' data-padding='0.4;0.2' className='overflow-hidden'>
-                <div className='underline-animated translate-y-full' data-animate>
+                <div className='underline-animated translate-y-full' data-animate='header'>
                   <a href={path}>{label}</a>
                 </div>
               </li>
@@ -84,7 +93,7 @@ export const Home = () => {
       </header>
 
       <div className='absolute bottom-16 left-1/2 -translate-x-1/2 overflow-hidden' data-cursor-interactive='center'>
-        <h2 id='subtitle' data-animate className='translate-y-full text-7xl font-thin'>
+        <h2 id='subtitle' className='translate-y-full text-7xl font-thin'>
           Creative Developer
         </h2>
       </div>
@@ -96,10 +105,10 @@ export const Home = () => {
           data-cursor-interactive='segment'
           data-padding='0.4;0.2'
         >
-          <div data-animate className='flex translate-y-full items-center'>
+          <div data-animate='footer' className='flex translate-y-full items-center'>
             <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
             <span className='relative flex size-3 items-center justify-center'>
-              <span className='absolute inline-flex size-full animate-ping self-center rounded-full bg-[#2c731f]'></span>
+              <span data-ping className='absolute inline-flex size-full self-center rounded-full bg-[#2c731f]'></span>
               <span className='relative inline-flex size-2.5 rounded-full bg-[#2c731f]'></span>
             </span>
           </div>
@@ -107,13 +116,13 @@ export const Home = () => {
 
         <ul role='list' className='flex items-center justify-start gap-x-10'>
           <li className='overflow-hidden' data-padding='0.4;0.2' data-cursor-interactive='segment'>
-            <div className='underline-animated translate-y-full' data-animate>
+            <div className='underline-animated translate-y-full' data-animate='footer'>
               <a href='mailto:pedroalmeida.415@gmail.com'>hello@pedroalmeida.dev</a>
             </div>
           </li>
           {socials.map(({ link, label }) => (
             <li key={label} className='overflow-hidden' data-padding='0.4;0.2' data-cursor-interactive='segment'>
-              <div className='underline-animated translate-y-full' data-animate>
+              <div className='underline-animated translate-y-full' data-animate='footer'>
                 <a href={link} target='_blank' rel='noopener noreferrer'>
                   {label}
                 </a>
@@ -122,7 +131,7 @@ export const Home = () => {
           ))}
         </ul>
         <div className='justify-self-end overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
-          <div data-animate className='translate-y-full'>
+          <div data-animate='footer' className='translate-y-full'>
             ©2024
           </div>
         </div>
