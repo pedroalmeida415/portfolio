@@ -61,25 +61,20 @@ export const Home = () => {
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
-      <header className='absolute left-0 top-0 flex w-full items-center justify-between px-6 py-8 leading-none'>
-        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
+      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-6 py-5'>
+        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
           <h1 data-animate className='translate-y-full'>
             <a href='/'>Pedro Almeida</a>
           </h1>
         </div>
 
         <nav>
-          <ul role='list' className='flex items-center gap-x-10 leading-none'>
+          <ul role='list' className='flex items-center gap-x-10'>
             {routes.map(({ path, label }) => (
-              <li
-                key={path}
-                data-cursor-interactive='segment'
-                data-padding='0.4;0.6'
-                className='underline-animated overflow-hidden'
-              >
-                <a href={path} className='block translate-y-full' data-animate>
-                  {label}
-                </a>
+              <li key={path} data-cursor-interactive='segment' data-padding='0.4;0.2' className='overflow-hidden'>
+                <div className='underline-animated translate-y-full' data-animate>
+                  <a href={path}>{label}</a>
+                </div>
               </li>
             ))}
           </ul>
@@ -92,12 +87,12 @@ export const Home = () => {
         </h2>
       </div>
 
-      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 p-6 leading-none'>
+      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 px-6 py-5'>
         <div
           id='ping-wrapper'
           className='justify-self-start overflow-hidden'
           data-cursor-interactive='segment'
-          data-padding='0.4;0.6'
+          data-padding='0.4;0.2'
         >
           <div data-animate className='flex translate-y-full items-center'>
             <h3 className='mr-2 font-normal tracking-wide'>Available for new projects</h3>
@@ -109,25 +104,25 @@ export const Home = () => {
         </div>
 
         <ul role='list' className='flex items-center justify-start gap-x-10'>
-          <div className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
-            <li className='underline-animated translate-y-full' data-animate>
+          <li className='overflow-hidden' data-padding='0.4;0.2' data-cursor-interactive='segment'>
+            <div className='underline-animated translate-y-full' data-animate>
               <a href='mailto:pedroalmeida.415@gmail.com'>hello@pedroalmeida.dev</a>
-            </li>
-          </div>
+            </div>
+          </li>
           {socials.map(({ link, label }) => (
-            <div key={label} className='overflow-hidden' data-padding='0.4;0.6' data-cursor-interactive='segment'>
-              <li className='underline-animated translate-y-full' data-animate>
+            <li key={label} className='overflow-hidden' data-padding='0.4;0.2' data-cursor-interactive='segment'>
+              <div className='underline-animated translate-y-full' data-animate>
                 <a href={link} target='_blank' rel='noopener noreferrer'>
                   {label}
                 </a>
-              </li>
-            </div>
+              </div>
+            </li>
           ))}
         </ul>
-        <div className='justify-self-end overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.6'>
-          <span data-animate className='block translate-y-full'>
+        <div className='justify-self-end overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
+          <div data-animate className='translate-y-full'>
             ©2024
-          </span>
+          </div>
         </div>
       </footer>
     </section>
