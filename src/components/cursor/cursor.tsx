@@ -17,7 +17,6 @@ let pointerBufferInitilized = false
 
 export const Cursor = () => {
   const viewport = useThree((state) => state.viewport)
-  const size = useThree((state) => state.size)
   const renderer = useThree((state) => state.gl)
 
   const cursorMeshRef = useRef<Mesh<BufferGeometry, ShaderMaterial> | null>(null)
@@ -36,7 +35,7 @@ export const Cursor = () => {
     )
 
     const subtitle = document.getElementById('subtitle') as HTMLElement
-    const { textTexture, textTextureScalar } = generateTextMask(subtitle, size)
+    const { textTexture, textTextureScalar } = generateTextMask(subtitle)
     setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTexture', textTexture)
     setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTextureScalar', textTextureScalar)
 
@@ -44,7 +43,7 @@ export const Cursor = () => {
     setUniform(cursorMeshRef.current, cursorFragmentShader, 'uResolution', resolution)
 
     previousViewportAspect = viewport.aspect
-  }, [viewport, size, renderer])
+  }, [viewport, renderer])
 
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
@@ -90,7 +89,7 @@ export const Cursor = () => {
   const cursorInitialUniforms = useMemo(
     () => {
       const subtitle = document.getElementById('subtitle') as HTMLElement
-      const { textTexture, textTextureScalar } = generateTextMask(subtitle, size)
+      const { textTexture, textTextureScalar } = generateTextMask(subtitle)
 
       const interactionsTexture = generateInteractionsTexture(viewport)
       const uvScalar = new Vector2(viewport.width / 2, viewport.height / 2)

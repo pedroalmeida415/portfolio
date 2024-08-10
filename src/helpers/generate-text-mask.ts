@@ -1,7 +1,8 @@
-import { type Size } from '@react-three/fiber'
 import { CanvasTexture, Vector2 } from 'three'
 
-export const generateTextMask = (textElement: HTMLElement, canvasSize: Size) => {
+export const generateTextMask = (textElement: HTMLElement) => {
+  const size = document.body.getBoundingClientRect()
+
   const canvas = document.createElement('canvas')
   canvas.style.position = 'absolute'
   canvas.style.top = '0'
@@ -58,11 +59,11 @@ export const generateTextMask = (textElement: HTMLElement, canvasSize: Size) => 
   const textTexture = new CanvasTexture(canvas)
   textTexture.generateMipmaps = false
 
-  const normalizedWidth = textTexture.image.width / canvasSize.width
+  const normalizedWidth = textTexture.image.width / size.width
   const uvScalar = 1 / normalizedWidth
 
   const textureAspect = textTexture.image.width / textTexture.image.height
-  const screenAspect = canvasSize.width / canvasSize.height
+  const screenAspect = size.width / size.height
 
   const textTextureScalar = new Vector2(uvScalar, uvScalar * (textureAspect / screenAspect))
 
