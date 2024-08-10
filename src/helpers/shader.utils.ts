@@ -18,6 +18,14 @@ export function setUniform(mesh: any, shader: GlslShader, uniformName: string, v
   }
 }
 
+export function getUniform(mesh: any, shader: GlslShader, uniformName: string) {
+  if (shader.uniforms[uniformName]) {
+    return mesh.material.uniforms[shader.uniforms[uniformName].variableName].value
+  } else {
+    return mesh.material.uniforms[uniformName].value
+  }
+}
+
 export function getWorldSpaceCoords(element: Element, viewport: Viewport) {
   const padding = element.getAttribute('data-padding')?.split(';').map(Number)
 

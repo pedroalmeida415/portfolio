@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
 import { BufferGeometry, Mesh, ShaderMaterial, Vector2 } from 'three'
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
-import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
+import { getUniform, mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as cursorFragmentShader } from '~/assets/shaders/cursor/fragment.glsl'
 import { default as cursorVertexShader } from '~/assets/shaders/cursor/vertex.glsl'
@@ -15,35 +15,48 @@ extend({ Mesh, BufferGeometry, ShaderMaterial })
 let previousViewportAspect: number | undefined
 let pointerBufferInitilized = false
 
-export const Cursor = () => {
+export const Cursor = memo(() => {
   const viewport = useThree((state) => state.viewport)
   const renderer = useThree((state) => state.gl)
 
   const cursorMeshRef = useRef<Mesh<BufferGeometry, ShaderMaterial> | null>(null)
+
+  const { resolution, uvScalar, interactionsTexture } = useMemo(
+    () => {
+      const interactionsTexture = generateInteractionsTexture(viewport)
+
+      return {
+        resolution: renderer.getDrawingBufferSize(new Vector2()),
+        uvScalar: new Vector2(viewport.width / 2, viewport.height / 2),
+        interactionsTexture,
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   useEffect(() => {
     if (!cursorMeshRef.current) return
     if (!previousViewportAspect) previousViewportAspect = viewport.aspect
     if (previousViewportAspect === viewport.aspect) return
 
-    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uUvScalar', [viewport.width / 2, viewport.height / 2])
-    setUniform(
-      cursorMeshRef.current,
-      cursorFragmentShader,
-      'uInteractionsTexture',
-      generateInteractionsTexture(viewport),
-    )
+    // Dispose of current texture
+    getUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTexture').dispose()
 
+    // Generate new one for more accurate result
     const subtitle = document.getElementById('subtitle') as HTMLElement
-    const { textTexture, textTextureScalar } = generateTextMask(subtitle)
-    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTexture', textTexture)
-    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTextureScalar', textTextureScalar)
+    const { textTexture: newTextTexture, textTextureScalar: newTextTextureScalar } = generateTextMask(subtitle)
+    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTexture', newTextTexture)
+    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uTextTextureScalar', newTextTextureScalar)
 
-    const resolution = renderer.getDrawingBufferSize(new Vector2())
-    setUniform(cursorMeshRef.current, cursorFragmentShader, 'uResolution', resolution)
+    generateInteractionsTexture(viewport, interactionsTexture)
+
+    uvScalar.set(viewport.width / 2, viewport.height / 2)
+    renderer.getDrawingBufferSize(resolution)
 
     previousViewportAspect = viewport.aspect
-  }, [viewport, renderer])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewport])
 
   let bufferIndex = 0
   const bufferSize = 5 // Number of frames to delay
@@ -91,11 +104,6 @@ export const Cursor = () => {
       const subtitle = document.getElementById('subtitle') as HTMLElement
       const { textTexture, textTextureScalar } = generateTextMask(subtitle)
 
-      const interactionsTexture = generateInteractionsTexture(viewport)
-      const uvScalar = new Vector2(viewport.width / 2, viewport.height / 2)
-
-      const resolution = renderer.getDrawingBufferSize(new Vector2())
-
       return mapMangledUniforms(
         {
           uMouse: { value: P0 },
@@ -119,13 +127,15 @@ export const Cursor = () => {
       <shaderMaterial
         transparent
         depthTest={false}
+        depthWrite={false}
         vertexShader={cursorVertexShader.sourceCode}
         fragmentShader={cursorFragmentShader.sourceCode}
         uniforms={cursorInitialUniforms}
       />
     </mesh>
   )
-}
+})
+Cursor.displayName = 'Cursor'
 
 // P1=2P(0.5)−0.5P0−0.5P2
 function calculateP1(P0: Vector2, P2: Vector2, Pt: Vector2, P1: Vector2) {

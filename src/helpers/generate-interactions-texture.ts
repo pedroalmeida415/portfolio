@@ -5,10 +5,10 @@ import { getWorldSpaceCoords } from './shader.utils'
 
 type InteractionType = 'segment' | 'center' | 'circle'
 
-export const generateInteractionsTexture = (viewport: Viewport) => {
+export const generateInteractionsTexture = (viewport: Viewport, textureToUpdate?: DataTexture) => {
   const interactiveElements = document.querySelectorAll('[data-cursor-interactive]')
   const elementsCount = interactiveElements.length
-  const data = new Float32Array(elementsCount * 4)
+  const data = textureToUpdate ? textureToUpdate.image.data : new Float32Array(elementsCount * 4)
 
   interactiveElements.forEach((element, i) => {
     const type = element.getAttribute('data-cursor-interactive') as InteractionType
@@ -38,6 +38,11 @@ export const generateInteractionsTexture = (viewport: Viewport) => {
       data[i4 + 3] = 0
     }
   })
+
+  if (textureToUpdate) {
+    textureToUpdate.needsUpdate = true
+    return textureToUpdate
+  }
 
   const texture = new DataTexture(data, elementsCount, 1, RGBAFormat, FloatType)
   texture.needsUpdate = true
