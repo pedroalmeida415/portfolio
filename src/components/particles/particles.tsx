@@ -22,8 +22,12 @@ export const Particles = () => {
   // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
 
   const renderer = useThree((state) => state.gl)
-  const viewport = useThree((state) => state.viewport)
-  const size = useThree((state) => state.size)
+
+  const resolution = useMemo(
+    () => renderer.getDrawingBufferSize(new Vector2()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
 
@@ -138,7 +142,7 @@ export const Particles = () => {
     () =>
       mapMangledUniforms(
         {
-          uSize: { value: size.width * 0.002 },
+          uSize: { value: resolution.x * 0.0018 },
           uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
         },
         particlesVertexShader.uniforms,
