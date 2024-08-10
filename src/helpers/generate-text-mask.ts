@@ -1,4 +1,4 @@
-import { CanvasTexture, Vector2 } from 'three'
+import { CanvasTexture, LinearFilter, RedFormat, Vector2 } from 'three'
 
 export const generateTextMask = (textElement: HTMLElement) => {
   const size = document.body.getBoundingClientRect()
@@ -57,6 +57,8 @@ export const generateTextMask = (textElement: HTMLElement) => {
   }
 
   const textTexture = new CanvasTexture(canvas)
+  textTexture.format = RedFormat
+  textTexture.minFilter = LinearFilter
   textTexture.generateMipmaps = false
 
   const normalizedWidth = textTexture.image.width / size.width
