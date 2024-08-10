@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo, useRef, type MutableRefObject } from 'react'
+import { memo, useMemo, useRef, useState, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
 
-import { PerspectiveCamera } from '@react-three/drei'
+import { PerformanceMonitor, PerspectiveCamera } from '@react-three/drei'
 import { Canvas as CanvasImpl, extend, useFrame, useThree } from '@react-three/fiber'
 import { useAtomValue, useSetAtom } from 'jotai'
-// import { Perf } from 'r3f-perf'
+import { Perf } from 'r3f-perf'
 // import { r3f } from '~/helpers/global'
 import { Group, MathUtils, Object3D, Plane, Vector3 } from 'three'
 
@@ -37,9 +37,15 @@ export const Canvas = ({ eventSource }: Props) => {
   const particlesData = useAtomValue(particlesDataAtom)
   const setIsCanvasCreated = useSetAtom(isCanvasCreatedAtom)
 
+  // const initialDpr = useRef(3)
+  const initialDpr = useRef(typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1)
+
+  const [dpr, setDpr] = useState(initialDpr.current)
+
   if (!particlesData) return null
   return (
     <CanvasImpl
+      dpr={dpr}
       style={{
         position: 'fixed',
         top: '0',
@@ -54,7 +60,7 @@ export const Canvas = ({ eventSource }: Props) => {
         depth: false,
       }}
       flat
-      resize={{ scroll: false, debounce: 50 }}
+      resize={{ scroll: false }}
       eventSource={eventSource.current!}
       eventPrefix='client'
       camera={{
@@ -69,6 +75,12 @@ export const Canvas = ({ eventSource }: Props) => {
         setIsCanvasCreated(true)
       }}
     >
+      <PerformanceMonitor
+        bounds={() => [57, Infinity]}
+        iterations={7}
+        factor={1}
+        onDecline={({ factor }) => setDpr(0.5 + (initialDpr.current - 0.5) * factor)}
+      />
       <Pointer3D />
       <Camera />
 
@@ -76,15 +88,16 @@ export const Canvas = ({ eventSource }: Props) => {
       <Cursor />
       <Particles />
 
-      {/* <Perf /> */}
+      <Perf />
       {/* <r3f.Out /> */}
       {/* <Preload all /> */}
     </CanvasImpl>
   )
 }
 
-const Camera = () => {
+const Camera = memo(() => {
   const viewport = useThree((state) => state.viewport)
+  console.log(viewport)
 
   return (
     <PerspectiveCamera
@@ -97,9 +110,10 @@ const Camera = () => {
       fov={calculateFov(viewport.aspect)}
     />
   )
-}
+})
+Camera.displayName = 'Camera'
 
-const Pointer3D = () => {
+const Pointer3D = memo(() => {
   const pointer3DRef = useRef<Object3D | null>(null)
   const normalPlane = useMemo(() => new Plane(new Vector3(0, 0, 1), 0), [])
 
@@ -119,4 +133,5 @@ const Pointer3D = () => {
       position={[0, 0, 0]}
     />
   )
-}
+})
+Pointer3D.displayName = 'Pointer3D'

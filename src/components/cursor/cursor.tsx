@@ -51,10 +51,14 @@ export const Cursor = memo(() => {
 
     generateInteractionsTexture(viewport, interactionsTexture)
 
+    previousViewportAspect = viewport.aspect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewport])
+
+  useEffect(() => {
+    if (!cursorMeshRef.current) return
     uvScalar.set(viewport.width / 2, viewport.height / 2)
     renderer.getDrawingBufferSize(resolution)
-
-    previousViewportAspect = viewport.aspect
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewport])
 

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
-import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector2, type Object3D } from 'three'
+import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector2 } from 'three'
 
 import { particlesDataAtom } from '~/store'
 
@@ -16,12 +16,13 @@ import { default as particlesVertexShader } from '~/assets/shaders/particles/ver
 
 extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
-export const Particles = () => {
+export const Particles = memo(() => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
   // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
   // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
 
   const renderer = useThree((state) => state.gl)
+  const viewport = useThree((state) => state.viewport)
 
   const resolution = useMemo(
     () => renderer.getDrawingBufferSize(new Vector2()),
@@ -119,6 +120,12 @@ export const Particles = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => () => gpgpuCompute.dispose(), [gpgpuCompute])
+  useEffect(() => {
+    if (!particlesObjectRef.current) return
+    renderer.getDrawingBufferSize(resolution)
+    setUniform(particlesObjectRef.current, particlesVertexShader, 'uSize', resolution.x * 0.0018)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewport])
 
   useFrame((state, delta) => {
     if (!particlesObjectRef.current) return
@@ -163,10 +170,12 @@ export const Particles = () => {
       <shaderMaterial
         transparent
         depthTest={false}
+        depthWrite={false}
         vertexShader={particlesVertexShader.sourceCode}
         fragmentShader={particlesFragmentShader.sourceCode}
         uniforms={particlesInitialUniforms}
       />
     </points>
   )
-}
+})
+Particles.displayName = 'Particles'
