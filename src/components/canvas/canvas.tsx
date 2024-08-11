@@ -37,7 +37,6 @@ export const Canvas = ({ eventSource }: Props) => {
   const particlesData = useAtomValue(particlesDataAtom)
   const setIsCanvasCreated = useSetAtom(isCanvasCreatedAtom)
 
-  // const initialDpr = useRef(3)
   const initialDpr = useRef(typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1)
 
   const [dpr, setDpr] = useState(initialDpr.current)
@@ -88,7 +87,7 @@ export const Canvas = ({ eventSource }: Props) => {
       <Cursor />
       <Particles />
 
-      <Perf />
+      {/* <Perf /> */}
       {/* <r3f.Out /> */}
       {/* <Preload all /> */}
     </CanvasImpl>
@@ -97,7 +96,6 @@ export const Canvas = ({ eventSource }: Props) => {
 
 const Camera = memo(() => {
   const viewport = useThree((state) => state.viewport)
-  console.log(viewport)
 
   return (
     <PerspectiveCamera

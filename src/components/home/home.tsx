@@ -72,7 +72,7 @@ export const Home = () => {
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
-      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-6 py-5'>
+      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-8 py-5'>
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
           <h1 data-animate='header' className='translate-y-full'>
             <a href='/'>Pedro Almeida</a>
@@ -98,7 +98,7 @@ export const Home = () => {
         </h2>
       </div>
 
-      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 px-6 py-5'>
+      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 px-8 py-5'>
         <div
           id='ping-wrapper'
           className='justify-self-start overflow-hidden'
@@ -115,11 +115,6 @@ export const Home = () => {
         </div>
 
         <ul role='list' className='flex items-center justify-start gap-x-10'>
-          <li className='overflow-hidden' data-padding='0.4;0.2' data-cursor-interactive='segment'>
-            <div className='underline-animated translate-y-full' data-animate='footer'>
-              <a href='mailto:pedroalmeida.415@gmail.com'>hello@pedroalmeida.dev</a>
-            </div>
-          </li>
           {socials.map(({ link, label }) => (
             <li key={label} className='overflow-hidden' data-padding='0.4;0.2' data-cursor-interactive='segment'>
               <div className='underline-animated translate-y-full' data-animate='footer'>
@@ -131,8 +126,8 @@ export const Home = () => {
           ))}
         </ul>
         <div className='justify-self-end overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
-          <div data-animate='footer' className='translate-y-full'>
-            ©2024
+          <div data-animate='footer' className='underline-animated translate-y-full'>
+            <a href='mailto:pedroalmeida.415@gmail.com'>hello@pedroalmeida.dev</a>
           </div>
         </div>
       </footer>

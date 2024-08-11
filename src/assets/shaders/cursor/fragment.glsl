@@ -112,12 +112,11 @@ void main() {
     
     vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
     
-    vec4 emailSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
-    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
-    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
-    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(8,0),0);
+    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
+    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
+    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
     
-    vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(9,0),0);
+    vec4 emailSegmentData = texelFetch(uInteractionsTexture, ivec2(8,0),0);
     
     // Construct subtraction distances
     float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
@@ -131,9 +130,7 @@ void main() {
     float linkedinSegmentDist = sdSegment(uv, vec2(linkedinSegmentData.r, linkedinSegmentData.b), vec2(linkedinSegmentData.g, linkedinSegmentData.b)) - linkedinSegmentData.a;
     float readcvSegmentDist = sdSegment(uv, vec2(readcvSegmentData.r, readcvSegmentData.b), vec2(readcvSegmentData.g, readcvSegmentData.b)) - readcvSegmentData.a;
     
-    float creditsSegmentDist = sdSegment(uv, vec2(creditsSegmentData.r, creditsSegmentData.b), vec2(creditsSegmentData.g, creditsSegmentData.b)) - creditsSegmentData.a;
-    
-    float combinedDistSubtract = min(nameSegmentDist, min(workButtonSegmentDist, min(aboutButtonSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, min(readcvSegmentDist, creditsSegmentDist))))))));
+    float combinedDistSubtract = min(nameSegmentDist, min(workButtonSegmentDist, min(aboutButtonSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, readcvSegmentDist)))))));
     
     // Merge distances
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
