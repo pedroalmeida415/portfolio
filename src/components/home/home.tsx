@@ -72,10 +72,12 @@ export const Home = () => {
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-screen-2xl'>
-      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-8 py-5'>
+      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-8 py-6'>
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
           <h1 data-animate='header' className='translate-y-full'>
-            <a href='/'>Pedro Almeida</a>
+            <a className='block' href='/'>
+              Pedro Almeida
+            </a>
           </h1>
         </div>
 
@@ -98,7 +100,7 @@ export const Home = () => {
         </h2>
       </div>
 
-      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 px-8 py-5'>
+      <footer className='absolute bottom-0 left-0 grid w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 px-8 py-6'>
         <div
           id='ping-wrapper'
           className='justify-self-start overflow-hidden'
