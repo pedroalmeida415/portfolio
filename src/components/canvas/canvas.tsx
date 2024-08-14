@@ -76,9 +76,11 @@ export const Canvas = ({ eventSource }: Props) => {
     >
       <PerformanceMonitor
         bounds={() => [57, Infinity]}
-        iterations={7}
         factor={1}
-        onDecline={({ factor }) => setDpr(0.5 + (initialDpr.current - 0.5) * factor)}
+        flipflops={1}
+        onDecline={({ factor }) => {
+          setDpr(initialDpr.current * factor)
+        }}
       />
       <Pointer3D />
       <Camera />
@@ -125,7 +127,6 @@ const Pointer3D = memo(() => {
       name='Pointer3D'
       ref={pointer3DRef}
       visible={false}
-      renderOrder={-1}
       frustumCulled={false}
       matrixAutoUpdate={false}
       position={[0, 0, 0]}
