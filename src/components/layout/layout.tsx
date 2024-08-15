@@ -26,7 +26,7 @@ export const Layout = ({ children }: PropsWithChildren) => {
         const multipliersPromise = getParticlesData('multipliers')
         const [positions, multipliers] = await Promise.all([positionsPromise, multipliersPromise])
 
-        setParticlesData({ positions: new Float32Array(positions.buffer), multipliers })
+        setParticlesData({ positions, multipliers })
       } catch (error) {
         console.log(error)
       }
@@ -52,5 +52,5 @@ async function getParticlesData(type: 'positions' | 'multipliers') {
   const decompressedStreamBuffer = LZMA.decompressFile(buffer)
   const rawBytes: Uint8Array = decompressedStreamBuffer.toUint8Array()
 
-  return rawBytes
+  return new Float32Array(rawBytes.buffer)
 }

@@ -18,6 +18,16 @@ extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
 export const Particles = memo(() => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
+  // const gltf = useLoader(GLTFLoader, '/particles-grid.glb')
+  // const mesh = gltf.nodes.pedro as Mesh
+
+  // const boundingBox = mesh.geometry.boundingBox as Box3
+  // const positionsAtt = mesh.geometry.attributes.position
+  // const multipliersAtt = mesh.geometry.attributes.color
+
+  // const meshWidth = boundingBox.max.x
+  // const meshHeight = boundingBox.max.y
+
   // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
   // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
 
@@ -45,10 +55,42 @@ export const Particles = memo(() => {
     // // --- Translate base geometry instead of points geometry for accurate raycast ---
     // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
 
+    // const positions = new Float32Array(positionsAtt.count * 2)
+    // for (let i = 0; i < positionsAtt.count; ++i) {
+    //   const i3 = i * 3
+    //   let pointX = positionsAtt.array[i3 + 0]
+    //   let pointY = positionsAtt.array[i3 + 1]
+
+    //   const ndcX = (pointX / meshWidth) * 2 - 1
+    //   const ndcY = (pointY / meshHeight) * 2 - 1
+
+    //   const padding = viewport.width - 0.75
+
+    //   // Adjust the NDC to viewport coordinates considering the aspect ratio
+    //   const positionX = (ndcX * padding) / 2
+    //   const positionY = (ndcY * meshHeight * padding) / meshWidth / 2
+
+    //   const i2 = i * 2
+    //   positions[i2 + 0] = positionX
+    //   positions[i2 + 1] = positionY + 1.0
+    // }
+
+    // const multipliers = new Float32Array(multipliersAtt.count)
+    // for (let i = 0; i < multipliersAtt.count; ++i) {
+    //   const i4 = i * 4
+    //   multipliers[i] = multipliersAtt.array[i4 + 1]
+    // }
+
     // fetch(
     //   new Request('/api/encode?output=position', {
     //     method: 'POST',
-    //     body: baseGeometry.attributes.position.array,
+    //     body: positions,
+    //   }),
+    // )
+    // fetch(
+    //   new Request('/api/encode?output=multipliers', {
+    //     method: 'POST',
+    //     body: multipliers,
     //   }),
     // )
 
@@ -73,18 +115,17 @@ export const Particles = memo(() => {
     // Texture to store particles position
     const baseParticlesTexture = gpgpuCompute.createTexture()
 
-    const totalStaggerDuration = 2.5
+    const totalStaggerDuration = 3
     // Fill texture with particles values
     for (let i = 0; i < baseGeometryCount; ++i) {
       const i2 = i * 2
       const i4 = i * 4
-      const normalizedMultiplier = staggerMultipliers[i] / 255
 
       // RGBA values for FBO texture from base geometry position
       baseParticlesTexture.image.data[i4 + 0] = positions[i2 + 0]
       baseParticlesTexture.image.data[i4 + 1] = positions[i2 + 1]
       baseParticlesTexture.image.data[i4 + 2] = 0
-      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * normalizedMultiplier
+      baseParticlesTexture.image.data[i4 + 3] = totalStaggerDuration * staggerMultipliers[i]
     }
 
     // Particles variable

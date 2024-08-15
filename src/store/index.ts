@@ -4,5 +4,5 @@ export const isCanvasCreatedAtom = atom(false)
 
 export const particlesDataAtom = atom<{
   positions: Float32Array
-  multipliers: Uint8Array
+  multipliers: Float32Array
 }>()
