@@ -75,9 +75,7 @@ export const Home = () => {
       <header className='absolute left-0 top-0 flex w-full items-start justify-between px-8 py-6'>
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
           <h1 data-animate='header' className='translate-y-full'>
-            <a className='block' href='/'>
-              Pedro Almeida
-            </a>
+            Pedro Almeida
           </h1>
         </div>
 
