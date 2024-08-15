@@ -78,8 +78,13 @@ export const Home = () => {
             Pedro Almeida
           </h1>
         </div>
+        <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
+          <p data-animate='header' className='block translate-y-full'>
+            ©2024
+          </p>
+        </div>
 
-        <nav>
+        {/* <nav>
           <ul role='list' className='flex items-center gap-x-10'>
             {routes.map(({ path, label }) => (
               <li key={path} data-cursor-interactive='segment' data-padding='0.4;0.2' className='overflow-hidden'>
@@ -89,7 +94,7 @@ export const Home = () => {
               </li>
             ))}
           </ul>
-        </nav>
+        </nav> */}
       </header>
 
       <div className='absolute bottom-16 left-1/2 -translate-x-1/2 overflow-hidden' data-cursor-interactive='center'>

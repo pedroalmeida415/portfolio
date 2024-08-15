@@ -107,21 +107,19 @@ void main() {
     
     // Fetch subtraction elements data
     vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
-    vec4 workButtonSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
-    vec4 aboutButtonSegmentData = texelFetch(uInteractionsTexture, ivec2(2,0),0);
+    vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
     
-    vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
+    vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(3,0),0);
     
-    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
-    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
-    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
+    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
+    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
+    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
     
-    vec4 emailSegmentData = texelFetch(uInteractionsTexture, ivec2(8,0),0);
+    vec4 emailSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
     
     // Construct subtraction distances
     float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
-    float workButtonSegmentDist = sdSegment(uv, vec2(workButtonSegmentData.r, workButtonSegmentData.b), vec2(workButtonSegmentData.g, workButtonSegmentData.b)) - workButtonSegmentData.a;
-    float aboutButtonSegmentDist = sdSegment(uv, vec2(aboutButtonSegmentData.r, aboutButtonSegmentData.b), vec2(aboutButtonSegmentData.g, aboutButtonSegmentData.b)) - aboutButtonSegmentData.a;
+    float creditsSegmentDist = sdSegment(uv, vec2(creditsSegmentData.r, creditsSegmentData.b), vec2(creditsSegmentData.g, creditsSegmentData.b)) - creditsSegmentData.a;
     
     float availableSegmentDist = sdSegment(uv, vec2(availableSegmentData.r, availableSegmentData.b), vec2(availableSegmentData.g, availableSegmentData.b)) - availableSegmentData.a;
     
@@ -130,12 +128,12 @@ void main() {
     float linkedinSegmentDist = sdSegment(uv, vec2(linkedinSegmentData.r, linkedinSegmentData.b), vec2(linkedinSegmentData.g, linkedinSegmentData.b)) - linkedinSegmentData.a;
     float readcvSegmentDist = sdSegment(uv, vec2(readcvSegmentData.r, readcvSegmentData.b), vec2(readcvSegmentData.g, readcvSegmentData.b)) - readcvSegmentData.a;
     
-    float combinedDistSubtract = min(nameSegmentDist, min(workButtonSegmentDist, min(aboutButtonSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, readcvSegmentDist)))))));
+    float combinedDistSubtract = min(nameSegmentDist, min(creditsSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, readcvSegmentDist))))));
     
     // Merge distances
     float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
     
-    vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(3,0),0).xy;
+    vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(2,0),0).xy;
     uv -= textCenterCoords;
     uv *= uTextTextureScalar;
     
