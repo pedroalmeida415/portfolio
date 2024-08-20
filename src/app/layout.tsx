@@ -104,7 +104,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang='en'>
-      <body className={`${neue_montreal.variable} bg-offWhite font-neue-montreal font-normal text-black antialiased`}>
+      <body
+        className={`${neue_montreal.variable} fixed size-full overflow-hidden bg-offWhite font-neue-montreal font-normal text-black antialiased`}
+      >
         <Provider>
           <Layout>{children}</Layout>
         </Provider>
