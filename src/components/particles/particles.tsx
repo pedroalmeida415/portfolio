@@ -8,6 +8,7 @@ import { particlesDataAtom } from '~/store'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
+import { isMobileDevice } from '~/helpers/is-mobile'
 import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as computePositionShader } from '~/assets/shaders/particles/compute-position.glsl'
@@ -18,18 +19,6 @@ extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
 export const Particles = memo(() => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
-  // const gltf = useLoader(GLTFLoader, '/particles-grid.glb')
-  // const mesh = gltf.nodes.pedro as Mesh
-
-  // const boundingBox = mesh.geometry.boundingBox as Box3
-  // const positionsAtt = mesh.geometry.attributes.position
-  // const multipliersAtt = mesh.geometry.attributes.color
-
-  // const meshWidth = boundingBox.max.x
-  // const meshHeight = boundingBox.max.y
-
-  // const textSvg = useLoader(SVGLoader, '/pedro-outline.svg')
-  // const gradientTextureBitmap = useLoader(ImageBitmapLoader, '/pedro-green-gradient.png')
 
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
@@ -41,59 +30,9 @@ export const Particles = memo(() => {
   )
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
+  const particleSizeMultiplier = isMobileDevice() ? 0.005 : 0.0018
 
   const { gpgpuCompute, particlesVariable, particlesUvArray, particlesPointer } = useMemo(() => {
-    // const svgWidth = Number((textSvg.xml as any).attributes.width.value)
-    // const svgHeight = Number((textSvg.xml as any).attributes.height.value)
-    // const svgHeightInViewport = (svgHeight * viewport.width) / svgWidth
-
-    // const [positions] = generateGeometryPoints(textSvg, viewport, gradientTextureBitmap)
-
-    // const baseGeometry = new BufferGeometry()
-    // baseGeometry.setAttribute('position', new Float32BufferAttribute(positions, 2))
-
-    // // --- Translate base geometry instead of points geometry for accurate raycast ---
-    // baseGeometry.translate(0, -svgHeightInViewport / 2 + viewport.height / 2, 0)
-
-    // const positions = new Float32Array(positionsAtt.count * 2)
-    // for (let i = 0; i < positionsAtt.count; ++i) {
-    //   const i3 = i * 3
-    //   let pointX = positionsAtt.array[i3 + 0]
-    //   let pointY = positionsAtt.array[i3 + 1]
-
-    //   const ndcX = (pointX / meshWidth) * 2 - 1
-    //   const ndcY = (pointY / meshHeight) * 2 - 1
-
-    //   const padding = viewport.width - 0.75
-
-    //   // Adjust the NDC to viewport coordinates considering the aspect ratio
-    //   const positionX = (ndcX * padding) / 2
-    //   const positionY = (ndcY * meshHeight * padding) / meshWidth / 2
-
-    //   const i2 = i * 2
-    //   positions[i2 + 0] = positionX
-    //   positions[i2 + 1] = positionY + 1.0
-    // }
-
-    // const multipliers = new Float32Array(multipliersAtt.count)
-    // for (let i = 0; i < multipliersAtt.count; ++i) {
-    //   const i4 = i * 4
-    //   multipliers[i] = multipliersAtt.array[i4 + 1]
-    // }
-
-    // fetch(
-    //   new Request('/api/encode?output=position', {
-    //     method: 'POST',
-    //     body: positions,
-    //   }),
-    // )
-    // fetch(
-    //   new Request('/api/encode?output=multipliers', {
-    //     method: 'POST',
-    //     body: multipliers,
-    //   }),
-    // )
-
     // --- GPU Compute ---
     const baseGeometryCount = positions.length / 2
     const gpgpuSize = Math.ceil(Math.sqrt(baseGeometryCount))
@@ -164,7 +103,7 @@ export const Particles = memo(() => {
   useEffect(() => {
     if (!particlesObjectRef.current) return
     renderer.getDrawingBufferSize(resolution)
-    setUniform(particlesObjectRef.current, particlesVertexShader, 'uSize', resolution.x * 0.0018)
+    setUniform(particlesObjectRef.current, particlesVertexShader, 'uSize', resolution.x * particleSizeMultiplier)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewport])
 
@@ -190,7 +129,7 @@ export const Particles = memo(() => {
     () =>
       mapMangledUniforms(
         {
-          uSize: { value: resolution.x * 0.0018 },
+          uSize: { value: resolution.x * particleSizeMultiplier },
           uParticlesTexture: { value: gpgpuCompute.getCurrentRenderTarget(particlesVariable).texture },
         },
         particlesVertexShader.uniforms,

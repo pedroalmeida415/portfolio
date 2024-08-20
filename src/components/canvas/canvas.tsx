@@ -17,6 +17,8 @@ import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
 import { Particles } from '~/components/particles/particles'
 
+import { isMobileDevice } from '~/helpers/is-mobile'
+
 extend({ Object3D, PerspectiveCamera, Group })
 
 type Props = {
@@ -25,10 +27,15 @@ type Props = {
 
 const calculateFov = (viewportAspect: number) => {
   const defaultFov = 50
-  const particlesAspectRatio = 2.1843003033790924
-  if (viewportAspect > particlesAspectRatio) return defaultFov
+  let aspectRatio
+  const desktopAspect = 2.1843003033790924
+  const mobileAspect = 0.6035537635668909
+
+  aspectRatio = isMobileDevice() ? mobileAspect : desktopAspect
+
+  if (viewportAspect > aspectRatio) return defaultFov
   const cameraHeight = Math.tan(MathUtils.degToRad(defaultFov / 2))
-  const ratio = viewportAspect / particlesAspectRatio
+  const ratio = viewportAspect / aspectRatio
   const newCameraHeight = cameraHeight / ratio
   return MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2
 }

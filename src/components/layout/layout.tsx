@@ -8,6 +8,7 @@ import { particlesDataAtom } from '~/store'
 
 import { Canvas } from '~/components/canvas/canvas'
 
+import { isMobileDevice } from '~/helpers/is-mobile'
 import { LZMA } from '~/helpers/lzma'
 
 let didLayoutInit = false
@@ -19,11 +20,12 @@ export const Layout = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     if (didLayoutInit) return
+    const isMobile = isMobileDevice()
 
     async function fetchParticlesData() {
       try {
-        const positionsPromise = getParticlesData('positions')
-        const multipliersPromise = getParticlesData('multipliers')
+        const positionsPromise = getParticlesData('positions', isMobile)
+        const multipliersPromise = getParticlesData('multipliers', isMobile)
         const [positions, multipliers] = await Promise.all([positionsPromise, multipliersPromise])
 
         setParticlesData({ positions, multipliers })
@@ -32,6 +34,7 @@ export const Layout = ({ children }: PropsWithChildren) => {
       }
     }
     fetchParticlesData()
+
     didLayoutInit = true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -46,8 +49,8 @@ export const Layout = ({ children }: PropsWithChildren) => {
   )
 }
 
-async function getParticlesData(type: 'positions' | 'multipliers') {
-  const res = await fetch(`/${type}.bin`)
+async function getParticlesData(type: 'positions' | 'multipliers', isMobile: boolean) {
+  const res = await fetch(`/${type}${isMobile ? '-mobile' : ''}.bin`)
   const buffer = await res.arrayBuffer()
   const decompressedStreamBuffer = LZMA.decompressFile(buffer)
   const rawBytes: Uint8Array = decompressedStreamBuffer.toUint8Array()
