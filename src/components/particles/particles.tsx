@@ -4,11 +4,10 @@ import { useFrame, useThree, extend } from '@react-three/fiber'
 import { useAtomValue } from 'jotai'
 import { Points, ShaderMaterial, BufferGeometry, BufferAttribute, Vector2 } from 'three'
 
-import { particlesDataAtom } from '~/store'
+import { isMobileDeviceAtom, particlesDataAtom } from '~/store'
 
 import { GPUComputationRenderer } from '~/components/three/GPUComputationRenderer'
 
-import { isMobileDevice } from '~/helpers/is-mobile'
 import { mapMangledUniforms, setUniform } from '~/helpers/shader.utils'
 
 import { default as computePositionShader } from '~/assets/shaders/particles/compute-position.glsl'
@@ -19,6 +18,7 @@ extend({ Points, ShaderMaterial, BufferGeometry, BufferAttribute })
 
 export const Particles = memo(() => {
   const { positions, multipliers: staggerMultipliers } = useAtomValue(particlesDataAtom)!
+  const isMobile = useAtomValue(isMobileDeviceAtom)
 
   const renderer = useThree((state) => state.gl)
   const viewport = useThree((state) => state.viewport)
@@ -30,8 +30,8 @@ export const Particles = memo(() => {
   )
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
-  const particleSizeMultiplier = isMobileDevice() ? 0.005 : 0.0018
-  const loadingCircleRadius = isMobileDevice() ? 1.5 : 2.5
+  const particleSizeMultiplier = isMobile ? 0.005 : 0.0018
+  const loadingCircleRadius = isMobile ? 1.5 : 2.5
 
   const { gpgpuCompute, particlesVariable, particlesUvArray, particlesPointer } = useMemo(() => {
     // --- GPU Compute ---

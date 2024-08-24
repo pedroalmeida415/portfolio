@@ -1,7 +1,10 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 
 import { extend, useFrame, useThree } from '@react-three/fiber'
+import { useAtomValue } from 'jotai'
 import { BufferGeometry, Mesh, ShaderMaterial, Vector2 } from 'three'
+
+import { isMobileDeviceAtom, isPointerDownAtom } from '~/store'
 
 import { generateInteractionsTexture } from '~/helpers/generate-interactions-texture'
 import { generateTextMask } from '~/helpers/generate-text-mask'
@@ -16,6 +19,9 @@ let previousViewportAspect: number | undefined
 let pointerBufferInitilized = false
 
 export const Cursor = memo(() => {
+  const isPointerDown = useAtomValue(isPointerDownAtom)
+  const isMobile = useAtomValue(isMobileDeviceAtom)
+
   const viewport = useThree((state) => state.viewport)
   const renderer = useThree((state) => state.gl)
 
@@ -79,6 +85,15 @@ export const Cursor = memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
+
+  useEffect(() => {
+    if (!cursorMeshRef.current || !isMobile || isPointerDown) return
+    pointerBufferInitilized = false
+    P0.set(0, 100)
+    P1.copy(P0)
+    P2.copy(P0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPointerDown])
 
   useFrame((state) => {
     if (!cursorMeshRef.current || state.raycaster.ray.direction.z === -1) return

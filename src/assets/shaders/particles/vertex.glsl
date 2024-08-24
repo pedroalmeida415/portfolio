@@ -10,5 +10,5 @@ void main() {
     
     gl_Position = projectionMatrix * modelViewMatrix * vec4(particle.pos, 0.0, 1.0);
     
-    gl_PointSize = min(uSize, (uSize * abs(particle.delay)) + (uSize / 3.0));
+    gl_PointSize = min(uSize, (uSize * abs(particle.delay)) + (uSize / 2.0));
 }

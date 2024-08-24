@@ -2,25 +2,25 @@
 
 import { type PropsWithChildren, useRef, useEffect } from 'react'
 
-import { useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 
-import { particlesDataAtom } from '~/store'
+import { isMobileDeviceAtom, isPointerDownAtom, particlesDataAtom } from '~/store'
 
 import { Canvas } from '~/components/canvas/canvas'
 
-import { isMobileDevice } from '~/helpers/is-mobile'
 import { LZMA } from '~/helpers/lzma'
 
 let didLayoutInit = false
 
 export const Layout = ({ children }: PropsWithChildren) => {
+  const isMobile = useAtomValue(isMobileDeviceAtom)
   const setParticlesData = useSetAtom(particlesDataAtom)
+  const setIsPointerDown = useSetAtom(isPointerDownAtom)
 
   const eventSourceRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (didLayoutInit) return
-    const isMobile = isMobileDevice()
 
     async function fetchParticlesData() {
       try {
@@ -41,7 +41,20 @@ export const Layout = ({ children }: PropsWithChildren) => {
 
   return (
     <>
-      <main ref={eventSourceRef} className='pointer-events-none size-full touch-none'>
+      <main
+        onPointerUp={() => {
+          if (isMobile) {
+            setIsPointerDown(false)
+          }
+        }}
+        onPointerDown={() => {
+          if (isMobile) {
+            setIsPointerDown(true)
+          }
+        }}
+        ref={eventSourceRef}
+        className='pointer-events-none size-full touch-none'
+      >
         {children}
       </main>
       <Canvas eventSource={eventSourceRef} />

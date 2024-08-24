@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useMemo, useRef, useState, type MutableRefObject } from 'react'
+import { memo, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
 
@@ -9,15 +9,13 @@ import { Canvas as CanvasImpl, extend, useFrame, useThree } from '@react-three/f
 import { useAtomValue, useSetAtom } from 'jotai'
 import { Perf } from 'r3f-perf'
 // import { r3f } from '~/helpers/global'
-import { Group, MathUtils, Object3D, Plane, Vector3 } from 'three'
+import { Group, MathUtils, Object3D, Plane, Ray, Vector3 } from 'three'
 
-import { isCanvasCreatedAtom, particlesDataAtom } from '~/store'
+import { isCanvasCreatedAtom, isMobileDeviceAtom, isPointerDownAtom, particlesDataAtom } from '~/store'
 
 import { Background } from '~/components/background/background'
 import { Cursor } from '~/components/cursor/cursor'
 import { Particles } from '~/components/particles/particles'
-
-import { isMobileDevice } from '~/helpers/is-mobile'
 
 extend({ Object3D, PerspectiveCamera, Group })
 
@@ -31,7 +29,9 @@ const calculateFov = (viewportAspect: number) => {
   const desktopAspect = 2.1843003033790924
   const mobileAspect = 0.6035537635668909
 
-  aspectRatio = isMobileDevice() ? mobileAspect : desktopAspect
+  const isMobile = window.matchMedia('(max-width: 768px)').matches
+
+  aspectRatio = isMobile ? mobileAspect : desktopAspect
 
   if (viewportAspect > aspectRatio) return defaultFov
   const cameraHeight = Math.tan(MathUtils.degToRad(defaultFov / 2))
@@ -121,13 +121,29 @@ const Camera = memo(() => {
 Camera.displayName = 'Camera'
 
 const Pointer3D = memo(() => {
+  const raycaster = useThree((state) => state.raycaster)
+  const isPointerDown = useAtomValue(isPointerDownAtom)
+  const isMobile = useAtomValue(isMobileDeviceAtom)
+
   const pointer3DRef = useRef<Object3D | null>(null)
   const normalPlane = useMemo(() => new Plane(new Vector3(0, 0, 1), 0), [])
+  const defaultRay = useMemo(
+    () => raycaster.ray.clone(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   useFrame((state) => {
     if (!pointer3DRef.current || state.raycaster.ray.direction.z === -1) return
     state.raycaster.ray.intersectPlane(normalPlane, pointer3DRef.current.position)
   }, -1)
+
+  useEffect(() => {
+    if (!pointer3DRef.current || !isMobile || isPointerDown) return
+    raycaster.ray.copy(defaultRay)
+    pointer3DRef.current.position.set(0, 100, 0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPointerDown])
 
   return (
     <object3D
