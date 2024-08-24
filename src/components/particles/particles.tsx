@@ -31,6 +31,7 @@ export const Particles = memo(() => {
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
   const particleSizeMultiplier = isMobileDevice() ? 0.005 : 0.0018
+  const loadingCircleRadius = isMobileDevice() ? 1.5 : 2.5
 
   const { gpgpuCompute, particlesVariable, particlesUvArray, particlesPointer } = useMemo(() => {
     // --- GPU Compute ---
@@ -70,7 +71,7 @@ export const Particles = memo(() => {
     // Particles variable
     const particlesVariable = gpgpuCompute.addVariable(
       'uParticles',
-      computePositionShader.sourceCode,
+      computePositionShader.sourceCode.replace('{PARTICLES_CIRCLE_RADIUS}', loadingCircleRadius.toString(10)),
       baseParticlesTexture,
     )
     gpgpuCompute.setVariableDependencies(particlesVariable, [particlesVariable])
@@ -114,7 +115,7 @@ export const Particles = memo(() => {
     particlesPointer.copy(pointer3D)
 
     // --- Update GPU Compute ---
-    setUniform(particlesVariable, computePositionShader, 'uDeltaTime', delta)
+    setUniform(particlesVariable, computePositionShader, 'uDeltaTime', delta % 1)
     setUniform(particlesVariable, computePositionShader, 'uIsLMBDown', false)
     gpgpuCompute.compute()
     setUniform(

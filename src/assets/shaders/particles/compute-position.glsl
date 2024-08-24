@@ -1,4 +1,4 @@
-@nomangle uParticles resolution
+@nomangle uParticles resolution PARTICLES_CIRCLE_RADIUS
 
 uniform float uDeltaTime;
 uniform sampler2D uBase;
@@ -25,13 +25,15 @@ void main() {
     vec4 current = texelFetch(uParticles, uv, 0);
     
     if (base == current) {
+        float radius = {PARTICLES_CIRCLE_RADIUS};
+        
         // Generate a random angle
         float angle = random(base.xy) * 2.0 * 3.14159265359;
         // Set the base position to be on the circumference of a circle with radius x
-        vec2 basePos = vec2(cos(angle), sin(angle)) * 2.5;
+        vec2 basePos = vec2(cos(angle), sin(angle)) * radius;
         
         particle.pos = basePos;
-        particle.delay = base.a - fract(uDeltaTime);
+        particle.delay = base.a - uDeltaTime;
         particle.is_touched = uIsLMBDown;
         
         gl_FragColor = encode_particle(particle);
@@ -50,7 +52,7 @@ void main() {
     particle.pos += particle.delay <= 0.0 ? direction * (force *  0.1) : vec2(0.0);
     
     particle.pos += particle.delay <= 0.0 ? (base.xy - particle.pos) * 0.05 : vec2(0.0);
-    particle.delay -= fract(uDeltaTime);
+    particle.delay -= uDeltaTime;
     
     gl_FragColor = encode_particle(particle);
 }
