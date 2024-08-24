@@ -11,6 +11,7 @@ import { Canvas } from '~/components/canvas/canvas'
 import { LZMA } from '~/helpers/lzma'
 
 let didLayoutInit = false
+let pointerDownTimeout: NodeJS.Timeout | null = null
 
 export const Layout = ({ children }: PropsWithChildren) => {
   const isMobile = useAtomValue(isMobileDeviceAtom)
@@ -44,7 +45,10 @@ export const Layout = ({ children }: PropsWithChildren) => {
       <main
         onPointerUp={() => {
           if (isMobile) {
-            setIsPointerDown(false)
+            pointerDownTimeout && clearTimeout(pointerDownTimeout)
+            pointerDownTimeout = setTimeout(() => {
+              setIsPointerDown(false)
+            }, 50)
           }
         }}
         onPointerDown={() => {
