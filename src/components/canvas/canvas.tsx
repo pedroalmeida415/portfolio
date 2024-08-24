@@ -136,7 +136,7 @@ const Pointer3D = memo(() => {
       visible={false}
       frustumCulled={false}
       matrixAutoUpdate={false}
-      position={[0, 0, 0]}
+      position={[0, 100, 0]}
     />
   )
 })

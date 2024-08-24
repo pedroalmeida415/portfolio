@@ -67,7 +67,7 @@ export const Cursor = memo(() => {
   const middleBufferIndex = Math.floor(bufferSize / 2)
   const { P0, P1, P2, pointerBuffer } = useMemo(
     () => {
-      const cursorPointer = new Vector2(0, 0)
+      const cursorPointer = new Vector2(0, 100)
 
       return {
         P0: cursorPointer,
