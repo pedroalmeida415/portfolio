@@ -1,11 +1,17 @@
+@nomangle INTERPOLATE_IS_MOBILE IS_MOBILE
+
+#define IS_MOBILE INTERPOLATE_IS_MOBILE
+
 uniform vec2 uMouse;
 uniform vec2 uP1;
 uniform vec2 uP2;
 uniform vec2 uUvScalar;
 uniform vec2 uResolution;
-uniform vec2 uTextTextureScalar;
-uniform sampler2D uTextTexture;
-uniform sampler2D uInteractionsTexture;
+#if !IS_MOBILE
+    uniform vec2 uTextTextureScalar;
+    uniform sampler2D uTextTexture;
+    uniform sampler2D uInteractionsTexture;
+#endif
 
 float smoothMax(float a, float b, float k) {
     return log(exp(k * a) + exp(k * b)) / k;
@@ -102,51 +108,54 @@ void main() {
     float screenBoxDist = sdBox(uv, uUvScalar + 1.0);
     float screenBoxClipDist = sdBox(uv, uUvScalar + 0.01);
     float screenBorderDist = max(screenBoxDist, -screenBoxClipDist);
-    
+
     vec2 combinedDistUnion = sminBlend(min(curveDist,mouseCircleDist), screenBorderDist, .2);
-    
-    // Fetch subtraction elements data
-    vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
-    vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
-    
-    vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(3,0),0);
-    
-    vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
-    vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
-    vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
-    
-    vec4 emailSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
-    
-    // Construct subtraction distances
-    float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
-    float creditsSegmentDist = sdSegment(uv, vec2(creditsSegmentData.r, creditsSegmentData.b), vec2(creditsSegmentData.g, creditsSegmentData.b)) - creditsSegmentData.a;
-    
-    float availableSegmentDist = sdSegment(uv, vec2(availableSegmentData.r, availableSegmentData.b), vec2(availableSegmentData.g, availableSegmentData.b)) - availableSegmentData.a;
-    
-    float emailSegmentDist = sdSegment(uv, vec2(emailSegmentData.r, emailSegmentData.b), vec2(emailSegmentData.g, emailSegmentData.b)) - emailSegmentData.a;
-    float twitterSegmentDist = sdSegment(uv, vec2(twitterSegmentData.r, twitterSegmentData.b), vec2(twitterSegmentData.g, twitterSegmentData.b)) - twitterSegmentData.a;
-    float linkedinSegmentDist = sdSegment(uv, vec2(linkedinSegmentData.r, linkedinSegmentData.b), vec2(linkedinSegmentData.g, linkedinSegmentData.b)) - linkedinSegmentData.a;
-    float readcvSegmentDist = sdSegment(uv, vec2(readcvSegmentData.r, readcvSegmentData.b), vec2(readcvSegmentData.g, readcvSegmentData.b)) - readcvSegmentData.a;
-    
-    float combinedDistSubtract = min(nameSegmentDist, min(creditsSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, readcvSegmentDist))))));
-    
-    // Merge distances
-    float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
-    
-    vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(2,0),0).xy;
-    uv -= textCenterCoords;
-    uv *= uTextTextureScalar;
-    
-    uv /= uUvScalar;
-    uv = uv * 0.5 + 0.5;
-    float textMask = texture(uTextTexture, uv).r;
-    
+
     vec4 cursorColor = vec4(0.122,0.337,0.451,1.0);
     vec4 screenBorderColor = vec4(0.647,0.753,0.694,1.0);
     vec4 backgroundColor = vec4(0.957,0.953,0.941,0.0);
     
     vec4 col = mix(cursorColor, screenBorderColor, combinedDistUnion.y);
-    col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
+    
+    #if IS_MOBILE
+        col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDistUnion.x));
+    #else
+        // Fetch subtraction elements data
+        vec4 nameSegmentData = texelFetch(uInteractionsTexture, ivec2(0,0),0);
+        vec4 creditsSegmentData = texelFetch(uInteractionsTexture, ivec2(1,0),0);
+        
+        vec4 availableSegmentData = texelFetch(uInteractionsTexture, ivec2(3,0),0);
+        
+        vec4 twitterSegmentData = texelFetch(uInteractionsTexture, ivec2(4,0),0);
+        vec4 linkedinSegmentData = texelFetch(uInteractionsTexture, ivec2(5,0),0);
+        vec4 readcvSegmentData = texelFetch(uInteractionsTexture, ivec2(6,0),0);
+        
+        vec4 emailSegmentData = texelFetch(uInteractionsTexture, ivec2(7,0),0);
+        
+        // Construct subtraction distances
+        float nameSegmentDist = sdSegment(uv, vec2(nameSegmentData.r, nameSegmentData.b), vec2(nameSegmentData.g, nameSegmentData.b)) - nameSegmentData.a;
+        float creditsSegmentDist = sdSegment(uv, vec2(creditsSegmentData.r, creditsSegmentData.b), vec2(creditsSegmentData.g, creditsSegmentData.b)) - creditsSegmentData.a;
+        
+        float availableSegmentDist = sdSegment(uv, vec2(availableSegmentData.r, availableSegmentData.b), vec2(availableSegmentData.g, availableSegmentData.b)) - availableSegmentData.a;
+        
+        float emailSegmentDist = sdSegment(uv, vec2(emailSegmentData.r, emailSegmentData.b), vec2(emailSegmentData.g, emailSegmentData.b)) - emailSegmentData.a;
+        float twitterSegmentDist = sdSegment(uv, vec2(twitterSegmentData.r, twitterSegmentData.b), vec2(twitterSegmentData.g, twitterSegmentData.b)) - twitterSegmentData.a;
+        float linkedinSegmentDist = sdSegment(uv, vec2(linkedinSegmentData.r, linkedinSegmentData.b), vec2(linkedinSegmentData.g, linkedinSegmentData.b)) - linkedinSegmentData.a;
+        float readcvSegmentDist = sdSegment(uv, vec2(readcvSegmentData.r, readcvSegmentData.b), vec2(readcvSegmentData.g, readcvSegmentData.b)) - readcvSegmentData.a;
+        
+        float combinedDistSubtract = min(nameSegmentDist, min(creditsSegmentDist, min(availableSegmentDist, min(emailSegmentDist, min(twitterSegmentDist, min(linkedinSegmentDist, readcvSegmentDist))))));
+        float combinedDist = smoothMax(combinedDistUnion.x, -combinedDistSubtract, 9.);
+
+        vec2 textCenterCoords = texelFetch(uInteractionsTexture, ivec2(2,0),0).xy;
+        uv -= textCenterCoords;
+        uv *= uTextTextureScalar;
+        
+        uv /= uUvScalar;
+        uv = uv * 0.5 + 0.5;
+        float textMask = texture(uTextTexture, uv).r;
+
+        col = mix(col, backgroundColor, smoothstep(0.0, 0.015, combinedDist + textMask));
+    #endif
     
     gl_FragColor = col;
 }

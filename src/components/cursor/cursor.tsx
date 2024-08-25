@@ -42,7 +42,7 @@ export const Cursor = memo(() => {
   )
 
   useEffect(() => {
-    if (!cursorMeshRef.current) return
+    if (!cursorMeshRef.current || isMobile) return
     if (!previousViewportAspect) previousViewportAspect = viewport.aspect
     if (previousViewportAspect === viewport.aspect) return
 
@@ -120,8 +120,16 @@ export const Cursor = memo(() => {
 
   const cursorInitialUniforms = useMemo(
     () => {
-      const subtitle = document.getElementById('subtitle') as HTMLElement
-      const { textTexture, textTextureScalar } = generateTextMask(subtitle)
+      let desktopUniforms: Record<string, unknown> = {}
+
+      if (!isMobile) {
+        const subtitle = document.getElementById('subtitle') as HTMLElement
+        const { textTexture, textTextureScalar } = generateTextMask(subtitle)
+
+        desktopUniforms.uTextTexture = { value: textTexture }
+        desktopUniforms.uTextTextureScalar = { value: textTextureScalar }
+        desktopUniforms.uInteractionsTexture = { value: interactionsTexture }
+      }
 
       return mapMangledUniforms(
         {
@@ -129,10 +137,8 @@ export const Cursor = memo(() => {
           uP1: { value: P1 },
           uP2: { value: P2 },
           uUvScalar: { value: uvScalar },
-          uTextTexture: { value: textTexture },
-          uTextTextureScalar: { value: textTextureScalar },
-          uInteractionsTexture: { value: interactionsTexture },
           uResolution: { value: resolution },
+          ...desktopUniforms,
         },
         cursorFragmentShader.uniforms,
       )
@@ -148,7 +154,7 @@ export const Cursor = memo(() => {
         depthTest={false}
         depthWrite={false}
         vertexShader={cursorVertexShader.sourceCode}
-        fragmentShader={cursorFragmentShader.sourceCode}
+        fragmentShader={cursorFragmentShader.sourceCode.replace('INTERPOLATE_IS_MOBILE', isMobile ? '1' : '0')}
         uniforms={cursorInitialUniforms}
       />
     </mesh>
