@@ -83,7 +83,6 @@ export const Particles = memo(() => {
         uDeltaTime: { value: 0 },
         uBase: { value: baseParticlesTexture },
         uMouse: { value: particlesPointer },
-        uIsLMBDown: { value: false },
       },
       computePositionShader.uniforms,
     )
@@ -116,7 +115,6 @@ export const Particles = memo(() => {
 
     // --- Update GPU Compute ---
     setUniform(particlesVariable, computePositionShader, 'uDeltaTime', delta % 1)
-    setUniform(particlesVariable, computePositionShader, 'uIsLMBDown', false)
     gpgpuCompute.compute()
     setUniform(
       particlesObjectRef.current,
