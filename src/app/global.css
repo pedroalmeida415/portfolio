@@ -11,7 +11,7 @@
     text-rendering: optimizelegibility;
     text-size-adjust: 100%;
 
-    font-size: clamp(8px, 1.041667vw, 20px);
+    font-size: clamp(16px, 1.041667vw, 20px);
   }
 }
 

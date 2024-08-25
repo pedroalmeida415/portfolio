@@ -98,7 +98,7 @@ export const Home = () => {
       </header>
 
       <div className='absolute bottom-16 left-1/2 -translate-x-1/2 overflow-hidden' data-cursor-interactive='center'>
-        <h2 id='subtitle' className='translate-y-full text-7xl font-thin'>
+        <h2 id='subtitle' className='translate-y-full whitespace-nowrap text-7xl font-thin'>
           Creative Developer
         </h2>
       </div>
