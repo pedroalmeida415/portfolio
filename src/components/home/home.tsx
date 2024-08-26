@@ -159,9 +159,9 @@ export const Home = () => {
         </div>
       </footer>
       <div id='countdown' className={clsx('countdown', particlesData && 'stopped [--counter:100]')}>
-        <svg id='countdown-circle' viewBox='-50 -50 100 100' strokeWidth='1'>
-          <circle r='45'></circle>
-          <circle r='45' pathLength='1'></circle>
+        <svg id='countdown-circle' viewBox='-50 -50 100 100' strokeWidth='1' fill='none'>
+          <circle fill='none' stroke='#c0c0c0' r='45'></circle>
+          <circle data-progress stroke='#1d1d1d' fill='none' strokeLinecap='square' r='45' pathLength='100'></circle>
         </svg>
       </div>
     </section>
