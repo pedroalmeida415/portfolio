@@ -13,7 +13,7 @@ export const generateTextMask = (textElement: HTMLElement) => {
 
   const font = getComputedStyle(document.body).getPropertyValue('--font-neue-montreal-variable')
   const fontSize = getComputedStyle(textElement).fontSize
-  const text = textElement.innerText
+  const text = textElement.innerText.replaceAll('\n', '')
 
   const blurColor = '#ff0000'
   const baseBlur = 1

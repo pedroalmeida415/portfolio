@@ -94,6 +94,10 @@
         stroke-dasharray: var(--k) 1;
       }
     }
+    @media (max-width: 768px) {
+      width: 71.1111vw;
+      font-size: 3rem;
+    }
   }
 
   .underline-animated {

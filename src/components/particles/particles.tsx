@@ -31,7 +31,7 @@ export const Particles = memo(() => {
 
   const particlesObjectRef = useRef<Points<BufferGeometry, ShaderMaterial> | null>(null)
   const particleSizeMultiplier = isMobile ? 0.005 : 0.0018
-  const loadingCircleRadius = isMobile ? 1.5 : 2.5
+  const loadingCircleRadius = isMobile ? 1.8 : 2.5
 
   const { gpgpuCompute, particlesVariable, particlesUvArray, particlesPointer } = useMemo(() => {
     // --- GPU Compute ---
