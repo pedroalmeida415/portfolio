@@ -103,14 +103,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
-    <html
-      lang='en'
-      style={{
-        height: '100%',
-      }}
-    >
+    <html lang='en' className='h-full overscroll-none'>
       <body
-        className={`${neue_montreal.variable} size-full overflow-hidden bg-offWhite font-neue-montreal font-normal text-black antialiased`}
+        className={`${neue_montreal.variable} flex size-full max-h-screen min-h-full flex-col overflow-hidden overscroll-none bg-offWhite font-neue-montreal font-normal text-black antialiased`}
       >
         <Provider>
           <Layout>{children}</Layout>

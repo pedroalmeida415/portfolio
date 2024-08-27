@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
+import { memo, use, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 
 // import { Preload } from '@react-three/drei'
 
@@ -121,7 +121,9 @@ const Camera = memo(() => {
 Camera.displayName = 'Camera'
 
 const Pointer3D = memo(() => {
+  const setSize = useThree((state) => state.setSize)
   const raycaster = useThree((state) => state.raycaster)
+
   const isPointerDown = useAtomValue(isPointerDownAtom)
   const isMobile = useAtomValue(isMobileDeviceAtom)
 
@@ -139,7 +141,11 @@ const Pointer3D = memo(() => {
   }, -1)
 
   useEffect(() => {
-    if (!pointer3DRef.current || !isMobile || isPointerDown) return
+    if (!pointer3DRef.current || !isMobile) return
+    if (isPointerDown) {
+      setSize(window.innerWidth, window.innerHeight)
+      return
+    }
     raycaster.ray.copy(defaultRay)
     pointer3DRef.current.position.set(0, 100, 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps

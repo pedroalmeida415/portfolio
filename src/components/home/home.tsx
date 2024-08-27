@@ -75,7 +75,7 @@ export const Home = () => {
 
   return (
     <section ref={scope} className='relative mx-auto size-full max-w-md text-sm lg:max-w-screen-2xl lg:text-base'>
-      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-4 py-6 lg:px-8'>
+      <header className='absolute left-0 top-0 flex w-full items-start justify-between px-4 py-3 lg:px-8 lg:py-6'>
         <div className='overflow-hidden' data-cursor-interactive='segment' data-padding='0.4;0.2'>
           <h1 data-animate='header' className='translate-y-full'>
             Pedro Almeida
@@ -116,7 +116,7 @@ export const Home = () => {
         </div>
       </div>
 
-      <footer className='absolute bottom-0 left-0 flex w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 justify-center px-0 py-6 lg:grid lg:px-8'>
+      <footer className='absolute bottom-0 left-0 flex w-full grid-cols-[1fr_max-content_1fr] grid-rows-1 justify-center px-0 py-3 lg:grid lg:px-8 lg:py-6'>
         <div
           data-ping-wrapper
           className='hidden justify-self-start overflow-hidden lg:block'
