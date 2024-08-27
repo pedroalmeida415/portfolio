@@ -8,26 +8,13 @@ import { useAtomValue } from 'jotai'
 
 import { isCanvasCreatedAtom, particlesDataAtom } from '~/store'
 
-import HomeIcon from '~/assets/home-icon.svg'
-
-const routes = [
-  {
-    path: '/projects',
-    label: 'Projects',
-  },
-  {
-    path: '/about',
-    label: 'About',
-  },
-]
-
 const socials = [
   {
-    link: 'https://twitter.com/',
+    link: 'https://x.com/pedroalmeida415',
     label: 'X / Twitter',
   },
   {
-    link: 'https://www.linkedin.com/',
+    link: 'https://linkedin.com/in/pedrohlalmeida',
     label: 'LinkedIn',
   },
   {
@@ -144,7 +131,7 @@ export const Home = () => {
           ))}
           <li className='overflow-hidden lg:hidden'>
             <div className='underline-animated translate-y-full lg:hidden' data-animate='footer'>
-              <a href='mailto:pedroalmeida.415@gmail.com'>Email</a>
+              <a href='mailto:hello@pedroalmeida.io'>Email</a>
             </div>
           </li>
         </ul>
@@ -154,7 +141,7 @@ export const Home = () => {
           data-padding='0.4;0.2'
         >
           <div data-animate='footer' className='underline-animated translate-y-full'>
-            <a href='mailto:pedroalmeida.415@gmail.com'>hello@pedroalmeida.dev</a>
+            <a href='mailto:hello@pedroalmeida.io'>hello@pedroalmeida.io</a>
           </div>
         </div>
       </footer>

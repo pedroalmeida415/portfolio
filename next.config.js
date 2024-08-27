@@ -6,6 +6,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  output: 'export',
   images: {},
   webpack(config, { isServer }) {
     if (!isServer) {
