@@ -20,35 +20,40 @@ const neue_montreal = localFont({
   ],
 })
 
-const title = 'React Three Next Starter'
-const description = 'The easiest and fastest way to create a 3D website using React Three Fiber and NextJS'
+const title = 'Pedro Almeida | Creative Developer'
+const description = 'Focused on creating great, personality-rich, “absolute cinema” digital experiences. ✋🤯🤚'
 
-// either Static metadata
 export const metadata: Metadata = {
   title,
   description,
-  keywords: 'Software Engineer,Product Manager,Project Manager,Data Scientist,Computer Scientist',
+  keywords: 'Creative Developer,Frontend Developer,WebGL,3D,Animation',
   robots: 'index,follow',
   authors: {
-    name: 'Author',
+    name: 'Pedro Almeida',
   },
   twitter: {
-    creator: '@pmndrs',
+    creator: '@pedro_almeiding',
     card: 'summary',
-    site: '@pmndrs',
+    site: '@pedro_almeiding',
   },
   openGraph: {
     title,
     siteName: title,
     description,
     type: 'website',
-    url: 'https://react-three-next.vercel.app/',
+    url: 'https://pedroalmeida.io/',
     images: [
       {
-        url: '/icons/share.png',
-        width: 1200,
-        height: 630,
-        alt: 'Share Image',
+        url: '/icons/share-desktop.png',
+        width: 1920,
+        height: 921,
+        alt: 'Share Image Desktop',
+      },
+      {
+        url: '/icons/share-mobile.png',
+        width: 749,
+        height: 1333,
+        alt: 'Share Image Mobile',
       },
     ],
   },
@@ -74,7 +79,7 @@ export const metadata: Metadata = {
     },
     {
       type: 'mask-icon',
-      color: '#000000',
+      color: '#1d1d1d',
       url: '/icons/safari-pinned-tab.svg',
     },
     {
@@ -86,7 +91,7 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: true,
   },
-  metadataBase: new URL('http://localhost:3000/'),
+  metadataBase: new URL('https://pedroalmeida.io/'),
   other: {
     language: 'english',
     distribution: 'web',
@@ -96,7 +101,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   minimumScale: 1,
   initialScale: 1.0,
-  themeColor: 'black',
+  themeColor: '#1f5673',
   width: 'device-width',
   userScalable: false,
 }

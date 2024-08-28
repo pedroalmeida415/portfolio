@@ -10,7 +10,7 @@ import { isCanvasCreatedAtom, particlesDataAtom } from '~/store'
 
 const socials = [
   {
-    link: 'https://x.com/pedroalmeida415',
+    link: 'https://x.com/pedro_almeiding',
     label: 'X / Twitter',
   },
   {
@@ -18,7 +18,7 @@ const socials = [
     label: 'LinkedIn',
   },
   {
-    link: 'https://read.cv/',
+    link: 'https://read.cv/pedroalmeida',
     label: 'Read.cv',
   },
 ]

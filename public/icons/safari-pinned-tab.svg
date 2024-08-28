@@ -1,18 +1,60 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
- "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="200.000000pt" height="200.000000pt" viewBox="0 0 200.000000 200.000000"
- preserveAspectRatio="xMidYMid meet">
-<metadata>
-Created by potrace 1.11, written by Peter Selinger 2001-2013
-</metadata>
-<g transform="translate(0.000000,200.000000) scale(0.100000,-0.100000)"
-fill="#000000" stroke="none">
-<path d="M0 1000 l0 -1000 1000 0 1000 0 0 1000 0 1000 -1000 0 -1000 0 0
--1000z m1400 140 l0 -260 -120 0 -120 0 0 140 0 140 -140 0 -140 0 0 120 0
-120 260 0 260 0 0 -260z m-560 -140 l0 -120 -120 0 -120 0 0 120 0 120 120 0
-120 0 0 -120z m280 0 l0 -120 -120 0 -120 0 0 120 0 120 120 0 120 0 0 -120z
-m0 -280 l0 -120 -120 0 -120 0 0 120 0 120 120 0 120 0 0 -120z"/>
-</g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1080"
+   height="1080"
+   viewBox="0 0 1080 1080"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1">
+    <g
+       id="g6"
+       style="display:none">
+      <text
+         xml:space="preserve"
+         style="font-size:900px;font-family:'nova sans';-inkscape-font-specification:'nova sans';letter-spacing:0px;opacity:1;fill:#ffffff;fill-opacity:1;stroke-width:3"
+         x="59.674988"
+         y="754.19995"
+         id="text5"><tspan
+           x="59.674988"
+           y="754.19995"
+           id="tspan5">p</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:900px;font-family:'nova sans';-inkscape-font-specification:'nova sans';letter-spacing:0px;opacity:1;fill:#023956;fill-opacity:1;stroke-width:3"
+         x="334.52502"
+         y="914.29999"
+         id="text6"><tspan
+           id="tspan6"
+           x="334.52502"
+           y="914.29999"
+           style="font-size:900px;fill:#023956;fill-opacity:1">a</tspan></text>
+    </g>
+    <rect
+       style="opacity:1;fill:#1d1d1d;fill-opacity:1;stroke-width:3"
+       id="rect1"
+       width="1170.6113"
+       height="1190.4148"
+       x="-46.20834"
+       y="-1144.2064"
+       transform="scale(1,-1)" />
+    <g
+       id="g8"
+       transform="matrix(0.76722932,0,0,0.76722932,125.69617,126.62725)">
+      <path
+         id="text4"
+         style="font-size:900px;font-family:'nova sans';-inkscape-font-specification:'nova sans';letter-spacing:0px;fill:#1f5673;fill-opacity:1;stroke-width:3"
+         d="m 672.02539,325.69922 c -164.69983,0 -297.90039,133.20016 -297.90039,297 0,5.33034 0.14926,10.62507 0.42188,15.88672 11.54754,1.9148 23.86936,2.91601 37.02734,2.91601 25.46694,0 49.35805,-5.6232 70.66601,-15.89453 -0.034,-1.57094 -0.11523,-3.12317 -0.11523,-4.70703 0,-103.4999 83.70011,-189 193.5,-189 103.4999,0 190.80078,78.30011 190.80078,189 0,115.19989 -82.80167,195.29883 -192.60156,195.29883 -56.51543,0 -108.896,-24.61359 -144.58399,-65.79492 -34.81784,15.34825 -72.90491,24.56131 -112.90625,26.19922 52.01678,87.34797 146.97662,145.79687 255.69141,145.79687 80.99992,0 148.50004,-34.20042 184.5,-68.40039 v 60.30078 h 112.5 V 622.69922 c 0,-163.79984 -132.30016,-297 -297,-297 z" />
+      <path
+         id="text1"
+         style="font-size:900px;font-family:'nova sans';-inkscape-font-specification:'nova sans';letter-spacing:0px;fill:#ffffff;stroke-width:3"
+         d="m 344.97461,165.59961 v 106.20117 c 19.79998,0 42.30119,0.89922 61.20117,2.69922 51.61791,6.15626 99.60006,28.89266 133.6211,64.53125 C 575.41101,322.4601 614.63043,312.319 655.99023,310.23633 599.04488,223.63966 494.17175,165.59961 367.47461,165.59961 Z m -234,214.20117 v 534.59961 h 112.5 V 700.19922 c 41.39996,41.39996 117.90006,62.10156 180,62.10156 164.69983,0 298.80078,-134.10055 298.80078,-297.90039 0,-4.89994 -0.14522,-9.76828 -0.39453,-14.61133 -8.59839,-1.20603 -17.32468,-2.02148 -26.25586,-2.02148 -31.67922,0 -60.86247,7.62332 -86.04102,20.97461 -2.02579,111.01382 -80.29898,187.35742 -178.00976,187.35742 -127.79987,0 -192.59961,-90.89935 -192.59961,-223.19922 v -53.09961 z" />
+    </g>
+  </g>
 </svg>
