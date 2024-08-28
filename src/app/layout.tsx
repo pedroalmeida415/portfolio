@@ -21,7 +21,7 @@ const neue_montreal = localFont({
 })
 
 const title = 'Pedro Almeida | Creative Developer'
-const description = 'Focused on creating great, personality-rich, “absolute cinema” digital experiences. ✋🤯🤚'
+const description = 'Focused on creating great, personality-rich, “absolute cinema” digital experiences.'
 
 export const metadata: Metadata = {
   title,
@@ -48,12 +48,6 @@ export const metadata: Metadata = {
         width: 1920,
         height: 921,
         alt: 'Share Image Desktop',
-      },
-      {
-        url: '/icons/share-mobile.png',
-        width: 749,
-        height: 1333,
-        alt: 'Share Image Mobile',
       },
     ],
   },
