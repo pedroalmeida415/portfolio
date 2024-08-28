@@ -50,5 +50,6 @@
     "analyze": "rm -rf ./next && ANALYZE=true next build",
     "start": "next start",
     "prettier": "npx prettier --list-different \"./src/**/*.{ts,tsx,md}\" \"./app/**/*.{ts,tsx,md}\"\""
-  }
+  },
+  "packageManager": "yarn@3.6.3"
 }
